@@ -1,4 +1,4 @@
-package io.github.dediamondpro.hycord.modcore;
+package io.github.dediamondpro.hycord;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -108,7 +108,7 @@ public class ModCoreInstaller {
 
     public static int initialize(File gameDir, String minecraftVersion) {
         if (isInitalized()) return -1;
-        dataDir = new File(gameDir, "modcore");
+        dataDir = new File(gameDir, "tweaker");
         if (!dataDir.exists()) {
             if (!dataDir.mkdirs()) {
                 bail("Unable to create necessary files");

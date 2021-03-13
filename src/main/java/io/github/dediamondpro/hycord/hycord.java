@@ -15,7 +15,6 @@ import io.github.dediamondpro.hycord.core.commandHandler;
 import io.github.dediamondpro.hycord.features.discord.richPressence;
 import org.apache.logging.log4j.Level;
 import io.github.dediamondpro.hycord.core.startCore;
-import io.github.dediamondpro.hycord.modcore.ModCoreInstaller;
 
 import java.io.IOException;
 
@@ -34,6 +33,7 @@ public class hycord {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        config.preload();
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
 
         ClientCommandHandler.instance.registerCommand(mainCommand);

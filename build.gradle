@@ -28,7 +28,7 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin"
+    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin"
 }
 
 repositories {
@@ -64,7 +64,7 @@ processResources {
 shadowJar {
     project.configurations.shadow.setTransitive(true);
     configurations = [project.configurations.shadow]
-    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin",
+    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin",
                 "ModSide": "CLIENT",
                 "FMLCorePluginContainsFMLMod": true
     )

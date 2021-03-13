@@ -1,0 +1,39 @@
+package io.github.dediamondpro.hycord.options;
+
+import club.sk1er.vigilance.Vigilant;
+import club.sk1er.vigilance.data.Property;
+import club.sk1er.vigilance.data.PropertyType;
+
+import java.io.File;
+
+@SuppressWarnings("unused")
+public class settings extends Vigilant{
+    @Property(
+            type = PropertyType.SWITCH, name = "Discord Rich Presence",
+            description = "Display your status on Discord, requires restart",
+            category = "Discord"
+    )
+    public static boolean enableRP = true;
+
+    @Property(
+            type = PropertyType.SLIDER,
+            name = "Maximum discord party size",
+            description = "Sets the maximum discord party size.",
+            category = "Discord",
+            min = 1,
+            max = 100
+    )
+    public static int maxPartySize = 10;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "auto friend list",
+            description = "Automatically do /friend list when you join hypixel",
+            category = "misc"
+    )
+    public static boolean autoFLEnabled = false;
+
+    public settings(){
+        super(new File("./config/hycord.toml"));
+        initialize();
+    }
+}

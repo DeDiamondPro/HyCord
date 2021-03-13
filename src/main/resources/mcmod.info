@@ -1,0 +1,16 @@
+[
+{
+  "modid": "hycord",
+  "name": "HyCord",
+  "description": "Integration between Discord and Hypixel",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["DeDiamondPro"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

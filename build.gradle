@@ -1,5 +1,3 @@
-
-// For those who want the bleeding edge
 buildscript {
     repositories {
         jcenter()
@@ -7,25 +5,30 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        // search through the 'libs' folder
+        flatDir dirs: 'libs'
     }
-	
-     flatDir dirs: 'libs'
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 version = "1.0-beta1"
-group= "io.github.dediamondpro"
+group = "io.github.dediamondpro"
 archivesBaseName = "hycord"
 sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
-     makeObfSourceJar = false
     mappings = "stable_22"
+    makeObfSourceJar = false
+    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin"
 }
 
 repositories {
@@ -33,12 +36,13 @@ repositories {
 }
 
 dependencies {
+    // include modcore as a dependency
     provided files("libs/modcore.jar")
-    compile 'com.github.jncrmx:discord-game-sdk4j:0.5.2'
+    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.2'
+    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.2'
 }
 
-processResources
-{
+processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
@@ -46,21 +50,34 @@ processResources
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
+
         // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version': project.version, 'mcversion': project.minecraft.version
     }
-        
-    // copy everything else, thats not the mcmod.info
+
+    // copy everything else, that's not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+shadowJar {
+    project.configurations.shadow.setTransitive(true);
+    configurations = [project.configurations.shadow]
+
+    classifier '' // Replace the default JAR
+}
+
+reobf {
+    shadowJar {} // Reobfuscate the shadowed JAR
 }
 
 jar {
     manifest {
         attributes "FMLCorePlugin": "io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin",
                 "ModSide": "CLIENT",
-                "FMLCorePluginContainsFMLMod": "Yes, yes it does"
+                "FMLCorePluginContainsFMLMod": true
     }
 }
+
+jar.finalizedBy('reobfJar')

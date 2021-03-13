@@ -20,19 +20,18 @@ import io.github.dediamondpro.hycord.modcore.ModCoreInstaller;
 import java.io.IOException;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
-public class hycord
-{
+public class hycord {
     public static final String MODID = "hycord";
     public static final String VERSION = "1.0-beta1";
 
     private final settings config = new settings();
 
-    commandHandler mainCommand = new commandHandler("hycord",new commandHandler.ProcessCommandRunnable(){
-        public void processCommand(ICommandSender sender, String args[]){
+    commandHandler mainCommand = new commandHandler("hycord", new commandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String args[]) {
             ModCore.getInstance().getGuiHandler().open(config.gui());
         }
     });
-    
+
     @EventHandler
     public void init(FMLInitializationEvent event) {
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
@@ -47,8 +46,8 @@ public class hycord
         Thread newThread = new Thread(() -> {
             try {
                 startCore.main();
-            }catch (IOException err){
-                FMLLog.getLogger().log(Level.ERROR,"err");
+            } catch (IOException err) {
+                FMLLog.getLogger().log(Level.ERROR, "err");
             }
         });
         newThread.start();

@@ -14,13 +14,13 @@ public class autoFl {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         ticks++;
-        if(!settings.autoFLEnabled || !utils.isHypixel() || send || ticks % 20 != 0) return;
+        if (!settings.autoFLEnabled || !utils.isHypixel() || send || ticks % 20 != 0) return;
         Minecraft.getMinecraft().thePlayer.sendChatMessage("/fl");
         send = true;
     }
 
     @SubscribeEvent
-    public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event){
+    public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         send = false;
     }
 }

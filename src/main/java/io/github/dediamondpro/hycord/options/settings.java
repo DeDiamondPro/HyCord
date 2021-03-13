@@ -7,7 +7,7 @@ import club.sk1er.vigilance.data.PropertyType;
 import java.io.File;
 
 @SuppressWarnings("unused")
-public class settings extends Vigilant{
+public class settings extends Vigilant {
     @Property(
             type = PropertyType.SWITCH, name = "Discord Rich Presence",
             description = "Display your status on Discord, requires restart",
@@ -32,7 +32,7 @@ public class settings extends Vigilant{
     )
     public static boolean autoFLEnabled = false;
 
-    public settings(){
+    public settings() {
         super(new File("./config/hycord.toml"));
         initialize();
     }

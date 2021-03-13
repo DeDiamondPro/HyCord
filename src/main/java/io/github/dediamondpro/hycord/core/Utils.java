@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 
 import java.util.Locale;
 
-public class utils {
+public class Utils {
     public static boolean isHypixel() {
         Minecraft mc = Minecraft.getMinecraft();
 

@@ -1,8 +1,8 @@
 package io.github.dediamondpro.hycord.features.discord;
 
 import de.jcm.discordgamesdk.activity.Activity;
-import io.github.dediamondpro.hycord.core.startCore;
-import io.github.dediamondpro.hycord.core.utils;
+import io.github.dediamondpro.hycord.core.StartCore;
+import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Locale;
 
-public class richPressence {
+public class RichPresence {
     int ticks;
     Instant time;
     int partyMembers = 1;
@@ -27,7 +27,7 @@ public class richPressence {
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
         ticks++;
-        if (ticks % 100 != 0 || !utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
+        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
             return;
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = scoreboard.getObjectiveInDisplaySlot(1);
@@ -105,7 +105,7 @@ public class richPressence {
             activity.party().size().setMaxSize(settings.maxPartySize);
             activity.party().size().setCurrentSize(partyMembers);
 
-            activity.assets().setLargeImage(utils.getDiscordPic(arg));
+            activity.assets().setLargeImage(Utils.getDiscordPic(arg));
 
             // Setting a join secret and a party ID causes an "Ask to Join" button to appear
             if (partyLeader) {
@@ -114,7 +114,7 @@ public class richPressence {
             }
 
             // Finally, update the current activity to our activity
-            startCore.core.activityManager().updateActivity(activity);
+            StartCore.core.activityManager().updateActivity(activity);
             FMLLog.getLogger().log(Level.INFO, "Rich Presence done");
         }
     }

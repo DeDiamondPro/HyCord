@@ -11,10 +11,10 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import io.github.dediamondpro.hycord.options.settings;
 import club.sk1er.mods.core.ModCore;
-import io.github.dediamondpro.hycord.core.commandHandler;
-import io.github.dediamondpro.hycord.features.discord.richPressence;
+import io.github.dediamondpro.hycord.core.CommandHandler;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import org.apache.logging.log4j.Level;
-import io.github.dediamondpro.hycord.core.startCore;
+import io.github.dediamondpro.hycord.core.StartCore;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ public class hycord {
 
     private final settings config = new settings();
 
-    commandHandler mainCommand = new commandHandler("hycord", new commandHandler.ProcessCommandRunnable() {
+    CommandHandler mainCommand = new CommandHandler("hycord", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String args[]) {
             ModCore.getInstance().getGuiHandler().open(config.gui());
         }
@@ -41,11 +41,11 @@ public class hycord {
         MinecraftForge.EVENT_BUS.register(new autoFl());
 
 
-        MinecraftForge.EVENT_BUS.register(new richPressence());
+        MinecraftForge.EVENT_BUS.register(new RichPresence());
 
         Thread newThread = new Thread(() -> {
             try {
-                startCore.main();
+                StartCore.main();
             } catch (IOException err) {
                 FMLLog.getLogger().log(Level.ERROR, "err");
             }

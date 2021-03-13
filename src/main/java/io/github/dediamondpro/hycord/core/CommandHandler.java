@@ -4,11 +4,11 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 
-public class commandHandler extends  CommandBase{
+public class CommandHandler extends  CommandBase{
     private String Commandname;
     private ProcessCommandRunnable runnable;
 
-    public commandHandler(String Commandname, ProcessCommandRunnable runnable) {
+    public CommandHandler(String Commandname, ProcessCommandRunnable runnable) {
         this.Commandname = Commandname;
         this.runnable = runnable;
     }

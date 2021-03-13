@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Level;
 import java.io.File;
 import java.io.IOException;
 
-public class startCore {
+public class StartCore {
 
     public static Core core;
 

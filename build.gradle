@@ -64,20 +64,16 @@ processResources {
 shadowJar {
     project.configurations.shadow.setTransitive(true);
     configurations = [project.configurations.shadow]
+    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin",
+                "ModSide": "CLIENT",
+                "FMLCorePluginContainsFMLMod": true
+    )
 
     classifier '' // Replace the default JAR
 }
 
 reobf {
     shadowJar {} // Reobfuscate the shadowed JAR
-}
-
-jar {
-    manifest {
-        attributes "FMLCorePlugin": "io.github.dediamondpro.hycore.modcore.FMLLoadingPlugin",
-                "ModSide": "CLIENT",
-                "FMLCorePluginContainsFMLMod": true
-    }
 }
 
 jar.finalizedBy('reobfJar')

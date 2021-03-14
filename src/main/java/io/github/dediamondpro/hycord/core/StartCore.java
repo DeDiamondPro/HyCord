@@ -29,7 +29,8 @@ public class StartCore {
             params.setClientID(819625966627192864L);
             params.setFlags(CreateParams.getDefaultFlags());
             core = new Core(params);
-            {
+
+            while(true){
                 core.runCallbacks();
                 try {
                     // Sleep a bit to save CPU

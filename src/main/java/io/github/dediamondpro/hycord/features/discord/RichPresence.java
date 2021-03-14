@@ -148,7 +148,7 @@ public class RichPresence {
             activity.assets().setLargeImage(Utils.getDiscordPic(arg));
 
             // Setting a join secret and a party ID causes an "Ask to Join" button to appear
-            if (partyLeader) {
+            if (partyLeader && settings.enableInvites) {
                 activity.party().setID(Minecraft.getMinecraft().thePlayer.getName());
                 activity.secrets().setJoinSecret(Minecraft.getMinecraft().thePlayer.getUniqueID().toString());
             }

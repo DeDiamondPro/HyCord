@@ -26,6 +26,13 @@ public class settings extends Vigilant {
     public static int maxPartySize = 10;
 
     @Property(
+            type = PropertyType.SWITCH, name = "Enable Invites",
+            description = "Enable the ability to party invite people on Discord and add a button \"ask to join\"",
+            category = "Discord"
+    )
+    public static boolean enableInvites = true;
+
+    @Property(
             type = PropertyType.SWITCH, name = "auto friend list",
             description = "Automatically do /friend list when you join hypixel",
             category = "misc"

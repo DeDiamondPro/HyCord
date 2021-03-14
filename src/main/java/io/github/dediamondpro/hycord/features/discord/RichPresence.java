@@ -71,6 +71,7 @@ public class RichPresence {
                             e.printStackTrace();
                         }
                     }
+                    Thread.currentThread().interrupt();
                 }
             });
             newThread.start();

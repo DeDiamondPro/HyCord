@@ -13,32 +13,15 @@ import java.io.IOException;
 public class StartCore {
 
     public static Core core;
+    public static File discordLibrary;
+    public static boolean isEnabled = false;
 
     public static void main() throws IOException {
-        FMLLog.getLogger().log(Level.INFO, "Trying to start RPC");
-        File discordLibrary = DownloadNativeLibrary.downloadDiscordLibrary();
-        FMLLog.getLogger().log(Level.INFO, "Installed discord SDK");
+        FMLLog.getLogger().log(Level.INFO, "Trying to download sdk");
+        discordLibrary = DownloadNativeLibrary.downloadDiscordLibrary();
         if (discordLibrary == null) {
             FMLLog.getLogger().log(Level.ERROR, "Error downloading Discord SDK.");
             return;
-        }
-        // Initialize the Core
-        Core.init(discordLibrary);
-
-        try (CreateParams params = new CreateParams()) {
-            params.setClientID(819625966627192864L);
-            params.setFlags(CreateParams.getDefaultFlags());
-            core = new Core(params);
-
-            while(true){
-                core.runCallbacks();
-                try {
-                    // Sleep a bit to save CPU
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

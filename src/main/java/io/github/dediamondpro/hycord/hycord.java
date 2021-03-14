@@ -43,13 +43,11 @@ public class hycord {
 
         MinecraftForge.EVENT_BUS.register(new RichPresence());
 
-        Thread newThread = new Thread(() -> {
-            try {
-                StartCore.main();
-            } catch (IOException err) {
-                FMLLog.getLogger().log(Level.ERROR, "err");
-            }
-        });
-        newThread.start();
+        try {
+            StartCore.main();
+        } catch (IOException err) {
+            FMLLog.getLogger().log(Level.ERROR, "err");
+        }
+
     }
 }

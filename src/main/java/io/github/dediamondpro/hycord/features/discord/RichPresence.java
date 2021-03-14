@@ -1,5 +1,8 @@
 package io.github.dediamondpro.hycord.features.discord;
 
+import club.sk1er.mods.core.util.MinecraftUtils;
+import de.jcm.discordgamesdk.Core;
+import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import io.github.dediamondpro.hycord.core.StartCore;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -12,6 +15,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -44,6 +48,41 @@ public class RichPresence {
     @SubscribeEvent
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
+    }
+
+    @SubscribeEvent
+    void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        if (MinecraftUtils.isHypixel()) {
+            Thread newThread = new Thread(() -> {
+                Core.init(StartCore.discordLibrary);
+
+                try (CreateParams params = new CreateParams()) {
+                    params.setClientID(819625966627192864L);
+                    params.setFlags(CreateParams.getDefaultFlags());
+                    StartCore.core = new Core(params);
+                    StartCore.isEnabled = true;
+
+                    while (StartCore.isEnabled) {
+                        StartCore.core.runCallbacks();
+                        try {
+                            // Sleep a bit to save CPU
+                            Thread.sleep(16);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+            newThread.start();
+        }
+    }
+
+    @SubscribeEvent
+    void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+        if(StartCore.isEnabled) {
+            StartCore.isEnabled = false;
+            StartCore.core.close();
+        }
     }
 
     @SubscribeEvent

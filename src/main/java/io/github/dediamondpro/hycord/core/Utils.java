@@ -52,7 +52,7 @@ public class Utils {
             return "warlords";
         } else if (game.contains("murder_mystery")) {
             return "murdermystery";
-        } else if (game.contains("tnt")) {
+        } else if (game.contains("tnt") || game.equals("bow_spleef") || game.equals("pvp_run")) {
             return "tnt";
         } else if (game.contains("vampirez")) {
             return "vampirez";
@@ -70,5 +70,26 @@ public class Utils {
             return "blitz_sg";
         }
         return "hypixel_logo";
+    }
+
+    public static String getMode(String rawMode){
+        String mode = rawMode.toLowerCase(Locale.ROOT).replaceAll("\"","").replaceAll("duels_","").replaceAll("_"," ");
+        if(mode.contains("bedwars eight one")){
+            return mode.replaceAll("bedwars eight one","Solo");
+        }else if(mode.contains("bedwars eight two")){
+            return mode.replaceAll("bedwars eight two","Doubles");
+        }else if(mode.contains("bedwars four three")){
+            return mode.replaceAll("bedwars four three","3v3v3v3");
+        }else if(mode.contains("bedwars four four")){
+            return mode.replaceAll("bedwars four four","4v4v4v4");
+        }else if(mode.contains("bedwars two four")){
+            return mode.replaceAll("bedwars two four","4v4");
+        }else if(mode.equals("uhc meetup")){
+            return "Uhc Deathmatch";
+        }else if(mode.contains("tnt") || mode.contains("pvprun") || mode.contains("bowspleef") || mode.contains("capture")){
+            return "In a party";
+        }
+
+        return mode.substring(0, 1).toUpperCase() + mode.substring(1);
     }
 }

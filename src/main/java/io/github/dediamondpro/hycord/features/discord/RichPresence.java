@@ -1,12 +1,16 @@
 package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.util.MinecraftUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import io.github.dediamondpro.hycord.core.StartCore;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.settings;
+import jdk.nashorn.internal.parser.JSONParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -16,10 +20,13 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.network.internal.FMLMessage;
+import netscape.javascript.JSObject;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Locale;
 
 public class RichPresence {
@@ -27,6 +34,8 @@ public class RichPresence {
     Instant time;
     int partyMembers = 1;
     boolean partyLeader = true;
+    boolean checkedLoc = false;
+    String secondLine = "In a party";
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -43,11 +52,15 @@ public class RichPresence {
                 FMLLog.getLogger().log(Level.ERROR, err);
             }
         }
+        if(!checkedLoc){
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
+        }
     }
 
     @SubscribeEvent
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
+        checkedLoc = false;
     }
 
     @SubscribeEvent
@@ -89,8 +102,25 @@ public class RichPresence {
     @SubscribeEvent
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-
-        if (msg.startsWith("§6Party Members (")) {
+        if(msg.startsWith("§f{\"server\":") && !checkedLoc){
+            event.setCanceled(true);
+            JsonParser parser= new JsonParser();
+            JsonObject data = (JsonObject) parser.parse(event.message.getUnformattedText());
+            if(data.get("server").toString().contains("lobby")){
+                secondLine = "In a lobby";
+            }else if(data.has("mode")){
+                if(data.get("gametype").toString().equals("\"ARCADE\"")){
+                    secondLine = "In a party";
+                }else if(data.get("gametype").toString().equals("\"SKYBLOCK\"") && data.has("map")){
+                    secondLine = data.get("map").toString().replaceAll("\"","").substring(0, 1).toUpperCase() + data.get("map").toString().replaceAll("\"","").substring(1).toLowerCase(Locale.ROOT);
+                }else {
+                    secondLine = Utils.getMode(data.get("mode").toString());
+                }
+            }else{
+                secondLine = "In a party";
+            }
+            checkedLoc = true;
+        }else if (msg.startsWith("§6Party Members (")) {
             String amount[] = msg.split("[()]");
             partyMembers = Integer.parseInt(amount[1]);
         } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
@@ -137,7 +167,7 @@ public class RichPresence {
     void updateRPC(String arg) throws IOException {
         try (Activity activity = new Activity()) {
             activity.setDetails(arg);
-            activity.setState("In a party");
+            activity.setState(secondLine);
 
             activity.timestamps().setStart(time);
 

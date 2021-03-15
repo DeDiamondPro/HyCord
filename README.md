@@ -1,6 +1,6 @@
 # HyCord
 <p align="center">
-<a href="https://github.com/DeDiamondPro/HyCore">
+<a href="https://github.com/DeDiamondPro/HyCord">
     <img src="https://img.shields.io/tokei/lines/github/DeDiamondPro/HyCord?color=success&logo=github&logoColor=#00FFFF" alt="lines">
  </a>
   <a href="https://github.com/DeDiamondPro/HyCord/blob/master/LICENSE" target="_blank">

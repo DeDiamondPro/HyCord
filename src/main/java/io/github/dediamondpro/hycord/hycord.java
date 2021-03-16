@@ -1,22 +1,17 @@
 package io.github.dediamondpro.hycord;
 
+import club.sk1er.mods.core.ModCore;
+import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.features.autoFl;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import io.github.dediamondpro.hycord.options.settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import io.github.dediamondpro.hycord.options.settings;
-import club.sk1er.mods.core.ModCore;
-import io.github.dediamondpro.hycord.core.CommandHandler;
-import io.github.dediamondpro.hycord.features.discord.RichPresence;
-import org.apache.logging.log4j.Level;
-import io.github.dediamondpro.hycord.core.StartCore;
-
-import java.io.IOException;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
@@ -39,15 +34,6 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(mainCommand);
 
         MinecraftForge.EVENT_BUS.register(new autoFl());
-
-
         MinecraftForge.EVENT_BUS.register(new RichPresence());
-
-        try {
-            StartCore.main();
-        } catch (IOException err) {
-            FMLLog.getLogger().log(Level.ERROR, "err");
-        }
-
     }
 }

@@ -10,14 +10,12 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'com.github.johnrengelman.shadow'
 
-version = "1.0-beta1"
+version = "1.0-beta1.1"
 group = "io.github.dediamondpro"
 archivesBaseName = "hycord"
 sourceCompatibility = targetCompatibility = 1.8
@@ -31,15 +29,13 @@ minecraft {
     clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin"
 }
 
-repositories {
-    maven { url 'https://jitpack.io' }
+repositories{
+    flatDir dirs: 'libs'
 }
 
 dependencies {
     // include modcore as a dependency
-    provided files("libs/modcore.jar")
-    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.2'
-    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.2'
+    provided files("modcore")
 }
 
 processResources {
@@ -61,19 +57,9 @@ processResources {
     }
 }
 
-shadowJar {
-    project.configurations.shadow.setTransitive(true);
-    configurations = [project.configurations.shadow]
+jar {
     manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin",
-                "ModSide": "CLIENT",
-                "FMLCorePluginContainsFMLMod": true
+            "ModSide": "CLIENT",
+            "FMLCorePluginContainsFMLMod": true
     )
-
-    classifier '' // Replace the default JAR
 }
-
-reobf {
-    shadowJar {} // Reobfuscate the shadowed JAR
-}
-
-jar.finalizedBy('reobfJar')

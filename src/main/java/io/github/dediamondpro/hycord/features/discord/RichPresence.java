@@ -1,16 +1,15 @@
 package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.util.MinecraftUtils;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
+import de.jcm.discordgamesdk.LogLevel;
 import de.jcm.discordgamesdk.activity.Activity;
 import io.github.dediamondpro.hycord.core.StartCore;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.settings;
-import jdk.nashorn.internal.parser.JSONParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -20,13 +19,10 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.network.internal.FMLMessage;
-import netscape.javascript.JSObject;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Locale;
 
 public class RichPresence {
@@ -42,6 +38,9 @@ public class RichPresence {
         ticks++;
         if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
             return;
+        if(!checkedLoc){
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
+        }
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = scoreboard.getObjectiveInDisplaySlot(1);
         if (sidebarObjective != null) {
@@ -51,9 +50,6 @@ public class RichPresence {
             } catch (IOException err) {
                 FMLLog.getLogger().log(Level.ERROR, err);
             }
-        }
-        if(!checkedLoc){
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
         }
     }
 
@@ -66,16 +62,31 @@ public class RichPresence {
     @SubscribeEvent
     void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         if (MinecraftUtils.isHypixel()) {
-            Thread newThread = new Thread(() -> {
-                Core.init(StartCore.discordLibrary);
-
-                try (CreateParams params = new CreateParams()) {
-                    params.setClientID(819625966627192864L);
-                    params.setFlags(CreateParams.getDefaultFlags());
-                    StartCore.core = new Core(params);
-                    StartCore.isEnabled = true;
-
-                    while (StartCore.isEnabled) {
+            try (CreateParams params = new CreateParams()) {
+                params.setClientID(819625966627192864L);
+                params.setFlags(CreateParams.getDefaultFlags());
+                StartCore.core = new Core(params);
+                StartCore.core.setLogHook(LogLevel.DEBUG, (level, message) -> {
+                    Level level1 = Level.INFO;
+                    switch (level) {
+                        case ERROR:
+                            level1 = Level.ERROR;
+                            break;
+                        case WARN:
+                            level1 = Level.WARN;
+                            break;
+                        case INFO:
+                            level1 = Level.INFO;
+                            break;
+                        case DEBUG:
+                            level1 = Level.DEBUG;
+                            break;
+                    }
+                    FMLLog.getLogger().log(level1, message);
+                });
+                StartCore.isEnabled = true;
+                Thread callbacks = new Thread(() ->{
+                        while (StartCore.isEnabled) {
                         StartCore.core.runCallbacks();
                         try {
                             // Sleep a bit to save CPU
@@ -84,19 +95,16 @@ public class RichPresence {
                             e.printStackTrace();
                         }
                     }
-                    Thread.currentThread().interrupt();
-                }
-            });
-            newThread.start();
+                });
+                callbacks.start();
+            }
         }
     }
 
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        if(StartCore.isEnabled) {
-            StartCore.isEnabled = false;
-            StartCore.core.close();
-        }
+        StartCore.core.close();
+        StartCore.isEnabled = false;
     }
 
     @SubscribeEvent
@@ -161,8 +169,12 @@ public class RichPresence {
             partyLeader = true;
         } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
             partyMembers--;
+        } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
+            partyLeader = false;
+        }else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
+            partyMembers++;
         }
-    }//§eYou'll be partying with: §r§b[MVP§r§2+§r§b] Epr0§r§e, §r§a[VIP] Lty_§r§e, §r§a[VIP] Blizardhere§r§e, §r§b[MVP§r§c+§r§b] meiatres§r§e, §r§a[VIP§r§6+§r§a] KenziecraftGamer§r§e, §r§a[VIP] O22HS§r§e, §r§7Battersson§r§e, §r§7Dhaanyaa§r§e, §r§a[VIP§r§6+§r§a] Octatious§r
+    }
 
     void updateRPC(String arg) throws IOException {
         try (Activity activity = new Activity()) {
@@ -185,7 +197,6 @@ public class RichPresence {
 
             // Finally, update the current activity to our activity
             StartCore.core.activityManager().updateActivity(activity);
-            FMLLog.getLogger().log(Level.INFO, "Rich Presence done");
         }
     }
 }

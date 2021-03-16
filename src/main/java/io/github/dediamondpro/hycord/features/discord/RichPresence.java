@@ -61,8 +61,6 @@ public class RichPresence {
         if (MinecraftUtils.isHypixel()) {
             DiscordEventHandlers handlers = new DiscordEventHandlers.Builder().setJoinGameEventHandler((user) -> {
                 FMLLog.getLogger().log(Level.INFO,user);
-            }).setJoinRequestEventHandler((user) -> {
-                FMLLog.getLogger().log(Level.INFO,user);
             }).build();
             DiscordRPC.discordInitialize("819625966627192864", handlers, true);
             FMLLog.getLogger().log(Level.INFO, "started RPC");

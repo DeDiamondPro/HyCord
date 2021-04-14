@@ -3,7 +3,7 @@
 <a href="https://github.com/DeDiamondPro/HyCord">
     <img alt="license" src="https://img.shields.io/github/license/DeDiamondPro/HyCord?color=00FFFF&style=for-the-badge">
  </a>
-  <a href="https://github.com/DeDiamondPro/HyCord/blob/master/LICENSE">
+  <a href="https://github.com/DeDiamondPro/HyCord/">
     <img alt="lines" src="https://img.shields.io/tokei/lines/github/DeDiamondPro/HyCord?color=00FFFF&style=for-the-badge">
  </a>
     <a href="https://discord.gg/ZBNS8jsAMd" target="_blank">

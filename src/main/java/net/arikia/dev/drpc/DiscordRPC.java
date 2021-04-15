@@ -211,7 +211,7 @@ public final class DiscordRPC {
 		 */
 		public final int reply;
 
-		public DiscordReply(int reply) {
+	        DiscordReply(int reply) {
 			this.reply = reply;
 		}
 	}

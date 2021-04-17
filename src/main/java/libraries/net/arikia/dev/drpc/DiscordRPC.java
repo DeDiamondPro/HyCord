@@ -187,7 +187,7 @@ public final class DiscordRPC {
 	/**
 	 * Enum containing reply codes for join request events.
 	 *
-	 * @see libaries.net.arikia.dev.drpc.callbacks.JoinRequestCallback
+	 * @see libraries.net.arikia.dev.drpc.callbacks.JoinRequestCallback
 	 */
 	public enum DiscordReply {
 		/**
@@ -198,7 +198,7 @@ public final class DiscordRPC {
 		/**
 		 * Accepts the join request, requesting player received a JoinGameCallback.
 		 *
-		 * @see libaries.net.arikia.dev.drpc.callbacks.JoinGameCallback
+		 * @see libraries.net.arikia.dev.drpc.callbacks.JoinGameCallback
 		 */
 		YES(1),
 		/**
@@ -211,7 +211,7 @@ public final class DiscordRPC {
 		 */
 		public final int reply;
 
-		private DiscordReply(int reply) {
+		DiscordReply(int reply) {
 			this.reply = reply;
 		}
 	}

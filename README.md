@@ -1,5 +1,11 @@
 # HyCord
 <p align="center">
+<a href="https://github.com/DeDiamondPro/HyCord/releases" target="_blank">
+<img alt="release" src="https://img.shields.io/github/v/release/DeDiamondPro/HyCord?color=00FFFF&style=for-the-badge" />
+</a>
+<a href="https://github.com/DeDiamondPro/HyCord/releases" target="_blank">
+<img alt="downloads" src="https://img.shields.io/github/downloads/DeDiamondPro/HyCord/total?color=00FFFF&style=for-the-badge" />
+</a>
 <a href="https://github.com/DeDiamondPro/HyCord/blob/master/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/DeDiamondPro/HyCord?color=00FFFF&style=for-the-badge">
  </a>

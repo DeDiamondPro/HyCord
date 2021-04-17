@@ -15,7 +15,7 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.0.0-pre1"
+version = "1.0.0"
 group = "io.github.dediamondpro"
 archivesBaseName = "hycord"
 sourceCompatibility = targetCompatibility = 1.8
@@ -26,7 +26,7 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin"
+    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
 }
 
 repositories{
@@ -58,7 +58,7 @@ processResources {
 }
 
 jar {
-    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycore.tweaker.FMLLoadingPlugin",
+    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
             "ModSide": "CLIENT",
             "FMLCorePluginContainsFMLMod": true
     )

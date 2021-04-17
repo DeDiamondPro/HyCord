@@ -82,6 +82,11 @@ public class RichPresence {
             Thread callBacks = new Thread(() -> {
                 while (enabled) {
                     DiscordRPC.discordRunCallbacks();
+                    try{
+                        Thread.sleep(16);//run callbacks at 60fps
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             callBacks.start();

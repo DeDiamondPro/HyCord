@@ -1,4 +1,4 @@
-package net.arikia.dev.drpc;
+package libraries.net.arikia.dev.drpc;
 
 import com.sun.jna.Structure;
 

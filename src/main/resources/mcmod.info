@@ -2,13 +2,13 @@
 {
   "modid": "hycord",
   "name": "HyCord",
-  "description": "Integration between Discord and Hypixel",
+  "description": "Integration mod between Discord and Hypixel",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
   "authorList": ["DeDiamondPro"],
-  "credits": "Syeyoung for providing help with some parts of the code and providing the servers to make this all possible",
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

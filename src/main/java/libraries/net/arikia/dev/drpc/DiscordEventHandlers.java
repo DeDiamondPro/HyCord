@@ -1,7 +1,7 @@
-package net.arikia.dev.drpc;
+package libraries.net.arikia.dev.drpc;
 
 import com.sun.jna.Structure;
-import net.arikia.dev.drpc.callbacks.*;
+import libraries.net.arikia.dev.drpc.callbacks.*;
 
 import java.util.Arrays;
 import java.util.List;

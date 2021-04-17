@@ -1,14 +1,13 @@
 package io.github.dediamondpro.hycord.core;
 
-import io.github.dediamondpro.hycord.features.discord.RichPresence;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.StringUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,34 +83,18 @@ public class Utils {
         return "hypixel_logo";
     }
 
-    public static String getMode(String rawMode){
-        String mode = rawMode.toLowerCase(Locale.ROOT).replaceAll("\"","").replaceAll("duels_","").replaceAll("_"," ");
-        if(mode.contains("bedwars eight one")){
-            return mode.replaceAll("bedwars eight one","Solo");
-        }else if(mode.contains("bedwars eight two")){
-            return mode.replaceAll("bedwars eight two","Doubles");
-        }else if(mode.contains("bedwars four three")){
-            return mode.replaceAll("bedwars four three","3v3v3v3");
-        }else if(mode.contains("bedwars four four")){
-            return mode.replaceAll("bedwars four four","4v4v4v4");
-        }else if(mode.contains("bedwars two four")){
-            return mode.replaceAll("bedwars two four","4v4");
-        }else if(mode.equals("uhc meetup")){
-            return "Uhc Deathmatch";
-        }else if(mode.contains("tnt") || mode.contains("pvprun") || mode.contains("bowspleef") || mode.contains("capture")){
-            return "In a party";
-        }
-
-        return mode.substring(0, 1).toUpperCase() + mode.substring(1);
-    }
-
+    /**
+     * Taken from Danker's Skyblock Mod under GPL 3.0 license
+     * https://github.com/bowser0000/SkyblockMod/blob/master/LICENSE
+     * @author bowser0000
+     */
     public static String cleanSB(String scoreboard) {
         char[] nvString = StringUtils.stripControlCodes(scoreboard).toCharArray();
         StringBuilder cleaned = new StringBuilder();
-        char sbChar = "⏣".charAt(0);
+        char sbChar = "⏣".charAt(0); // Added skyblock location char
 
         for (char c : nvString) {
-            if ((int) c > 20 && (int) c < 127 || c ==  sbChar) {
+            if ((int) c > 20 && (int) c < 127 || c ==  sbChar) { //added exception fro skyblock char
                 cleaned.append(c);
             }
         }
@@ -119,6 +102,11 @@ public class Utils {
         return cleaned.toString();
     }
 
+    /**
+     * Taken from Danker's Skyblock Mod under GPL 3.0 license
+     * https://github.com/bowser0000/SkyblockMod/blob/master/LICENSE
+     * @author bowser0000
+     */
     public static List<String> getSidebarLines() {
         List<String> lines = new ArrayList<>();
         if (Minecraft.getMinecraft().theWorld == null) return lines;

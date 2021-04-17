@@ -4,6 +4,12 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 
+
+/**
+ * Taken from NotEnoughUpdates under Attribution-NonCommercial 3.0 license
+ * https://github.com/Moulberry/NotEnoughUpdates/blob/master/LICENSE
+ * @author MoulBerry
+ */
 public class CommandHandler extends  CommandBase{
     private String Commandname;
     private ProcessCommandRunnable runnable;

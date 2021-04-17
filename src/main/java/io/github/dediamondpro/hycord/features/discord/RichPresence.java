@@ -3,9 +3,9 @@ package io.github.dediamondpro.hycord.features.discord;
 import club.sk1er.mods.core.util.MinecraftUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.settings;
-import net.arikia.dev.drpc.DiscordEventHandlers;
-import net.arikia.dev.drpc.DiscordRPC;
-import net.arikia.dev.drpc.DiscordRichPresence;
+import libraries.net.arikia.dev.drpc.DiscordEventHandlers;
+import libraries.net.arikia.dev.drpc.DiscordRPC;
+import libraries.net.arikia.dev.drpc.DiscordRichPresence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -40,11 +40,9 @@ public class RichPresence {
         ticks++;
         if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
             return;
-        //Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
-            //FMLLog.getLogger().log(Level.INFO, sCleaned);
             if (sCleaned.contains("Mode: ")) {
                 secondLine = sCleaned.replaceAll("Mode: ", "");
             }else if(sCleaned.contains("⏣ ")){
@@ -76,7 +74,7 @@ public class RichPresence {
         if (MinecraftUtils.isHypixel()) {
             DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
                     .setJoinGameEventHandler(JoinHandler::Handler)
-                    .setJoinRequestEventHandler(JoinRequestHander::Handler)
+                    .setJoinRequestEventHandler(JoinRequestHandler::Handler)
                     .build();
             DiscordRPC.discordInitialize("819625966627192864", handlers, true);
             FMLLog.getLogger().log(Level.INFO, "started RPC");
@@ -112,6 +110,8 @@ public class RichPresence {
             String[] secret = event.message.getUnformattedText().split("&");
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + secret[1]);
             invited = secret[1];
+            joinSecret = UUID.randomUUID().toString();
+            updateRPC();
             event.setCanceled(true);
         } else if (msg.startsWith("§6Party Members (")) {
             String[] amount = msg.split("[()]");
@@ -129,8 +129,6 @@ public class RichPresence {
             if(invited != null && msg.contains(invited)){
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/pc HyCordPId&" + PartyId);
                 invited = null;
-                joinSecret = UUID.randomUUID().toString();
-                updateRPC();
             }
         } else if (msg.endsWith("§r§ehas left the party.§r")) {
             partyMembers--;

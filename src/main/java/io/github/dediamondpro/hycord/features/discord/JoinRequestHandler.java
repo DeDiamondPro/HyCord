@@ -14,15 +14,15 @@ public class JoinRequestHandler {
                 + EnumChatFormatting.YELLOW + user.username + "#" + user.discriminator + "has requested to join your party.\n");
 
         ChatComponentText accept = new ChatComponentText(EnumChatFormatting.GREEN  + "[Accept] ");
-        accept.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordReplyYes " + user.userId))
+        accept.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordreplyyes " + user.userId))
                 .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Accept the join request"))));
 
         ChatComponentText deny = new ChatComponentText(EnumChatFormatting.RED  + "[Deny] ");
-        deny.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordReplyNo " + user.userId))
+        deny.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordreplyno " + user.userId))
                 .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.RED + "Deny the join request"))));
 
         ChatComponentText ignore = new ChatComponentText(EnumChatFormatting.GRAY  + "[Ignore]\n");
-        ignore.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordReplyIgnore " + user.userId))
+        ignore.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/$hycordreplyignore " + user.userId))
                 .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GRAY + "Ignore the join request"))));
 
         ChatComponentText end = new ChatComponentText(EnumChatFormatting.BLUE + "§9§m-----------------------------§r§9");

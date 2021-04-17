@@ -42,7 +42,7 @@ public class hycord {
             }
         }
     });
-    CommandHandler replyYesCommand = new CommandHandler("$hycordReplyYes", new CommandHandler.ProcessCommandRunnable() {
+    CommandHandler replyYesCommand = new CommandHandler("$hycordreplyyes", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String args[]) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
@@ -51,7 +51,7 @@ public class hycord {
             }
         }
     });
-    CommandHandler replyNoCommand = new CommandHandler("$hycordReplyNo", new CommandHandler.ProcessCommandRunnable() {
+    CommandHandler replyNoCommand = new CommandHandler("$hycordreplyno", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String args[]) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
@@ -60,36 +60,13 @@ public class hycord {
             }
         }
     });
-    CommandHandler replyIgnoreCommand = new CommandHandler("$hycordReplyIgnore", new CommandHandler.ProcessCommandRunnable() {
+    CommandHandler replyIgnoreCommand = new CommandHandler("$hycordreplyignore", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String args[]) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
             }else{
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
-        }
-    });
-    CommandHandler testCommand = new CommandHandler("testCommand", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String[] args) {
-            ChatComponentText message = new ChatComponentText(EnumChatFormatting.BLUE + "§9§m-----------------------------§r§9\n"
-                    + EnumChatFormatting.YELLOW + "has requested to join your party.\n");
-            ChatComponentText accept = new ChatComponentText(EnumChatFormatting.GREEN  + "[Accept] ");
-            accept.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"$hycordReplyYes"))
-                    .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GREEN + "Accept the join request"))));
-            ChatComponentText deny = new ChatComponentText(EnumChatFormatting.RED  + "[Deny] ");
-            deny.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"$hycordReplyNo"))
-                    .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.RED + "Deny the join request"))));
-            ChatComponentText ignore = new ChatComponentText(EnumChatFormatting.GRAY  + "[Ignore]\n");
-            ignore.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"$hycordReplyIgnore"))
-                    .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.GRAY + "Ignore the join request"))));
-            ChatComponentText end = new ChatComponentText(EnumChatFormatting.BLUE + "§9§m-----------------------------§r§9");
-
-            message.appendSibling(accept);
-            message.appendSibling(deny);
-            message.appendSibling(ignore);
-            message.appendSibling(end);
-
-            Minecraft.getMinecraft().thePlayer.addChatMessage(message);
         }
     });
 
@@ -103,7 +80,6 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(replyYesCommand);
         ClientCommandHandler.instance.registerCommand(replyNoCommand);
         ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
-        ClientCommandHandler.instance.registerCommand(testCommand);
 
         MinecraftForge.EVENT_BUS.register(new autoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

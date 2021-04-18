@@ -108,7 +108,7 @@ public class RichPresence {
             String[] id = event.message.getUnformattedText().split("&");
             if(id[1].length() == 36) {
                 PartyId = id[1];
-                event.setCanceled(true);
+                //event.setCanceled(true);
             }
         }
         if(event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom")){

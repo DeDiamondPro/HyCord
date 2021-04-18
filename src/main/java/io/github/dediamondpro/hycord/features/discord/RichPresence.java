@@ -108,7 +108,7 @@ public class RichPresence {
             String[] id = event.message.getUnformattedText().split("&");
             if(id[1].length() == 36) {
                 PartyId = id[1];
-                //event.setCanceled(true);
+                event.setCanceled(true);
             }
         }
         if(event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom")){
@@ -131,7 +131,7 @@ public class RichPresence {
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
-            if(invited != null && msg.contains(invited)){
+            if(invited != null && msg.contains(invited) && settings.sharePId){
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/pc HyCordPId&" + PartyId);
                 invited = null;
             }

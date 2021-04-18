@@ -10,7 +10,7 @@ import java.io.File;
 public class settings extends Vigilant {
     @Property(
             type = PropertyType.SWITCH, name = "Discord Rich Presence",
-            description = "Display your status on Discord, requires relog to take effect",
+            description = "Display your status on Discord, requires relog to take effect.",
             category = "Discord",
             subcategory = "Rich presence"
     )
@@ -19,7 +19,7 @@ public class settings extends Vigilant {
     @Property(
             type = PropertyType.SLIDER,
             name = "Maximum discord party size",
-            description = "Sets the maximum discord party size.",
+            description = "Sets the maximum Discord party size.",
             category = "Discord",
             min = 1,
             max = 100,
@@ -29,7 +29,7 @@ public class settings extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH, name = "Enable Invites",
-            description = "Enable the ability to party invite people on Discord and add a button \"ask to join\"",
+            description = "Enable the ability to party invite people on Discord and add a button \"ask to join\".",
             category = "Discord",
             subcategory = "Invites"
     )
@@ -44,10 +44,10 @@ public class settings extends Vigilant {
     public static boolean sharePId = false;
 
     @Property(
-            type = PropertyType.SWITCH, name = "auto friend list",
-            description = "Automatically do /friend list when you join hypixel",
-            category = "misc",
-            subcategory = "autoFL"
+            type = PropertyType.SWITCH, name = "Auto Friend List",
+            description = "Automatically do /friend list when you join Hypixel.",
+            category = "Miscellaneous",
+            subcategory = "AutoFL"
     )
     public static boolean autoFLEnabled = false;
 

@@ -104,7 +104,7 @@ public class RichPresence {
     @SubscribeEvent
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-        if(msg.contains("HyCordPId&") && msg.startsWith("§r§9Party §8>")){
+        if(msg.contains("HyCordPId&") && (msg.startsWith("§r§9Party §8>") || msg.startsWith("§dFrom"))){
             String[] id = event.message.getUnformattedText().split("&");
             if(id[1].length() == 36) {
                 PartyId = id[1];
@@ -131,8 +131,8 @@ public class RichPresence {
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
-            if(invited != null && msg.contains(invited) && settings.sharePId){
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/pc HyCordPId&" + PartyId);
+            if(invited != null && msg.contains(invited)){
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg "+ invited + " HyCordPId&" + PartyId);
                 invited = null;
             }
         } else if (msg.endsWith("§r§ehas left the party.§r")) {

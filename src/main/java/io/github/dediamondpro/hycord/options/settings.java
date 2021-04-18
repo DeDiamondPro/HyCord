@@ -35,13 +35,13 @@ public class settings extends Vigilant {
     )
     public static boolean enableInvites = true;
 
-    @Property(
+    /*@Property(
             type = PropertyType.SWITCH, name = "Share Party Id",
             description = "Share your party id in party chat when someone joins using HyCord (used to display that you're in the same party) NOTE: Everyone in the party will see this, use at your own risk.",
             category = "Discord",
             subcategory = "Advanced"
     )
-    public static boolean sharePId = false;
+    public static boolean sharePId = false;*/
 
     @Property(
             type = PropertyType.SWITCH, name = "Auto Friend List",

@@ -132,7 +132,7 @@ public class RichPresence {
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if(invited != null && msg.contains(invited)){
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg "+ invited + " HyCordPId&" + PartyId);
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg "+ invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
         } else if (msg.endsWith("§r§ehas left the party.§r")) {

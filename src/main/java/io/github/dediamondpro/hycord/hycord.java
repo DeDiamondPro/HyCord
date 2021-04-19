@@ -2,10 +2,10 @@ package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
 import io.github.dediamondpro.hycord.core.CommandHandler;
-import io.github.dediamondpro.hycord.core.Utils;
-import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.core.NickName;
+import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
+import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.discord.JoinHandler;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import io.github.dediamondpro.hycord.options.settings;
@@ -23,11 +23,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Scanner;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
@@ -139,25 +135,22 @@ public class hycord {
         try {
             if (nickNameSave.createNewFile()) {
                 System.out.println("File created: " + nickNameSave.getName());
-                NickNameController.nicknames.add(new NickName("DeDiamondPro","§cD§6e§eD§ai§9a§5m§do§cn§6d§eP§ar§9o"));
-                NickNameController.nicknames.add(new NickName("Strebbypatty","§cS§6t§er§ae§9b§5b§dy§cp§6a§et§at§9y"));
+                NickNameController.nicknames.add(new NickName("DeDiamondPro","§bDeD§3iam§9ond§1Pro"));
+                NickNameController.nicknames.add(new NickName("Strebbypatty","§4Strebbypatty"));
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
                 for(NickName str: NickNameController.nicknames) {
                     writer.write(str + System.lineSeparator());
                 }
                 writer.close();
             } else {
-                try{
-                    System.out.println("File already exists.");
-                    Stream<String> lines = Files.lines(nickNameSave.toPath());
-                    List<String> nicksStr = (lines.collect(Collectors.toList()));
-                    for(String element: nicksStr){
-                        String[] split = element.split(",");
-                        NickNameController.nicknames.add(new NickName(split[0],split[1]));
-                    }
-                } catch (UncheckedIOException e) {//stop complaining please
-                    e.printStackTrace();
+                System.out.println("Loading file");
+                Scanner myReader = new Scanner(nickNameSave);
+                while (myReader.hasNextLine()) {
+                    String data = myReader.nextLine();
+                    String[] split = data.split(",");
+                    NickNameController.nicknames.add(new NickName(split[0],split[1]));
                 }
+                myReader.close();
             }
         } catch (IOException e) {
             e.printStackTrace();

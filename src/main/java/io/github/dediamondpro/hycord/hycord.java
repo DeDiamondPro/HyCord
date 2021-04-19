@@ -20,9 +20,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.Map;
 import java.util.Scanner;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
@@ -87,15 +86,7 @@ public class hycord {
                         newNick = newNick.replace("&r" +  replacePart,Utils.rainbowText(replacePart));
                     }
                 }
-                boolean done = false;
-                for(NickName element: NickNameController.nicknames){
-                    if(element.name.equals(args[0])){
-                      NickNameController.nicknames.get(NickNameController.nicknames.indexOf(element)).nick = newNick;
-                      done = true;
-                      break;
-                    }
-                }
-                if(!done) NickNameController.nicknames.add(new NickName(args[0],newNick));
+                NickNameController.nicknames.put(args[0],newNick);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));
             }else{
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player and a nickname"));
@@ -105,7 +96,7 @@ public class hycord {
     CommandHandler clearNick = new CommandHandler("clearnick", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String args[]) {
             if(args.length > 0) {
-                NickNameController.nicknames.removeIf(element -> element.name.equals(args[0]));
+                NickNameController.nicknames.remove(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Cleared the nickname of " + args[0]));
             }else{
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player"));
@@ -135,20 +126,21 @@ public class hycord {
         try {
             if (nickNameSave.createNewFile()) {
                 System.out.println("File created: " + nickNameSave.getName());
-                NickNameController.nicknames.add(new NickName("DeDiamondPro","§bDeD§3iam§9ond§1Pro"));
-                NickNameController.nicknames.add(new NickName("Strebbypatty","§4Strebbypatty"));
+                NickNameController.nicknames.put("DeDiamondPro","§bDeD§3iam§9ond§1Pro");
+                NickNameController.nicknames.put("Strebbypatty","§4Strebbypatty");
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
-                for(NickName str: NickNameController.nicknames) {
-                    writer.write(str + System.lineSeparator());
+                for(String str: NickNameController.nicknames.keySet()) {
+                    writer.write(str + "," + NickNameController.nicknames.get(str) + System.lineSeparator());
                 }
                 writer.close();
             } else {
-                System.out.println("Loading file");
+                System.out.println("Loading nicks");
                 Scanner myReader = new Scanner(nickNameSave);
                 while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
+                    System.out.println(data);
                     String[] split = data.split(",");
-                    NickNameController.nicknames.add(new NickName(split[0],split[1]));
+                    NickNameController.nicknames.put(split[0],split[1]);
                 }
                 myReader.close();
             }

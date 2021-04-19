@@ -7,6 +7,7 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
@@ -20,9 +21,7 @@ public class Utils {
         Minecraft mc = Minecraft.getMinecraft();
 
         if (mc != null && mc.theWorld != null && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
-            if (mc.thePlayer.getClientBrand().toLowerCase().contains("hypixel")) {
-                return true;
-            }
+            return mc.thePlayer.getClientBrand().toLowerCase().contains("hypixel");
         }
         return false;
     }
@@ -136,4 +135,54 @@ public class Utils {
         return lines;
     }
 
+    public static String rainbowText(String text){
+        char[] charList = text.toCharArray();
+        StringBuilder rainbow = new StringBuilder();
+        int color = 0;
+        for(char a:charList){
+            switch (color){
+                case 0:
+                    rainbow.append(EnumChatFormatting.RED);
+                    rainbow.append(a);
+                    break;
+                case 1:
+                    rainbow.append(EnumChatFormatting.GOLD);
+                    rainbow.append(a);
+                    break;
+                case 2:
+                    rainbow.append(EnumChatFormatting.YELLOW);
+                    rainbow.append(a);
+                    break;
+                case 3:
+                    rainbow.append(EnumChatFormatting.GREEN);
+                    rainbow.append(a);
+                    break;
+                case 4:
+                    rainbow.append(EnumChatFormatting.BLUE);
+                    rainbow.append(a);
+                    break;
+                case 5:
+                    rainbow.append(EnumChatFormatting.DARK_PURPLE);
+                    rainbow.append(a);
+                    break;
+                case 6:
+                    rainbow.append(EnumChatFormatting.LIGHT_PURPLE);
+                    rainbow.append(a);
+                    color = -1;
+                    break;
+            }
+            color++;
+        }
+        return rainbow.toString();
+    }
+
+    public static String getLastColor(String text){
+        char[] charList = text.toCharArray();
+        for(int i = charList.length-1; i >= 0;i--){
+            if(charList[i] == "§".charAt(0)){
+                return String.valueOf(charList[i]) + charList[i + 1];
+            }
+        }
+        return "";
+    }
 }

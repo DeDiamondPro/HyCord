@@ -45,12 +45,15 @@ public class RichPresence {
             String sCleaned = Utils.cleanSB(s);
             if (sCleaned.contains("Mode: ")) {
                 secondLine = sCleaned.replaceAll("Mode: ", "");
-            }else if(sCleaned.contains("⏣ ")){
-                secondLine = sCleaned.replaceAll("⏣ ", "");
+            }else if(sCleaned.contains(" ⏣ ")){
+                secondLine = sCleaned.replaceAll(" ⏣ ", "");
             }
             if (sCleaned.contains("Map: ")) {
                 imageText = sCleaned.replaceAll("Map: ", "");
             }
+        }
+        if(secondLine.equals("Your Island")){
+            secondLine = "Private Island";
         }
         Scoreboard title = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = title.getObjectiveInDisplaySlot(1);

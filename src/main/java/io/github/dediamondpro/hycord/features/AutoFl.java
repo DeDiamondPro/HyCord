@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import io.github.dediamondpro.hycord.options.settings;
 
-public class autoFl {
+public class AutoFl {
     public boolean send = false;
     int ticks = 0;
 

@@ -94,7 +94,7 @@ public class Utils {
         char sbChar = "⏣".charAt(0); // Added skyblock location char
 
         for (char c : nvString) {
-            if ((int) c > 20 && (int) c < 127 || c == sbChar) { //added exception fro skyblock char
+            if ((int) c > 20 && (int) c < 127 || c == sbChar) { //added exception for skyblock char
                 cleaned.append(c);
             }
         }

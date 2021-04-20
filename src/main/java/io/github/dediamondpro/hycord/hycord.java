@@ -2,7 +2,6 @@ package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
 import io.github.dediamondpro.hycord.core.CommandHandler;
-import io.github.dediamondpro.hycord.core.NickName;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
@@ -20,24 +19,25 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
-import java.io.*;
-import java.util.Map;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.0-pre1";
 
     private final settings config = new settings();
 
     CommandHandler mainCommand = new CommandHandler("hycord", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             ModCore.getInstance().getGuiHandler().open(config.gui());
         }
     });
     CommandHandler partySize = new CommandHandler("psize", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 0){
                 settings.maxPartySize = Integer.parseInt(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the party size to " + args[0] + "!"));
@@ -47,7 +47,7 @@ public class hycord {
         }
     });
     CommandHandler replyYesCommand = new CommandHandler("$hycordreplyyes", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
             }else{
@@ -56,7 +56,7 @@ public class hycord {
         }
     });
     CommandHandler replyNoCommand = new CommandHandler("$hycordreplyno", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
             }else{
@@ -65,7 +65,7 @@ public class hycord {
         }
     });
     CommandHandler replyIgnoreCommand = new CommandHandler("$hycordreplyignore", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
             }else{
@@ -74,17 +74,17 @@ public class hycord {
         }
     });
     CommandHandler setNick = new CommandHandler("setnick", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 1) {
                 String newNick = args[1].replace("&", "§").replace("§r","&r");
                 while (newNick.contains("&r")){
+                    String replacePart;
                     if(newNick.split("&r")[1].contains("§")){
-                        String replacePart = newNick.split("&r")[1].split("§")[0];
-                        newNick = newNick.replace("&r" +  replacePart,Utils.rainbowText(replacePart));
+                        replacePart = newNick.split("&r")[1].split("§")[0];
                     }else{
-                        String replacePart = newNick.split("&r")[1];
-                        newNick = newNick.replace("&r" +  replacePart,Utils.rainbowText(replacePart));
+                        replacePart = newNick.split("&r")[1];
                     }
+                    newNick = newNick.replace("&r" +  replacePart,Utils.rainbowText(replacePart));
                 }
                 NickNameController.nicknames.put(args[0],newNick);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));
@@ -94,7 +94,7 @@ public class hycord {
         }
     });
     CommandHandler clearNick = new CommandHandler("clearnick", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String args[]) {
+        public void processCommand(ICommandSender sender, String[] args) {
             if(args.length > 0) {
                 NickNameController.nicknames.remove(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Cleared the nickname of " + args[0]));

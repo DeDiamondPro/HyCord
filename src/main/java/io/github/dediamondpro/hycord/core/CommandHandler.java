@@ -8,9 +8,10 @@ import net.minecraft.command.ICommandSender;
 /**
  * Taken from NotEnoughUpdates under Attribution-NonCommercial 3.0 license
  * https://github.com/Moulberry/NotEnoughUpdates/blob/master/LICENSE
+ *
  * @author MoulBerry
  */
-public class CommandHandler extends  CommandBase{
+public class CommandHandler extends CommandBase {
     private String Commandname;
     private ProcessCommandRunnable runnable;
 
@@ -23,15 +24,18 @@ public class CommandHandler extends  CommandBase{
         public abstract void processCommand(ICommandSender sender, String[] args);
     }
 
-    public boolean canCommandSenderUseCommand(ICommandSender sender){
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
     }
-    public String getCommandName(){
+
+    public String getCommandName() {
         return Commandname;
     }
-    public String getCommandUsage(ICommandSender sender){
+
+    public String getCommandUsage(ICommandSender sender) {
         return "/" + Commandname;
     }
+
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         runnable.processCommand(sender, args);
     }

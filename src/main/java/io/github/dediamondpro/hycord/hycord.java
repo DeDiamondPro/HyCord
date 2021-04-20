@@ -38,67 +38,67 @@ public class hycord {
     });
     CommandHandler partySize = new CommandHandler("psize", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0){
+            if (args.length > 0) {
                 settings.maxPartySize = Integer.parseInt(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the party size to " + args[0] + "!"));
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a number!"));
             }
         }
     });
     CommandHandler replyYesCommand = new CommandHandler("$hycordreplyyes", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
         }
     });
     CommandHandler replyNoCommand = new CommandHandler("$hycordreplyno", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
         }
     });
     CommandHandler replyIgnoreCommand = new CommandHandler("$hycordreplyignore", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
         }
     });
     CommandHandler setNick = new CommandHandler("setnick", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 1) {
-                String newNick = args[1].replace("&", "§").replace("§r","&r");
-                while (newNick.contains("&r")){
+            if (args.length > 1) {
+                String newNick = args[1].replace("&", "§").replace("§r", "&r");
+                while (newNick.contains("&r")) {
                     String replacePart;
-                    if(newNick.split("&r")[1].contains("§")){
+                    if (newNick.split("&r")[1].contains("§")) {
                         replacePart = newNick.split("&r")[1].split("§")[0];
-                    }else{
+                    } else {
                         replacePart = newNick.split("&r")[1];
                     }
-                    newNick = newNick.replace("&r" +  replacePart,Utils.rainbowText(replacePart));
+                    newNick = newNick.replace("&r" + replacePart, Utils.rainbowText(replacePart));
                 }
-                NickNameController.nicknames.put(args[0],newNick);
+                NickNameController.nicknames.put(args[0], newNick);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player and a nickname"));
             }
         }
     });
     CommandHandler clearNick = new CommandHandler("clearnick", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 NickNameController.nicknames.remove(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Cleared the nickname of " + args[0]));
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player"));
             }
         }
@@ -126,10 +126,10 @@ public class hycord {
         try {
             if (nickNameSave.createNewFile()) {
                 System.out.println("File created: " + nickNameSave.getName());
-                NickNameController.nicknames.put("DeDiamondPro","§bDeD§3iam§9ond§1Pro");
-                NickNameController.nicknames.put("Strebbypatty","§4Strebbypatty");
+                NickNameController.nicknames.put("DeDiamondPro", "§bDeD§3iam§9ond§1Pro");
+                NickNameController.nicknames.put("Strebbypatty", "§4Strebbypatty");
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
-                for(String str: NickNameController.nicknames.keySet()) {
+                for (String str : NickNameController.nicknames.keySet()) {
                     writer.write(str + "," + NickNameController.nicknames.get(str) + System.lineSeparator());
                 }
                 writer.close();
@@ -140,7 +140,7 @@ public class hycord {
                     String data = myReader.nextLine();
                     System.out.println(data);
                     String[] split = data.split(",");
-                    NickNameController.nicknames.put(split[0],split[1]);
+                    NickNameController.nicknames.put(split[0], split[1]);
                 }
                 myReader.close();
             }

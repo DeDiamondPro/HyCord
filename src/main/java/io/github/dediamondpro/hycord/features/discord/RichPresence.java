@@ -45,14 +45,14 @@ public class RichPresence {
             String sCleaned = Utils.cleanSB(s);
             if (sCleaned.contains("Mode: ")) {
                 secondLine = sCleaned.replaceAll("Mode: ", "");
-            }else if(sCleaned.contains(" ⏣ ")){
+            } else if (sCleaned.contains(" ⏣ ")) {
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
             }
             if (sCleaned.contains("Map: ")) {
                 imageText = sCleaned.replaceAll("Map: ", "");
             }
         }
-        if(secondLine.equals("Your Island")){
+        if (secondLine.equals("Your Island")) {
             secondLine = "Private Island";
         }
         Scoreboard title = Minecraft.getMinecraft().theWorld.getScoreboard();
@@ -85,7 +85,7 @@ public class RichPresence {
             Thread callBacks = new Thread(() -> {
                 while (enabled) {
                     DiscordRPC.discordRunCallbacks();
-                    try{
+                    try {
                         Thread.sleep(16);//run callbacks at 60fps
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -98,7 +98,7 @@ public class RichPresence {
 
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        if(enabled) {
+        if (enabled) {
             DiscordRPC.discordShutdown();
             enabled = false;
         }
@@ -107,14 +107,14 @@ public class RichPresence {
     @SubscribeEvent
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-        if(msg.contains("HyCordPId&") && (msg.startsWith("§r§9Party §8>") || msg.startsWith("§dFrom"))){
+        if (msg.contains("HyCordPId&") && (msg.startsWith("§r§9Party §8>") || msg.startsWith("§dFrom"))) {
             String[] id = event.message.getUnformattedText().split("&");
-            if(id[1].length() == 36) {
+            if (id[1].length() == 36) {
                 PartyId = id[1];
                 event.setCanceled(true);
             }
         }
-        if(event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom")){
+        if (event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom")) {
             String[] secret = event.message.getUnformattedText().split("&");
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + secret[1]);
             invited = secret[1];
@@ -134,8 +134,8 @@ public class RichPresence {
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
-            if(invited != null && msg.contains(invited)){
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg "+ invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
+            if (invited != null && msg.contains(invited)) {
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
         } else if (msg.endsWith("§r§ehas left the party.§r")) {
@@ -177,7 +177,7 @@ public class RichPresence {
             PartyId = UUID.randomUUID().toString();
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
             partyMembers++;
-        }else if (msg.startsWith("§eLooting §r§cThe Catacombs §r§ewith")){
+        } else if (msg.startsWith("§eLooting §r§cThe Catacombs §r§ewith")) {
             String[] message = msg.split("[9\\/]");
             partyMembers = Integer.parseInt(message[1]);
         }
@@ -189,7 +189,7 @@ public class RichPresence {
         presence.setStartTimestamps(time.toEpochMilli());
         presence.setParty(PartyId, partyMembers, settings.maxPartySize);
         presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if(partyLeader && settings.enableInvites) {
+        if (partyLeader && settings.enableInvites) {
             presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
         }
         DiscordRPC.discordUpdatePresence(presence.build());

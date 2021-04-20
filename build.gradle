@@ -29,7 +29,7 @@ minecraft {
     clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
 }
 
-repositories{
+repositories {
     flatDir dirs: 'libs'
     mavenCentral()
 }
@@ -58,7 +58,7 @@ processResources {
 }
 
 jar {
-    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+    manifest.attributes("FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
             "ModSide": "CLIENT",
             "FMLCorePluginContainsFMLMod": true
     )

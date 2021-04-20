@@ -85,6 +85,7 @@ public class Utils {
     /**
      * Taken from Danker's Skyblock Mod under GPL 3.0 license
      * https://github.com/bowser0000/SkyblockMod/blob/master/LICENSE
+     *
      * @author bowser0000
      */
     public static String cleanSB(String scoreboard) {
@@ -93,7 +94,7 @@ public class Utils {
         char sbChar = "⏣".charAt(0); // Added skyblock location char
 
         for (char c : nvString) {
-            if ((int) c > 20 && (int) c < 127 || c ==  sbChar) { //added exception fro skyblock char
+            if ((int) c > 20 && (int) c < 127 || c == sbChar) { //added exception fro skyblock char
                 cleaned.append(c);
             }
         }
@@ -104,6 +105,7 @@ public class Utils {
     /**
      * Taken from Danker's Skyblock Mod under GPL 3.0 license
      * https://github.com/bowser0000/SkyblockMod/blob/master/LICENSE
+     *
      * @author bowser0000
      */
     public static List<String> getSidebarLines() {
@@ -135,12 +137,12 @@ public class Utils {
         return lines;
     }
 
-    public static String rainbowText(String text){
+    public static String rainbowText(String text) {
         char[] charList = text.toCharArray();
         StringBuilder rainbow = new StringBuilder();
         int color = 0;
-        for(char a:charList){
-            switch (color){
+        for (char a : charList) {
+            switch (color) {
                 case 0:
                     rainbow.append(EnumChatFormatting.RED);
                     rainbow.append(a);
@@ -176,10 +178,10 @@ public class Utils {
         return rainbow.toString();
     }
 
-    public static String getLastColor(String text){
+    public static String getLastColor(String text) {
         char[] charList = text.toCharArray();
-        for(int i = charList.length-1; i >= 0;i--){
-            if(charList[i] == "§".charAt(0)){
+        for (int i = charList.length - 1; i >= 0; i--) {
+            if (charList[i] == "§".charAt(0)) {
                 return String.valueOf(charList[i]) + charList[i + 1];
             }
         }

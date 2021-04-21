@@ -5,7 +5,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import io.github.dediamondpro.hycord.core.Utils;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import io.github.dediamondpro.hycord.options.settings;
+import io.github.dediamondpro.hycord.options.Settings;
 
 public class AutoFl {
     public boolean send = false;
@@ -14,7 +14,7 @@ public class AutoFl {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         ticks++;
-        if (!settings.autoFLEnabled || !Utils.isHypixel() || send || ticks % 20 != 0) return;
+        if (!Settings.autoFLEnabled || !Utils.isHypixel() || send || ticks % 20 != 0) return;
         Minecraft.getMinecraft().thePlayer.sendChatMessage("/fl");
         send = true;
     }

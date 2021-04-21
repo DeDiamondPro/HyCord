@@ -2,7 +2,7 @@ package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.util.MinecraftUtils;
 import io.github.dediamondpro.hycord.core.Utils;
-import io.github.dediamondpro.hycord.options.settings;
+import io.github.dediamondpro.hycord.options.Settings;
 import libraries.net.arikia.dev.drpc.DiscordEventHandlers;
 import libraries.net.arikia.dev.drpc.DiscordRPC;
 import libraries.net.arikia.dev.drpc.DiscordRichPresence;
@@ -38,7 +38,7 @@ public class RichPresence {
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
         ticks++;
-        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
+        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -187,9 +187,9 @@ public class RichPresence {
         DiscordRichPresence.Builder presence = new DiscordRichPresence.Builder(secondLine);
         presence.setDetails(gameMode);
         presence.setStartTimestamps(time.toEpochMilli());
-        presence.setParty(PartyId, partyMembers, settings.maxPartySize);
+        presence.setParty(PartyId, partyMembers, Settings.maxPartySize);
         presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if (partyLeader && settings.enableInvites) {
+        if (partyLeader && Settings.enableInvites) {
             presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
         }
         DiscordRPC.discordUpdatePresence(presence.build());

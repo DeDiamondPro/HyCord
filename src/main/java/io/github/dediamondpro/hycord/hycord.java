@@ -5,9 +5,10 @@ import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
+import io.github.dediamondpro.hycord.features.UpdateChecker;
 import io.github.dediamondpro.hycord.features.discord.JoinHandler;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
-import io.github.dediamondpro.hycord.options.settings;
+import io.github.dediamondpro.hycord.options.Settings;
 import libraries.net.arikia.dev.drpc.DiscordRPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
@@ -29,7 +30,7 @@ public class hycord {
     public static final String MODID = "hycord";
     public static final String VERSION = "1.1.0-pre1";
 
-    private final settings config = new settings();
+    private final Settings config = new Settings();
 
     CommandHandler mainCommand = new CommandHandler("hycord", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
@@ -39,7 +40,7 @@ public class hycord {
     CommandHandler partySize = new CommandHandler("psize", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                settings.maxPartySize = Integer.parseInt(args[0]);
+                Settings.maxPartySize = Integer.parseInt(args[0]);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the party size to " + args[0] + "!"));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a number!"));
@@ -121,6 +122,10 @@ public class hycord {
         MinecraftForge.EVENT_BUS.register(new JoinHandler());
         MinecraftForge.EVENT_BUS.register(new RichPresence());
         MinecraftForge.EVENT_BUS.register(new NickNameController());
+
+        if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate()) {
+            MinecraftForge.EVENT_BUS.register(new UpdateChecker());
+        }
 
         File nickNameSave = new File("./config/HyCordNickNames.txt");
         try {

@@ -7,7 +7,17 @@ import club.sk1er.vigilance.data.PropertyType;
 import java.io.File;
 
 @SuppressWarnings("unused")
-public class settings extends Vigilant {
+public class Settings extends Vigilant {
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Update Channel",
+            description = "Choose what type of updates you get notified for.",
+            category = "General",
+            subcategory = "Updates",
+            options = {"None", "Release", "Pre-Release"}
+    )
+    public static int updateChannel = 1;
+
     @Property(
             type = PropertyType.SWITCH, name = "Discord Rich Presence",
             description = "Display your status on Discord, requires relog to take effect.",
@@ -43,7 +53,7 @@ public class settings extends Vigilant {
     )
     public static boolean autoFLEnabled = false;
 
-    public settings() {
+    public Settings() {
         super(new File("./config/hycord.toml"));
         initialize();
     }

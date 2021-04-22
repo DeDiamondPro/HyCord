@@ -104,6 +104,24 @@ public class hycord {
             }
         }
     });
+    CommandHandler nickList = new CommandHandler("nicklist", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames: \n");
+            for(String element: NickNameController.nicknames.keySet()){
+                message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element) + "\n"));
+            }
+            Minecraft.getMinecraft().thePlayer.addChatMessage(message);
+        }
+    });
+    CommandHandler nickHelp = new CommandHandler("nickhelp", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "HyCord Nickname Help:\n" +
+                    EnumChatFormatting.YELLOW + "/setnick <player> <nickname>: set the nickname of a player\n" +
+                    EnumChatFormatting.YELLOW + "/clearnick <player>: clear the nickname of a player\n" +
+                    EnumChatFormatting.YELLOW + "/nicklist: lists all nicknames\n" +
+                    EnumChatFormatting.YELLOW + "/nickhelp: shows this page\n"));
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
@@ -117,6 +135,8 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
         ClientCommandHandler.instance.registerCommand(setNick);
         ClientCommandHandler.instance.registerCommand(clearNick);
+        ClientCommandHandler.instance.registerCommand(nickList);
+        ClientCommandHandler.instance.registerCommand(nickHelp);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

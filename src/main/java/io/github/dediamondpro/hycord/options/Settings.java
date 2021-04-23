@@ -19,6 +19,15 @@ public class Settings extends Vigilant {
     public static int updateChannel = 1;
 
     @Property(
+            type = PropertyType.TEXT,
+            name = "Hypixel API Key",
+            description = "Your Hypixel API key, which can be obtained from /api new. Required for some features. Easily set by doing /hycord setkey <apikey>.",
+            category = "General",
+            subcategory = "API"
+    )
+    public static String apiKey = "";
+
+    @Property(
             type = PropertyType.SWITCH, name = "Discord Rich Presence",
             description = "Display your status on Discord, requires relog to take effect.",
             category = "Discord",
@@ -44,6 +53,24 @@ public class Settings extends Vigilant {
             subcategory = "Invites"
     )
     public static boolean enableInvites = true;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "Enable Custom Nicknames",
+            description = "Enable the ability to set custom nicknames (/nickhelp for more info).",
+            category = "Miscellaneous",
+            subcategory = "Nicknames"
+    )
+    public static boolean enableNicknames = true;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "Show Discord tag on hover",
+            description = "Enable the option to show a players discord name when you hover over their minecraft name. Requires your" +
+                    "API key to be set.",
+            category = "Discord",
+            subcategory = "Names"
+    )
+    public static boolean enableDiscordHover = false;
+
 
     @Property(
             type = PropertyType.SWITCH, name = "Auto Friend List",

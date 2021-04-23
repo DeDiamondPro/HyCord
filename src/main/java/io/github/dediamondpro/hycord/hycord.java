@@ -2,10 +2,12 @@ package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
 import io.github.dediamondpro.hycord.core.CommandHandler;
+import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
+import io.github.dediamondpro.hycord.features.discord.GetDiscord;
 import io.github.dediamondpro.hycord.features.discord.JoinHandler;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import io.github.dediamondpro.hycord.options.Settings;
@@ -28,13 +30,33 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.1.0-pre1";
+    public static final String VERSION = "1.1.0-pre2";
 
     private final Settings config = new Settings();
 
     CommandHandler mainCommand = new CommandHandler("hycord", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            ModCore.getInstance().getGuiHandler().open(config.gui());
+            if (args.length > 0 && args[0].equalsIgnoreCase("setkey")) {
+                if (args.length > 1) {
+                    Thread checkKey = new Thread(() -> {
+                        if (NetworkUtils.GetRequest("https://api.hypixel.net/key?key=" + args[1]) == null) {
+                            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Invalid API key."));
+                        } else {
+                            Settings.apiKey = args[1];
+                            System.out.println(Settings.apiKey);
+                            config.markDirty();
+                            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Successfully set your API key"));
+                            config.writeData();
+                            Thread.currentThread().interrupt();
+                        }
+                    });
+                    checkKey.start();
+                } else {
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify an API key. You can generate a new one by doing /api new"));
+                }
+            } else {
+                ModCore.getInstance().getGuiHandler().open(config.gui());
+            }
         }
     });
     CommandHandler partySize = new CommandHandler("psize", new CommandHandler.ProcessCommandRunnable() {
@@ -107,7 +129,7 @@ public class hycord {
     CommandHandler nickList = new CommandHandler("nicklist", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames: \n");
-            for(String element: NickNameController.nicknames.keySet()){
+            for (String element : NickNameController.nicknames.keySet()) {
                 message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element) + "\n"));
             }
             Minecraft.getMinecraft().thePlayer.addChatMessage(message);
@@ -120,6 +142,37 @@ public class hycord {
                     EnumChatFormatting.YELLOW + "/clearnick <player>: clear the nickname of a player\n" +
                     EnumChatFormatting.YELLOW + "/nicklist: lists all nicknames\n" +
                     EnumChatFormatting.YELLOW + "/nickhelp: shows this page\n"));
+        }
+    });
+    CommandHandler devstats = new CommandHandler("hycorddevstats", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("discordCache length " + GetDiscord.discordNameCache.size()));
+            for(String element: GetDiscord.discordNameCache.keySet()){
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(element + " -> " + GetDiscord.discordNameCache.get(element)));
+            }
+        }
+    });
+    CommandHandler getDiscord = new CommandHandler("getdiscord", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            if(args.length > 0) {
+                Thread fetchDiscord = new Thread(() -> {
+                    String discord;
+                    if (GetDiscord.discordNameCache.containsKey(args[0])) {
+                        discord = GetDiscord.discordNameCache.get(args[0]);
+                    }else {
+                       discord = GetDiscord.discord(args[0]);
+                    }
+                   if(discord != null){
+                       Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + args[0] + "'s Discord is: " + discord));
+                   }else{
+                       Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "No Discord found."));
+                   }
+                   Thread.currentThread().interrupt();
+                });
+                fetchDiscord.start();
+            }else{
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player."));
+            }
         }
     });
 
@@ -137,6 +190,8 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(clearNick);
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
+        ClientCommandHandler.instance.registerCommand(devstats);
+        ClientCommandHandler.instance.registerCommand(getDiscord);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

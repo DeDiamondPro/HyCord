@@ -91,6 +91,7 @@ public class RichPresence {
                         e.printStackTrace();
                     }
                 }
+                Thread.currentThread().interrupt();
             });
             callBacks.start();
         }

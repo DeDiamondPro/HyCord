@@ -116,7 +116,7 @@ public class RichPresence {
                 event.setCanceled(true);
             }
         }
-        if (event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom")) {
+        if (event.message.getUnformattedText().contains(joinSecret + "&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom"))) {
             String[] secret = event.message.getUnformattedText().split("&");
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + secret[1]);
             invited = secret[1];

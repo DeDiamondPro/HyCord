@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class NickNameController {
     public static HashMap<String, String> nicknames = new HashMap<>();
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
         if(event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
@@ -63,9 +63,12 @@ public class NickNameController {
         IChatComponent response = message;
         if (message.getSiblings().size() > 0) {
             ChatComponentText replacement = new ChatComponentText("");
-            if (message.getUnformattedTextForChat().contains(name) && message.getChatStyle().getChatHoverEvent()
-                    .getAction().equals(HoverEvent.Action.SHOW_TEXT) && message.getUnformattedText().contains(name)) {
-                if(message.getChatStyle() == null || message.getChatStyle().getChatHoverEvent() == null) {
+            if (message.getUnformattedTextForChat().contains(name)) {
+                if(message.getChatStyle() == null){
+                    replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
+                            .setChatStyle(new ChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                    new ChatComponentText(EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
+                } else if(message.getChatStyle().getChatHoverEvent() == null) {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                     new ChatComponentText(EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
@@ -74,6 +77,8 @@ public class NickNameController {
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                     new ChatComponentText( message.getChatStyle().getChatHoverEvent().getValue().getFormattedText()
                                             + "\n" + EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
+                }else{
+                    replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat()).setChatStyle(message.getChatStyle()));
                 }
             } else {
                 replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat()).setChatStyle(message.getChatStyle()));

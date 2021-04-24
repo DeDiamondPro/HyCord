@@ -2,7 +2,7 @@ package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.util.MinecraftUtils;
 import io.github.dediamondpro.hycord.core.Utils;
-import io.github.dediamondpro.hycord.options.settings;
+import io.github.dediamondpro.hycord.options.Settings;
 import libraries.net.arikia.dev.drpc.DiscordEventHandlers;
 import libraries.net.arikia.dev.drpc.DiscordRPC;
 import libraries.net.arikia.dev.drpc.DiscordRichPresence;
@@ -12,6 +12,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
@@ -38,7 +39,7 @@ public class RichPresence {
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
         ticks++;
-        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !settings.enableRP)
+        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -91,6 +92,7 @@ public class RichPresence {
                         e.printStackTrace();
                     }
                 }
+                Thread.currentThread().interrupt();
             });
             callBacks.start();
         }
@@ -104,17 +106,17 @@ public class RichPresence {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-        if (msg.contains("HyCordPId&") && (msg.startsWith("§r§9Party §8>") || msg.startsWith("§dFrom"))) {
+        if (msg.contains("HyCordPId&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom") || msg.startsWith("§dTo") || msg.startsWith("§r§dTo"))) {
             String[] id = event.message.getUnformattedText().split("&");
             if (id[1].length() == 36) {
                 PartyId = id[1];
                 event.setCanceled(true);
             }
         }
-        if (event.message.getUnformattedText().contains(joinSecret + "&") && msg.startsWith("§dFrom")) {
+        if (event.message.getUnformattedText().contains(joinSecret + "&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom"))) {
             String[] secret = event.message.getUnformattedText().split("&");
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + secret[1]);
             invited = secret[1];
@@ -187,9 +189,9 @@ public class RichPresence {
         DiscordRichPresence.Builder presence = new DiscordRichPresence.Builder(secondLine);
         presence.setDetails(gameMode);
         presence.setStartTimestamps(time.toEpochMilli());
-        presence.setParty(PartyId, partyMembers, settings.maxPartySize);
+        presence.setParty(PartyId, partyMembers, Settings.maxPartySize);
         presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if (partyLeader && settings.enableInvites) {
+        if (partyLeader && Settings.enableInvites) {
             presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
         }
         DiscordRPC.discordUpdatePresence(presence.build());

@@ -22,7 +22,7 @@ public class JoinHandler {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + inviting);
             event.setCanceled(true);
             inviting = null;
-        } else if (msg.startsWith("§dTo") && msg.contains(inviting) && msg.contains("&")) {
+        } else if ((msg.startsWith("§dTo") || msg.startsWith("§r§dTo")) && msg.contains(inviting) && msg.contains("&")) {
             event.setCanceled(true);
         }
     }

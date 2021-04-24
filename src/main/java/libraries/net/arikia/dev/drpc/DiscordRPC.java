@@ -129,18 +129,18 @@ public final class DiscordRPC {
 		String dir;
 
 		if (osUtil.isMac()) { //changed locations to sdk
-			dir = "hycord/libraries/darwin";
+			dir = "darwin";
 		} else if (osUtil.isWindows()) {
 			boolean is64bit = System.getProperty("sun.arch.data.model").equals("64");
-			dir = (is64bit ? "hycord/libraries/win-x64" : "hycord/libraries/win-x86");
+			dir = (is64bit ? "win-x64" : "win-x86");
 		} else {
-			dir = "hycord/libraries/linux";
+			dir = "linux";
 		}
 
-		finalPath = "/" + dir + "/" + name;
+		finalPath = "/hycord/libraries/" + dir + "/" + name;
 
 		try {
-			File f = new File(name);
+			File f = new File("/hycord/temp/" + name);
 
 			try (InputStream in = DiscordRPC.class.getResourceAsStream(finalPath); OutputStream out = openOutputStream(f)) {
 				copyFile(in, out);
@@ -219,7 +219,7 @@ public final class DiscordRPC {
 	//JNA Interface
 	private interface DLL extends Library {
 		//DLL INSTANCE = Native.load("discord-rpc", DLL.class);
-		DLL INSTANCE = (DLL) Native.loadLibrary("discord-rpc", DLL.class);
+		DLL INSTANCE = (DLL) Native.loadLibrary("/hycord/temp/discord-rpc", DLL.class);
 
 		void Discord_Initialize(String applicationId, DiscordEventHandlers handlers, int autoRegister, String optionalSteamId);
 		void Discord_Register(String applicationId, String command);

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -181,10 +183,20 @@ public class Utils {
     public static String getLastColor(String text) {
         char[] charList = text.toCharArray();
         for (int i = charList.length - 1; i >= 0; i--) {
-            if (charList[i] == "§".charAt(0)) {
+            if (charList[i] == "§".charAt(0) && charList[i + 1] != "l".charAt(0)) {
                 return String.valueOf(charList[i]) + charList[i + 1];
             }
         }
         return "";
+    }
+
+    static Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
+
+    public static String getName(String message){
+        Matcher m = getNamePattern.matcher(message);
+        if(m.matches()) {
+            return m.group("username");
+        }
+        return null;
     }
 }

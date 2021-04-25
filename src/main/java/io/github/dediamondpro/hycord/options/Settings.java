@@ -80,6 +80,14 @@ public class Settings extends Vigilant {
     )
     public static boolean autoFLEnabled = false;
 
+    @Property(
+            type = PropertyType.SWITCH, name = "Auto Guild List",
+            description = "Automatically do /guild online when you join Hypixel.",
+            category = "Miscellaneous",
+            subcategory = "AutoGL"
+    )
+    public static boolean autoGLEnabled = false;
+
     public Settings() {
         super(new File("./config/hycord.toml"));
         initialize();

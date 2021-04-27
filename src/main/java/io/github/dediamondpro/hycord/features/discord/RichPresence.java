@@ -28,7 +28,7 @@ public class RichPresence {
     String invited = null;
     Instant time = Instant.now();
     int partyMembers = 1;
-    boolean partyLeader = true;
+    boolean canInvite = true;
     String secondLine = "In a party";
     String imageText = "";
     String gameMode = "";
@@ -48,6 +48,10 @@ public class RichPresence {
                 secondLine = sCleaned.replaceAll("Mode: ", "");
             } else if (sCleaned.contains(" ⏣ ")) {
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
+            } else if (partyMembers > 1) {
+                secondLine = "In a party";
+            } else {
+                secondLine = "On Hypixel";
             }
             if (sCleaned.contains("Map: ")) {
                 imageText = sCleaned.replaceAll("Map: ", "");
@@ -69,7 +73,11 @@ public class RichPresence {
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
         imageText = "";
-        secondLine = "In a party";
+        if (partyMembers > 1) {
+            secondLine = "In a party";
+        } else {
+            secondLine = "On Hypixel";
+        }
         gameMode = "";
     }
 
@@ -128,11 +136,11 @@ public class RichPresence {
             partyMembers = Integer.parseInt(amount[1]);
         } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
             partyMembers = 1;
-            partyLeader = true;
+            canInvite = true;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ehas disbanded the party!§r")) {
             partyMembers = 1;
-            partyLeader = true;
+            canInvite = true;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
@@ -144,20 +152,18 @@ public class RichPresence {
             partyMembers--;
         } else if (msg.startsWith("§eYou left the party.§r")) {
             partyMembers = 1;
-            partyLeader = true;
+            canInvite = true;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.startsWith("§eYou have joined") && msg.endsWith("§r§eparty!§r")) {
             partyMembers = 2;
-            partyLeader = false;
+            canInvite = false;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.contains("has promoted") && msg.contains("§r§eto Party Moderator§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            partyLeader = true;
+            canInvite = true;
         } else if (msg.contains("has demoted") && msg.contains("§r§eto Party Member§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            partyLeader = false;
+            canInvite = false;
         } else if (msg.startsWith("§eThe party was transferred to") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            partyLeader = true;
-        } else if (msg.startsWith("§eThe party was transferred to")) {
-            partyLeader = false;
+            canInvite = true;
         } else if (msg.endsWith("§r§ewas removed from the party because they disconnected§r")) {
             partyMembers--;
         } else if (msg.startsWith("§eYou'll be partying with:")) {
@@ -169,19 +175,22 @@ public class RichPresence {
             }
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
-            partyLeader = true;
+            canInvite = true;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
             partyMembers--;
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            partyLeader = false;
+            canInvite = false;
             partyMembers++;
             PartyId = UUID.randomUUID().toString();
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
             partyMembers++;
         } else if (msg.startsWith("§eLooting §r§cThe Catacombs §r§ewith")) {
-            String[] message = msg.split("[9\\/]");
+            String[] message = msg.split("[9/]");
             partyMembers = Integer.parseInt(message[1]);
+        }else if (msg.equals("§cYou are not currently in a party.§r")){
+            partyMembers = 1;
+            canInvite = true;
         }
     }
 
@@ -191,7 +200,7 @@ public class RichPresence {
         presence.setStartTimestamps(time.toEpochMilli());
         presence.setParty(PartyId, partyMembers, Settings.maxPartySize);
         presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if (partyLeader && Settings.enableInvites) {
+        if (canInvite && Settings.enableInvites) {
             presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
         }
         DiscordRPC.discordUpdatePresence(presence.build());

@@ -30,7 +30,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.1";
 
     private final Settings config = new Settings();
 
@@ -63,7 +63,9 @@ public class hycord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
                 Settings.maxPartySize = Integer.parseInt(args[0]);
+                config.markDirty();
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the party size to " + args[0] + "!"));
+                config.writeData();
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a number!"));
             }
@@ -73,6 +75,7 @@ public class hycord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Accepted the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
@@ -82,6 +85,7 @@ public class hycord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Denied the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }
@@ -91,6 +95,7 @@ public class hycord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
                 DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "Ignored the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
             }

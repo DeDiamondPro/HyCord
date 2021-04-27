@@ -11,7 +11,7 @@ import net.minecraft.util.EnumChatFormatting;
 public class JoinRequestHandler {
     public static void Handler(DiscordUser user) {
         ChatComponentText message = new ChatComponentText(EnumChatFormatting.BLUE + "§9§m-----------------------------§r§9\n"
-                + EnumChatFormatting.YELLOW + user.username + "#" + user.discriminator + "has requested to join your party.\n");
+                + EnumChatFormatting.YELLOW + user.username + "#" + user.discriminator + " has requested to join your party.\n");
 
         ChatComponentText accept = new ChatComponentText(EnumChatFormatting.GREEN + "[Accept] ");
         accept.setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/$hycordreplyyes " + user.userId))

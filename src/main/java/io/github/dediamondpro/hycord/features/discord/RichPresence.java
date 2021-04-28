@@ -48,10 +48,6 @@ public class RichPresence {
                 secondLine = sCleaned.replaceAll("Mode: ", "");
             } else if (sCleaned.contains(" ⏣ ")) {
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
-            } else if (partyMembers > 1) {
-                secondLine = "In a party";
-            } else {
-                secondLine = "On Hypixel";
             }
             if (sCleaned.contains("Map: ")) {
                 imageText = sCleaned.replaceAll("Map: ", "");
@@ -134,38 +130,49 @@ public class RichPresence {
         } else if (msg.startsWith("§6Party Members (")) {
             String[] amount = msg.split("[()]");
             partyMembers = Integer.parseInt(amount[1]);
+            secondLine = "In a party";
         } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
             partyMembers = 1;
             canInvite = true;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas disbanded the party!§r")) {
             partyMembers = 1;
             canInvite = true;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if (invited != null && msg.contains(invited)) {
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
+            secondLine = "In a party";
         } else if (msg.endsWith("§r§ehas left the party.§r")) {
             partyMembers--;
+            secondLine = "In a party";
         } else if (msg.startsWith("§eYou left the party.§r")) {
             partyMembers = 1;
             canInvite = true;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "On Hypixel";
         } else if (msg.startsWith("§eYou have joined") && msg.endsWith("§r§eparty!§r")) {
             partyMembers = 2;
             canInvite = false;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "In a party";
         } else if (msg.contains("has promoted") && msg.contains("§r§eto Party Moderator§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
+            secondLine = "In a party";
         } else if (msg.contains("has demoted") && msg.contains("§r§eto Party Member§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
+            secondLine = "In a party";
         } else if (msg.startsWith("§eThe party was transferred to") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
+            secondLine = "In a party";
         } else if (msg.endsWith("§r§ewas removed from the party because they disconnected§r")) {
             partyMembers--;
+            secondLine = "In a party";
         } else if (msg.startsWith("§eYou'll be partying with:")) {
             partyMembers = 3;
             for (int i = 0; i < msg.length(); i++) {
@@ -173,24 +180,31 @@ public class RichPresence {
                     partyMembers++;
                 }
             }
+            secondLine = "In a party";
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
             canInvite = true;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
             partyMembers--;
+            secondLine = "In a party";
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
             partyMembers++;
             PartyId = UUID.randomUUID().toString();
+            secondLine = "In a party";
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
             partyMembers++;
+            secondLine = "In a party";
         } else if (msg.startsWith("§eLooting §r§cThe Catacombs §r§ewith")) {
             String[] message = msg.split("[9/]");
             partyMembers = Integer.parseInt(message[1]);
+            secondLine = "In a party";
         }else if (msg.equals("§cYou are not currently in a party.§r")){
             partyMembers = 1;
             canInvite = true;
+            secondLine = "On Hypixel";
         }
     }
 

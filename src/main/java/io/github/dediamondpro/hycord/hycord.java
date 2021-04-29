@@ -1,6 +1,7 @@
 package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
+import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -11,7 +12,6 @@ import io.github.dediamondpro.hycord.features.discord.GetDiscord;
 import io.github.dediamondpro.hycord.features.discord.JoinHandler;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import io.github.dediamondpro.hycord.options.Settings;
-import libraries.net.arikia.dev.drpc.DiscordRPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -74,7 +74,7 @@ public class hycord {
     CommandHandler replyYesCommand = new CommandHandler("$hycordreplyyes", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.YES);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Accepted the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -84,7 +84,7 @@ public class hycord {
     CommandHandler replyNoCommand = new CommandHandler("$hycordreplyno", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.NO);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Denied the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -94,7 +94,7 @@ public class hycord {
     CommandHandler replyIgnoreCommand = new CommandHandler("$hycordreplyignore", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.IGNORE);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "Ignored the request."));
             } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -202,6 +202,12 @@ public class hycord {
         MinecraftForge.EVENT_BUS.register(new JoinHandler());
         MinecraftForge.EVENT_BUS.register(new RichPresence());
         MinecraftForge.EVENT_BUS.register(new NickNameController());
+
+        try {
+            RichPresence.init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate()) {
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());

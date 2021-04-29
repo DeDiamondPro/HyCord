@@ -36,6 +36,7 @@ repositories {
 
 dependencies {
     provided files("modcore")
+    implementation name: 'discord-game-sdk4j-0.5.2'
 }
 
 processResources {

@@ -1,12 +1,14 @@
 buildscript {
     repositories {
         jcenter()
-        mavenCentral()
          maven {
              name = "forge"
              url = "https://maven.minecraftforge.net/"
          }
-         maven { url "https://jitpack.io" }
+         maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
     dependencies {
         classpath "com.github.asbyth:ForgeGradle:86b23926f3"
     }

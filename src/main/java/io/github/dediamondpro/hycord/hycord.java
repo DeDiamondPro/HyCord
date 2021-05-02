@@ -1,6 +1,7 @@
 package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
+import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
@@ -54,6 +55,8 @@ public class hycord {
                 } else {
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify an API key. You can generate a new one by doing /api new"));
                 }
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("discord")) {
+                RichPresence.discordRPC.overlayManager().openGuildInvite("ZBNS8jsAMd", System.out::println);
             } else {
                 ModCore.getInstance().getGuiHandler().open(config.gui());
             }
@@ -152,32 +155,37 @@ public class hycord {
     CommandHandler devstats = new CommandHandler("hycorddevstats", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("discordCache length " + GetDiscord.discordNameCache.size()));
-            for(String element: GetDiscord.discordNameCache.keySet()){
+            for (String element : GetDiscord.discordNameCache.keySet()) {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(element + " -> " + GetDiscord.discordNameCache.get(element)));
             }
         }
     });
     CommandHandler getDiscord = new CommandHandler("getdiscord", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 Thread fetchDiscord = new Thread(() -> {
                     String discord;
                     if (GetDiscord.discordNameCache.containsKey(args[0])) {
                         discord = GetDiscord.discordNameCache.get(args[0]);
-                    }else {
-                       discord = GetDiscord.discord(args[0]);
+                    } else {
+                        discord = GetDiscord.discord(args[0]);
                     }
-                   if(discord != null){
-                       Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + args[0] + "'s Discord is: " + discord));
-                   }else{
-                       Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "No Discord found."));
-                   }
-                   Thread.currentThread().interrupt();
+                    if (discord != null) {
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + args[0] + "'s Discord is: " + discord));
+                    } else {
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "No Discord found."));
+                    }
+                    Thread.currentThread().interrupt();
                 });
                 fetchDiscord.start();
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player."));
             }
+        }
+    });
+    CommandHandler invite = new CommandHandler("invite", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN,System.out::println);
         }
     });
 
@@ -197,6 +205,7 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
+        ClientCommandHandler.instance.registerCommand(invite);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

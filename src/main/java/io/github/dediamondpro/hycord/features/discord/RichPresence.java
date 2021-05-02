@@ -6,6 +6,7 @@ import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.DiscordEventAdapter;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.user.DiscordUser;
+import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
@@ -72,6 +73,7 @@ public class RichPresence {
         ticks++;
         if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
+        System.out.println(discordRPC.voiceManager().getInputMode());
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
@@ -123,6 +125,11 @@ public class RichPresence {
                 @Override
                 public void onActivityJoinRequest(DiscordUser user) {
                     JoinRequestHandler.Handler(user);
+                }
+
+                @Override
+                public void onRelationshipUpdate(Relationship relationship) {
+                   RelationshipHandler.Handler(relationship);
                 }
             });
             discordRPC = new Core(params);

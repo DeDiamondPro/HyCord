@@ -229,6 +229,7 @@ public class hycord {
                 NickNameController.nicknames.put("DeDiamondPro", "§bDeD§3iam§9ond§1Pro");
                 NickNameController.nicknames.put("Strebbypatty", "§4Strebbypatty");
                 NickNameController.nicknames.put("Unseaded", "§aUn§2sea§1ded");
+                NickNameController.nicknames.put("Zordlan", "§5Zordlan");
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
                 for (String str : NickNameController.nicknames.keySet()) {
                     writer.write(str + "," + NickNameController.nicknames.get(str) + System.lineSeparator());

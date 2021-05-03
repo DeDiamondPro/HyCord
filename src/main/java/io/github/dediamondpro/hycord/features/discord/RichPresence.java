@@ -19,6 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.Level;
 
 import java.io.File;
@@ -42,30 +43,29 @@ public class RichPresence {
     String gameMode = "";
     boolean enabled = true;
     private String joinSecret = UUID.randomUUID().toString();
-    private String PartyId = UUID.randomUUID().toString();
+    private String partyId = UUID.randomUUID().toString();
 
     public static void init() throws IOException {
         String fileName;
-        if(System.getProperty("os.name").toLowerCase().contains("windows")){
+        if (SystemUtils.IS_OS_WINDOWS) {
             fileName = "discord_game_sdk.dll";
-        }else {
+        } else if (SystemUtils.IS_OS_MAC) {
+            fileName = "discord_game_sdk.dylib";
+        } else {
             fileName = "discord_game_sdk.so";
         }
         String finalPath = "/hycord/libraries/game-sdk/" + fileName;
 
-        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-"+fileName+System.nanoTime());
-        if(!tempDir.mkdir()) {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName + System.nanoTime());
+        if (!tempDir.mkdir()) {
             throw new IOException("Could not make tmpdir");
         }
         tempDir.deleteOnExit();
         File temp = new File(tempDir, fileName);
         temp.deleteOnExit();
-        System.out.println("copying files");
         InputStream in = RichPresence.class.getResourceAsStream(finalPath);
-        Files.copy(in,temp.toPath());
+        Files.copy(in, temp.toPath());
         Core.init(temp);
-        System.out.println("set sdk");
-        System.out.println(temp.toString());
     }
 
     @SubscribeEvent
@@ -73,7 +73,6 @@ public class RichPresence {
         ticks++;
         if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
-        System.out.println(discordRPC.voiceManager().getInputMode());
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
@@ -129,7 +128,7 @@ public class RichPresence {
 
                 @Override
                 public void onRelationshipUpdate(Relationship relationship) {
-                   RelationshipHandler.Handler(relationship);
+                    RelationshipHandler.Handler(relationship);
                 }
             });
             discordRPC = new Core(params);
@@ -164,7 +163,7 @@ public class RichPresence {
         if (msg.contains("HyCordPId&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom") || msg.startsWith("§dTo") || msg.startsWith("§r§dTo"))) {
             String[] id = event.message.getUnformattedText().split("&");
             if (id[1].length() == 36) {
-                PartyId = id[1];
+                partyId = id[1];
                 event.setCanceled(true);
             }
         }
@@ -182,17 +181,17 @@ public class RichPresence {
         } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas disbanded the party!§r")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if (invited != null && msg.contains(invited)) {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + partyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
             secondLine = "In a party";
@@ -202,12 +201,12 @@ public class RichPresence {
         } else if (msg.startsWith("§eYou left the party.§r")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.startsWith("§eYou have joined") && msg.endsWith("§r§eparty!§r")) {
             partyMembers = 2;
             canInvite = false;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "In a party";
         } else if (msg.contains("has promoted") && msg.contains("§r§eto Party Moderator§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
@@ -232,7 +231,7 @@ public class RichPresence {
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
             partyMembers--;
@@ -240,7 +239,7 @@ public class RichPresence {
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
             partyMembers++;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "In a party";
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
             partyMembers++;
@@ -249,22 +248,27 @@ public class RichPresence {
             String[] message = msg.split("[9/]");
             partyMembers = Integer.parseInt(message[1]);
             secondLine = "In a party";
-        }else if (msg.equals("§cYou are not currently in a party.§r")){
+        } else if (msg.equals("§cYou are not currently in a party.§r")) {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
+        }else if (msg.equals("§cThe party was disbanded because the party leader disconnected.§r")){
+            partyMembers = 1;
+            canInvite = true;
+            secondLine = "On Hypixel";
+            partyId = UUID.randomUUID().toString();
         }
     }
 
     void updateRPC() {
-        try(Activity activity = new Activity()) {
+        try (Activity activity = new Activity()) {
             activity.setDetails(gameMode);
             activity.setState(secondLine);
             activity.party().size().setMaxSize(Settings.maxPartySize);
             activity.party().size().setCurrentSize(partyMembers);
             activity.assets().setLargeImage(Utils.getDiscordPic(gameMode));
             activity.assets().setLargeText(imageText);
-            activity.party().setID(PartyId);
+            activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
             if (canInvite && Settings.enableInvites) {
                 activity.secrets().setJoinSecret(joinSecret);

@@ -3,6 +3,7 @@ package io.github.dediamondpro.hycord;
 import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
+import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -11,6 +12,7 @@ import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
 import io.github.dediamondpro.hycord.features.discord.GetDiscord;
 import io.github.dediamondpro.hycord.features.discord.JoinHandler;
+import io.github.dediamondpro.hycord.features.discord.RelationshipHandler;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
@@ -31,7 +33,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.1.2";
+    public static final String VERSION = "1.2.0-pre1";
 
     private final Settings config = new Settings();
 
@@ -188,6 +190,15 @@ public class hycord {
             RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN,System.out::println);
         }
     });
+    CommandHandler getStatus = new CommandHandler("getstatus", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            if(args.length > 0) {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(RelationshipHandler.status(args[0]));
+            }else{
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a Discord user."));
+            }
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
@@ -206,6 +217,7 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
         ClientCommandHandler.instance.registerCommand(invite);
+        ClientCommandHandler.instance.registerCommand(getStatus);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

@@ -64,12 +64,20 @@ public class Settings extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH, name = "Show Discord tag on hover",
-            description = "Enable the option to show a players discord name when you hover over their minecraft name. Requires your" +
+            description = "Enable the option to show a players discord name when you hover over their minecraft name. Requires your " +
                     "API key to be set.",
             category = "Discord",
             subcategory = "Names"
     )
     public static boolean enableDiscordHover = false;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "Show Discord friend notifications",
+            description = "Put a message in chat when a discord friend changes their state.",
+            category = "Discord",
+            subcategory = "Relationships"
+    )
+    public static boolean enableFriendNotifs = false;
 
 
     @Property(

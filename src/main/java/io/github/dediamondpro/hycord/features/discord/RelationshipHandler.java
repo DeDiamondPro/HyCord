@@ -19,7 +19,7 @@ public class RelationshipHandler {
     public static void Handler(Relationship relation) {
         Relationship previous = cache.get(relation.getUser().getUserId());
 
-        if (previous == null || previous.getPresence().getStatus() != relation.getPresence().getStatus() && Settings.enableFriendNotifs) {
+        if ((previous == null || previous.getPresence().getStatus() != relation.getPresence().getStatus()) && Settings.enableFriendNotifs) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Discord "
                     + relation.getType().toString().toLowerCase(Locale.ROOT) + " > " + EnumChatFormatting.BLUE +
                     relation.getUser().getUsername() + "#" + relation.getUser().getDiscriminator() + EnumChatFormatting.YELLOW + " is now "

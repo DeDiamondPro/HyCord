@@ -28,7 +28,7 @@ public class NickNameController {
             String name = Utils.getName(msg);
             if (name != null && GetDiscord.discordNameCache.containsKey(name) && GetDiscord.discordNameCache.get(name) != null) {
                 event.message = hoverAdder(name,GetDiscord.discordNameCache.get(name),event.message);
-            }else {
+            }else if(name != null && !GetDiscord.discordNameCache.containsKey(name)){
                 Thread fetchDiscord = new Thread(() -> {
                     GetDiscord.discord(name);
                 });
@@ -67,16 +67,16 @@ public class NickNameController {
                 if(message.getChatStyle() == null){
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(new ChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    new ChatComponentText(EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
+                                    new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added)))));
                 } else if(message.getChatStyle().getChatHoverEvent() == null) {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    new ChatComponentText(EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
+                                    new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added)))));
                 }else if(message.getChatStyle().getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT)){
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                     new ChatComponentText( message.getChatStyle().getChatHoverEvent().getValue().getFormattedText()
-                                            + "\n" + EnumChatFormatting.DARK_PURPLE + "Discord: " + added)))));
+                                            + "\n" + EnumChatFormatting.BLUE + "Discord: " + added)))));
                 }else{
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat()).setChatStyle(message.getChatStyle()));
                 }
@@ -90,12 +90,12 @@ public class NickNameController {
         } else {
             if(message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent() == null) { ;
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ChatComponentText(EnumChatFormatting.DARK_PURPLE + "Discord: " + added))));
+                        new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added))));
             }else if(message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent().getAction()
                     .equals(HoverEvent.Action.SHOW_TEXT) && !message.getChatStyle().getChatHoverEvent().getValue().getFormattedText().contains("Discord: ")){
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ChatComponentText(message.getChatStyle().getChatHoverEvent().getValue().getFormattedText() + "\n"
-                                + EnumChatFormatting.DARK_PURPLE + "Discord: " + added))));
+                                + EnumChatFormatting.BLUE + "Discord: " + added))));
             }
         }
         return response;

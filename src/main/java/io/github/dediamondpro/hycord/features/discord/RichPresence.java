@@ -1,11 +1,14 @@
 package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.util.MinecraftUtils;
+import de.jcm.discordgamesdk.Core;
+import de.jcm.discordgamesdk.CreateParams;
+import de.jcm.discordgamesdk.DiscordEventAdapter;
+import de.jcm.discordgamesdk.activity.Activity;
+import de.jcm.discordgamesdk.user.DiscordUser;
+import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
-import libraries.net.arikia.dev.drpc.DiscordEventHandlers;
-import libraries.net.arikia.dev.drpc.DiscordRPC;
-import libraries.net.arikia.dev.drpc.DiscordRichPresence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -16,14 +19,20 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.Level;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 public class RichPresence {
+    public static Core discordRPC;
     int ticks;
     String invited = null;
     Instant time = Instant.now();
@@ -34,7 +43,30 @@ public class RichPresence {
     String gameMode = "";
     boolean enabled = true;
     private String joinSecret = UUID.randomUUID().toString();
-    private String PartyId = UUID.randomUUID().toString();
+    private String partyId = UUID.randomUUID().toString();
+
+    public static void init() throws IOException {
+        String fileName;
+        if (SystemUtils.IS_OS_WINDOWS) {
+            fileName = "discord_game_sdk.dll";
+        } else if (SystemUtils.IS_OS_MAC) {
+            fileName = "discord_game_sdk.dylib";
+        } else {
+            fileName = "discord_game_sdk.so";
+        }
+        String finalPath = "/hycord/libraries/game-sdk/" + fileName;
+
+        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName + System.nanoTime());
+        if (!tempDir.mkdir()) {
+            throw new IOException("Could not make tmpdir");
+        }
+        tempDir.deleteOnExit();
+        File temp = new File(tempDir, fileName);
+        temp.deleteOnExit();
+        InputStream in = RichPresence.class.getResourceAsStream(finalPath);
+        Files.copy(in, temp.toPath());
+        Core.init(temp);
+    }
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -80,16 +112,31 @@ public class RichPresence {
     @SubscribeEvent
     void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         if (MinecraftUtils.isHypixel()) {
-            DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
-                    .setJoinGameEventHandler(JoinHandler::Handler)
-                    .setJoinRequestEventHandler(JoinRequestHandler::Handler)
-                    .build();
-            DiscordRPC.discordInitialize("819625966627192864", handlers, true);
+            CreateParams params = new CreateParams();
+            params.setClientID(819625966627192864L);
+            params.setFlags(CreateParams.getDefaultFlags());
+            params.registerEventHandler(new DiscordEventAdapter() {
+                @Override
+                public void onActivityJoin(String secret) {
+                    JoinHandler.Handler(secret);
+                }
+
+                @Override
+                public void onActivityJoinRequest(DiscordUser user) {
+                    JoinRequestHandler.Handler(user);
+                }
+
+                @Override
+                public void onRelationshipUpdate(Relationship relationship) {
+                    RelationshipHandler.Handler(relationship);
+                }
+            });
+            discordRPC = new Core(params);
             FMLLog.getLogger().log(Level.INFO, "started RPC");
             enabled = true;
             Thread callBacks = new Thread(() -> {
                 while (enabled) {
-                    DiscordRPC.discordRunCallbacks();
+                    discordRPC.runCallbacks();
                     try {
                         Thread.sleep(16);//run callbacks at 60fps
                     } catch (InterruptedException e) {
@@ -105,7 +152,7 @@ public class RichPresence {
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         if (enabled) {
-            DiscordRPC.discordShutdown();
+            discordRPC.close();
             enabled = false;
         }
     }
@@ -116,7 +163,7 @@ public class RichPresence {
         if (msg.contains("HyCordPId&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom") || msg.startsWith("§dTo") || msg.startsWith("§r§dTo"))) {
             String[] id = event.message.getUnformattedText().split("&");
             if (id[1].length() == 36) {
-                PartyId = id[1];
+                partyId = id[1];
                 event.setCanceled(true);
             }
         }
@@ -134,17 +181,17 @@ public class RichPresence {
         } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas disbanded the party!§r")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if (invited != null && msg.contains(invited)) {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + partyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
             secondLine = "In a party";
@@ -154,12 +201,12 @@ public class RichPresence {
         } else if (msg.startsWith("§eYou left the party.§r")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.startsWith("§eYou have joined") && msg.endsWith("§r§eparty!§r")) {
             partyMembers = 2;
             canInvite = false;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "In a party";
         } else if (msg.contains("has promoted") && msg.contains("§r§eto Party Moderator§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
@@ -184,7 +231,7 @@ public class RichPresence {
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
             canInvite = true;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
         } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
             partyMembers--;
@@ -192,7 +239,7 @@ public class RichPresence {
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
             partyMembers++;
-            PartyId = UUID.randomUUID().toString();
+            partyId = UUID.randomUUID().toString();
             secondLine = "In a party";
         } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
             partyMembers++;
@@ -201,23 +248,33 @@ public class RichPresence {
             String[] message = msg.split("[9/]");
             partyMembers = Integer.parseInt(message[1]);
             secondLine = "In a party";
-        }else if (msg.equals("§cYou are not currently in a party.§r")){
+        } else if (msg.equals("§cYou are not currently in a party.§r")) {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
+        }else if (msg.equals("§cThe party was disbanded because the party leader disconnected.§r")){
+            partyMembers = 1;
+            canInvite = true;
+            secondLine = "On Hypixel";
+            partyId = UUID.randomUUID().toString();
         }
     }
 
     void updateRPC() {
-        DiscordRichPresence.Builder presence = new DiscordRichPresence.Builder(secondLine);
-        presence.setDetails(gameMode);
-        presence.setStartTimestamps(time.toEpochMilli());
-        presence.setParty(PartyId, partyMembers, Settings.maxPartySize);
-        presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if (canInvite && Settings.enableInvites) {
-            presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
+        try (Activity activity = new Activity()) {
+            activity.setDetails(gameMode);
+            activity.setState(secondLine);
+            activity.party().size().setMaxSize(Settings.maxPartySize);
+            activity.party().size().setCurrentSize(partyMembers);
+            activity.assets().setLargeImage(Utils.getDiscordPic(gameMode));
+            activity.assets().setLargeText(imageText);
+            activity.party().setID(partyId);
+            activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
+            if (canInvite && Settings.enableInvites) {
+                activity.secrets().setJoinSecret(joinSecret);
+            }
+            discordRPC.activityManager().updateActivity(activity);
         }
-        DiscordRPC.discordUpdatePresence(presence.build());
     }
 }
 

@@ -33,7 +33,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre1.1";
+    public static final String VERSION = "1.2.0-pre1.2";
 
     private final Settings config = new Settings();
 
@@ -59,6 +59,8 @@ public class hycord {
                 }
             } else if (args.length > 0 && args[0].equalsIgnoreCase("discord")) {
                 RichPresence.discordRPC.overlayManager().openGuildInvite("ZBNS8jsAMd", System.out::println);
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
+                RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
             } else {
                 ModCore.getInstance().getGuiHandler().open(config.gui());
             }
@@ -185,16 +187,11 @@ public class hycord {
             }
         }
     });
-    CommandHandler invite = new CommandHandler("invite", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String[] args) {
-            RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN,System.out::println);
-        }
-    });
     CommandHandler getStatus = new CommandHandler("getstatus", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(args.length > 0) {
+            if (args.length > 0) {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(RelationshipHandler.status(args[0]));
-            }else{
+            } else {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a Discord user."));
             }
         }
@@ -216,7 +213,6 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
-        ClientCommandHandler.instance.registerCommand(invite);
         ClientCommandHandler.instance.registerCommand(getStatus);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());

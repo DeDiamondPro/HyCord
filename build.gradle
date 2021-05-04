@@ -20,7 +20,7 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = "1.2.0-pre1.1"
+version = "1.2.0-pre1.2"
 group = "io.github.dediamondpro"
 archivesBaseName = "hycord"
 sourceCompatibility = targetCompatibility = 1.8

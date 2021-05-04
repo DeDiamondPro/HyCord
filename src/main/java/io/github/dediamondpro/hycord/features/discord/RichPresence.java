@@ -21,6 +21,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.Level;
+import org.lwjgl.Sys;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class RichPresence {
 
     public static void init() throws IOException {
         String fileName;
+        System.out.println("Setting sdk");
         if (SystemUtils.IS_OS_WINDOWS) {
             fileName = "discord_game_sdk.dll";
         } else if (SystemUtils.IS_OS_MAC) {
@@ -55,6 +57,7 @@ public class RichPresence {
             fileName = "discord_game_sdk.so";
         }
         String finalPath = "/hycord/libraries/game-sdk/" + fileName;
+        System.out.println(finalPath);
 
         File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName + System.nanoTime());
         if (!tempDir.mkdir()) {
@@ -65,6 +68,7 @@ public class RichPresence {
         temp.deleteOnExit();
         InputStream in = RichPresence.class.getResourceAsStream(finalPath);
         Files.copy(in, temp.toPath());
+        System.out.println(temp);
         Core.init(temp);
     }
 

@@ -32,12 +32,12 @@ public class RelationshipHandler {
     public static ChatComponentText status(String user) {
         for (Relationship element: cache.values()) {
             if(user.contains("#")){
-                if(element.getUser().getUsername().equals(user.split("#",2)[0]) &&
+                if(element.getUser().getUsername().equalsIgnoreCase(user.split("#",2)[0]) &&
                         element.getUser().getDiscriminator().equals(user.split("#",2)[1])){
                     return getiChatComponents(element);
                 }
             }else{
-                if(element.getUser().getUsername().equals(user)){
+                if(element.getUser().getUsername().equalsIgnoreCase(user)){
                     return getiChatComponents(element);
                 }
             }
@@ -51,14 +51,14 @@ public class RelationshipHandler {
                 element.getUser().getDiscriminator() + "'s status:");
         statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "Status: " + element.getPresence().getStatus().toString().toLowerCase(Locale.ROOT)));
         if (!element.getPresence().getActivity().getName().equals("") && element.getPresence().getActivity().getType() != ActivityType.CUSTOM) {
-            statusText.appendSibling(new ChatComponentText("\n" + element.getPresence().getActivity().getType().toString().charAt(0) +
-                    element.getPresence().getActivity().getType().toString().substring(1).toLowerCase(Locale.ROOT) + EnumChatFormatting.BLUE + element.getPresence().getActivity().getName()));
-        }
-        if (!element.getPresence().getActivity().getState().equals("")) {
-            statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getState()));
+            statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getType().toString().charAt(0) +
+                    element.getPresence().getActivity().getType().toString().substring(1).toLowerCase(Locale.ROOT) + element.getPresence().getActivity().getName()));
         }
         if (!element.getPresence().getActivity().getDetails().equals("")) {
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getDetails()));
+        }
+        if (!element.getPresence().getActivity().getState().equals("")) {
+            statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getState()));
         }
         if (element.getPresence().getActivity().party().size().getMaxSize() != 0) {
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "In a party: " + element.getPresence().getActivity()

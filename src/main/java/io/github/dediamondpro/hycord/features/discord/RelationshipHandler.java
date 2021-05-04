@@ -52,7 +52,7 @@ public class RelationshipHandler {
         statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "Status: " + element.getPresence().getStatus().toString().toLowerCase(Locale.ROOT)));
         if (!element.getPresence().getActivity().getName().equals("") && element.getPresence().getActivity().getType() != ActivityType.CUSTOM) {
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getType().toString().charAt(0) +
-                    element.getPresence().getActivity().getType().toString().substring(1).toLowerCase(Locale.ROOT) + element.getPresence().getActivity().getName()));
+                    element.getPresence().getActivity().getType().toString().substring(1).toLowerCase(Locale.ROOT) + " " + element.getPresence().getActivity().getName()));
         }
         if (!element.getPresence().getActivity().getDetails().equals("")) {
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getDetails()));

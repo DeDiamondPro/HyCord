@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class RichPresence {
     public static Core discordRPC;
@@ -43,8 +44,12 @@ public class RichPresence {
     String imageText = "";
     String gameMode = "";
     boolean enabled = true;
-    private String joinSecret = UUID.randomUUID().toString();
-    private String partyId = UUID.randomUUID().toString();
+    private static String joinSecret = UUID.randomUUID().toString();
+    private static String partyId = UUID.randomUUID().toString();
+
+    public static String getPartyId(){
+        return partyId;
+    }
 
     public static void init() throws IOException {
         String fileName;
@@ -133,6 +138,21 @@ public class RichPresence {
                 @Override
                 public void onRelationshipUpdate(Relationship relationship) {
                     RelationshipHandler.Handler(relationship);
+                }
+
+                @Override
+                public void onSpeaking(long lobbyId, long userId, boolean speaking) {
+                    LobbyManager.talkHandler(userId, speaking);
+                }
+
+                @Override
+                public void onMemberConnect(long lobbyId, long userId) {
+                    LobbyManager.joinHandler(userId);
+                }
+
+                @Override
+                public void onMemberDisconnect(long lobbyId, long userId) {
+                    LobbyManager.leaveHandler(userId);
                 }
             });
             discordRPC = new Core(params);

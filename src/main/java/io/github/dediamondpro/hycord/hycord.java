@@ -10,10 +10,7 @@ import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
-import io.github.dediamondpro.hycord.features.discord.GetDiscord;
-import io.github.dediamondpro.hycord.features.discord.JoinHandler;
-import io.github.dediamondpro.hycord.features.discord.RelationshipHandler;
-import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import io.github.dediamondpro.hycord.features.discord.*;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
@@ -33,7 +30,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre1.2";
+    public static final String VERSION = "1.2.0-pre2";
 
     private final Settings config = new Settings();
 
@@ -196,6 +193,11 @@ public class hycord {
             }
         }
     });
+    CommandHandler test = new CommandHandler("hycorddevtest", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            LobbyManager.initVoice();
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
@@ -214,11 +216,13 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
         ClientCommandHandler.instance.registerCommand(getStatus);
+        ClientCommandHandler.instance.registerCommand(test);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());
         MinecraftForge.EVENT_BUS.register(new RichPresence());
         MinecraftForge.EVENT_BUS.register(new NickNameController());
+        MinecraftForge.EVENT_BUS.register(new LobbyManager());
 
         try {
             RichPresence.init();
@@ -234,9 +238,6 @@ public class hycord {
         try {
             if (nickNameSave.createNewFile()) {
                 System.out.println("File created: " + nickNameSave.getName());
-                NickNameController.nicknames.put("DeDiamondPro", "§bDeD§3iam§9ond§1Pro");
-                NickNameController.nicknames.put("Strebbypatty", "§4Strebbypatty");
-                NickNameController.nicknames.put("Unseaded", "§aUn§2sea§1ded");
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
                 for (String str : NickNameController.nicknames.keySet()) {
                     writer.write(str + "," + NickNameController.nicknames.get(str) + System.lineSeparator());

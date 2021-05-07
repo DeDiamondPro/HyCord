@@ -79,6 +79,13 @@ public class Settings extends Vigilant {
     )
     public static boolean enableFriendNotifs = false;
 
+    @Property(
+            type = PropertyType.SWITCH, name = "Show people that aren't talking",
+            description = "Show people that aren't talking when in a voice chat.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showNonTalking = true;
 
     @Property(
             type = PropertyType.SWITCH, name = "Auto Friend List",

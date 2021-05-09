@@ -13,6 +13,7 @@ import io.github.dediamondpro.hycord.features.UpdateChecker;
 import io.github.dediamondpro.hycord.features.discord.*;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -153,14 +154,6 @@ public class hycord {
                     EnumChatFormatting.YELLOW + "/nickhelp: shows this page\n"));
         }
     });
-    CommandHandler devstats = new CommandHandler("hycorddevstats", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String[] args) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("discordCache length " + GetDiscord.discordNameCache.size()));
-            for (String element : GetDiscord.discordNameCache.keySet()) {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(element + " -> " + GetDiscord.discordNameCache.get(element)));
-            }
-        }
-    });
     CommandHandler getDiscord = new CommandHandler("getdiscord", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
@@ -198,6 +191,11 @@ public class hycord {
             LobbyManager.initVoice();
         }
     });
+    CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
@@ -213,10 +211,10 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(clearNick);
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
-        ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
         ClientCommandHandler.instance.registerCommand(getStatus);
         ClientCommandHandler.instance.registerCommand(test);
+        ClientCommandHandler.instance.registerCommand(voice);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new JoinHandler());

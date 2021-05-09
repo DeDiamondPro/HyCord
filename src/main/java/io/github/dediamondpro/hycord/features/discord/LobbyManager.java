@@ -8,26 +8,21 @@ import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.stats.Achievement;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
-import scala.swing.event.KeyPressed;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -45,7 +40,8 @@ public class LobbyManager {
 
     public static HashMap<Long, Boolean> talkingData = new HashMap<>();
     public static HashMap<Long, DiscordUser> users = new HashMap<>();
-    public static HashMap<Long, BufferedImage> pictures = new HashMap<>();
+    public static HashMap<Long, ResourceLocation> pictures = new HashMap<>();
+    public static HashMap<Long, BufferedImage> bufferedPictures = new HashMap<>();
     public static Long currentUser;
     public static Long lobbyId;
 
@@ -97,7 +93,7 @@ public class LobbyManager {
                         URL url = new URL("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64");
                         HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
                         httpcon.addRequestProperty("User-Agent", "");
-                        pictures.put(id, ImageIO.read(httpcon.getInputStream()));
+                        bufferedPictures.put(id, ImageIO.read(httpcon.getInputStream()));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -114,10 +110,10 @@ public class LobbyManager {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                         + EnumChatFormatting.GREEN + discordUser.getUsername() + "#" + discordUser.getDiscriminator() + " joined the voice chat"));
                 try {
-                    URL url = new URL("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=32");
+                    URL url = new URL("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64");
                     HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
                     httpcon.addRequestProperty("User-Agent", "");
-                    pictures.put(discordUser.getUserId(), ImageIO.read(httpcon.getInputStream()));
+                    bufferedPictures.put(discordUser.getUserId(), ImageIO.read(httpcon.getInputStream()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -166,6 +162,11 @@ public class LobbyManager {
 
     @SubscribeEvent
     void onRender(TickEvent.RenderTickEvent event) {
+        for(Long id : bufferedPictures.keySet()){
+            pictures.put(id,Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic"+id,new DynamicTexture(bufferedPictures.get(id))));
+            bufferedPictures.remove(id);
+        }
+
         if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
             return;
         ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
@@ -186,21 +187,29 @@ public class LobbyManager {
         for (Long id : talkingData.keySet()) {
             if (users.containsKey(id)) {
                 if (talkingData.get(id)) {
-                    Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
-                    amount++;
+                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf())) {
+                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255,0,0).getRGB());
+                    } else {
+                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
+                    }
                     if (pictures.containsKey(id)) {
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("profile", new DynamicTexture(pictures.get(id))));
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
                         GlStateManager.color(1.0F, 1.0F, 1.0F);
-                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * (amount - 1) - 12, 0, 0, 16, 16, 16, 16);
+                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
                     }
-                } else if (Settings.showNonTalking) {
-                    Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
                     amount++;
-                    if (pictures.containsKey(id)) {
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("profile", new DynamicTexture(pictures.get(id))));
-                        GlStateManager.color(0.6F, 0.6F, 0.6F);
-                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * (amount - 1) - 12, 0, 0, 16, 16, 16, 16);
+                } else if (Settings.showNonTalking) {
+                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf())) {
+                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255,0,0).getRGB());
+                    } else {
+                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
                     }
+                    if (pictures.containsKey(id)) {
+                        Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                        GlStateManager.color(0.6F, 0.6F, 0.6F);
+                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
+                    }
+                    amount++;
                 }
             }
         }

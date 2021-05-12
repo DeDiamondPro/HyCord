@@ -42,8 +42,8 @@ repositories {
 
 dependencies {
     provided files("modcore")
-    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.2'
-    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.2'
+    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
+    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.3'
 }
 
 processResources {

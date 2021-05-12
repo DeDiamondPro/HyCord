@@ -199,4 +199,8 @@ public class Utils {
         }
         return null;
     }
+
+    public static float map(float input, float inMin, float inMax, float outMin, float outMax){
+        return (input-inMin)/(inMax-inMin) * (outMax-outMin) + outMin;
+    }
 }

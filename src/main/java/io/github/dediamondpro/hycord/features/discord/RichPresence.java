@@ -4,7 +4,10 @@ import club.sk1er.mods.core.util.MinecraftUtils;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.DiscordEventAdapter;
+import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.activity.Activity;
+import de.jcm.discordgamesdk.lobby.LobbyTransaction;
+import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -21,7 +24,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.Level;
-import org.lwjgl.Sys;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +33,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 public class RichPresence {
     public static Core discordRPC;
@@ -46,6 +47,7 @@ public class RichPresence {
     boolean enabled = true;
     private static String joinSecret = UUID.randomUUID().toString();
     private static String partyId = UUID.randomUUID().toString();
+    //public String mainId = null;
 
     public static String getPartyId(){
         return partyId;
@@ -116,6 +118,16 @@ public class RichPresence {
             secondLine = "On Hypixel";
         }
         gameMode = "";
+        /*if(mainId == null){
+            LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
+            transaction.setType(LobbyType.PUBLIC);
+            transaction.setCapacity(100);
+            transaction.setLocked(false);
+            transaction.setOwner(336764548017291265L);
+            transaction.setMetadata(RichPresence.getPartyId(), RichPresence.getPartyId());
+
+            discordRPC.lobbyManager().createLobby(transaction, System.out::println);
+        }*/
     }
 
     @SubscribeEvent
@@ -176,7 +188,11 @@ public class RichPresence {
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         if (enabled) {
-            discordRPC.close();
+            try {
+                discordRPC.close();
+            }catch (GameSDKException e){
+                e.printStackTrace();
+            }
             enabled = false;
         }
     }

@@ -3,7 +3,6 @@ package io.github.dediamondpro.hycord;
 import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
-import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -11,9 +10,10 @@ import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
 import io.github.dediamondpro.hycord.features.discord.*;
+import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
+import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -193,7 +193,11 @@ public class hycord {
     });
     CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            if(LobbyManager.lobbyId != null) {
+                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            }else{
+                ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
+            }
         }
     });
 

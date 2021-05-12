@@ -43,7 +43,7 @@ public class LobbyManager {
     public static HashMap<Long, ResourceLocation> pictures = new HashMap<>();
     public static HashMap<Long, BufferedImage> bufferedPictures = new HashMap<>();
     public static Long currentUser;
-    public static Long lobbyId;
+    public static Long lobbyId = null;
 
     public static void initVoice() {
         LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
@@ -58,11 +58,12 @@ public class LobbyManager {
 
             Optional<Lobby> options = lobbies.stream()
                     //.filter(l -> l.getSecret().equals(RichPresence.getPartyId()))
+                    .filter(l -> l.getCapacity() > discordRPC.lobbyManager().memberCount(l))
                     .findAny();
-            if (options.isPresent()) {
+            /*if (options.isPresent()) {
                 System.out.println("Lobby found! joining , " + options.get().getId());
                 discordRPC.lobbyManager().connectLobby(options.get(), LobbyManager::startVoice);
-            } else {
+            } else {*/
                 System.out.println("No Lobby found; creating one.");
 
                 LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
@@ -72,7 +73,7 @@ public class LobbyManager {
                 transaction.setMetadata(RichPresence.getPartyId(), RichPresence.getPartyId());
 
                 discordRPC.lobbyManager().createLobby(transaction, LobbyManager::startVoice);
-            }
+            //}
         });
     }
 
@@ -100,6 +101,20 @@ public class LobbyManager {
                 }
             });
         }
+        talkingData.put(215402251403919360L,false);
+        discordRPC.userManager().getUser(215402251403919360L, (r, discordUser) -> {
+            if (r == Result.OK) {
+                users.put(215402251403919360L, discordUser);
+                try {
+                    URL url = new URL("https://cdn.discordapp.com/avatars/" + "215402251403919360" + "/" + discordUser.getAvatar() + ".png?size=64");
+                    HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+                    httpcon.addRequestProperty("User-Agent", "");
+                    bufferedPictures.put(215402251403919360L, ImageIO.read(httpcon.getInputStream()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public static void joinHandler(Long userId) {
@@ -187,7 +202,7 @@ public class LobbyManager {
         for (Long id : talkingData.keySet()) {
             if (users.containsKey(id)) {
                 if (talkingData.get(id)) {
-                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf())) {
+                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
                         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255,0,0).getRGB());
                     } else {
                         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
@@ -199,7 +214,7 @@ public class LobbyManager {
                     }
                     amount++;
                 } else if (Settings.showNonTalking) {
-                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf())) {
+                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
                         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255,0,0).getRGB());
                     } else {
                         Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
@@ -213,5 +228,13 @@ public class LobbyManager {
                 }
             }
         }
+    }
+
+    public static void leave(){
+        if(lobbyId == null)return;
+        discordRPC.lobbyManager().disconnectLobby(lobbyId);
+        users.clear();
+        talkingData.clear();
+        lobbyId = null;
     }
 }

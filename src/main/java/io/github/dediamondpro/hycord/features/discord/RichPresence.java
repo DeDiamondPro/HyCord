@@ -297,6 +297,8 @@ public class RichPresence {
             canInvite = true;
             secondLine = "On Hypixel";
             partyId = UUID.randomUUID().toString();
+        }else if (msg.endsWith("because they were offline.§r") && msg.startsWith("§eKicked")){
+            partyMembers += -1;
         }
     }
 

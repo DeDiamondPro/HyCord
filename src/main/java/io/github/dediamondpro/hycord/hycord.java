@@ -3,6 +3,7 @@ package io.github.dediamondpro.hycord;
 import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
+import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -27,6 +28,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+
+import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
@@ -186,18 +189,13 @@ public class hycord {
             }
         }
     });
-    CommandHandler test = new CommandHandler("hycorddevtest", new CommandHandler.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String[] args) {
-            LobbyManager.initVoice();
-        }
-    });
     CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(LobbyManager.lobbyId != null) {
-                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
-            }else{
+            //if(LobbyManager.lobbyId != null) {
+            //    ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            //}else{
                 ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
-            }
+            //}
         }
     });
 
@@ -217,7 +215,6 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
         ClientCommandHandler.instance.registerCommand(getStatus);
-        ClientCommandHandler.instance.registerCommand(test);
         ClientCommandHandler.instance.registerCommand(voice);
 
         MinecraftForge.EVENT_BUS.register(new AutoFl());

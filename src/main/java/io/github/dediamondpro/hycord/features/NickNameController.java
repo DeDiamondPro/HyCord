@@ -24,7 +24,7 @@ public class NickNameController {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-        if(event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
+        if(Utils.isHypixel() && event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
             String name = Utils.getName(msg);
             if (name != null && GetDiscord.discordNameCache.containsKey(name) && GetDiscord.discordNameCache.get(name) != null) {
                 event.message = hoverAdder(name,GetDiscord.discordNameCache.get(name),event.message);

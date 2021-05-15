@@ -138,12 +138,12 @@ public class VoiceBrowser extends GuiScreen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 && mouseY >= 4) {
+        if (mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 + scroll && mouseY >= 4 + scroll) {
             ModCore.getInstance().getGuiHandler().open(new VoiceCreator());
         }else if(mouseX >= joinButtonBegin-1 && mouseX <= joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 5){
             int amount = 1;
             for(Lobby lobby : matches){
-                if(mouseY >= 36 * amount - 26 && mouseY <= 36 * amount - 12){
+                if(mouseY >= 36 * amount - 26 + scroll && mouseY <= 36 * amount - 12 + scroll){
                     discordRPC.lobbyManager().connectLobby(lobby, LobbyManager::startVoice);
                     break;
                 }

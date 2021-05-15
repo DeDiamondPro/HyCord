@@ -89,7 +89,6 @@ public class VoiceMenu extends GuiScreen {
                 } else {
                     mc.fontRendererObj.drawStringWithShadow("Volume: " + (int) Utils.map(x, 153, 323, 0, 200) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                     Gui.drawRect(x, 36 * amount - 11, x + 3, 36 * amount, new Color(200, 200, 200).getRGB());
-
                 }
             }
             amount++;
@@ -106,7 +105,6 @@ public class VoiceMenu extends GuiScreen {
         if(mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 && mouseY >= 4){
             LobbyManager.leave();
             ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
-
         }else {
             int amount = 1;
             if (mouseX >= 72 && mouseX <= 82) {

@@ -81,20 +81,6 @@ public class LobbyManager {
                 }
             });
         }
-        /*talkingData.put(215402251403919360L, false);
-        discordRPC.userManager().getUser(215402251403919360L, (r, discordUser) -> {
-            if (r == Result.OK) {
-                users.put(215402251403919360L, discordUser);
-                try {
-                    URL url = new URL("https://cdn.discordapp.com/avatars/" + "215402251403919360" + "/" + discordUser.getAvatar() + ".png?size=64");
-                    HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                    httpcon.addRequestProperty("User-Agent", "");
-                    bufferedPictures.put(215402251403919360L, ImageIO.read(httpcon.getInputStream()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });*/
     }
 
     public static void joinHandler(Long userId) {
@@ -159,59 +145,63 @@ public class LobbyManager {
     void onRender(TickEvent.RenderTickEvent event) {
         if (!Utils.isHypixel()) return;
         try {
-            for (Long id : bufferedPictures.keySet()) {
-                pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
-                bufferedPictures.remove(id);
+            try {
+                for (Long id : bufferedPictures.keySet()) {
+                    pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
+                    bufferedPictures.remove(id);
+                }
+            } catch (ConcurrentModificationException e) {
+                e.printStackTrace();
             }
-        } catch (ConcurrentModificationException e) {
-            e.printStackTrace();
-        }
 
-        if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
-            return;
-        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-        if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(micTexture);
-            GlStateManager.color(1.0F, 1.0F, 1.0F);
-            Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
-        } else if (discordRPC.voiceManager().isSelfDeaf()) {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(deafenTexture);
-            GlStateManager.color(1.0F, 1.0F, 1.0F);
-            Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
-        } else if (discordRPC.voiceManager().isSelfMute()) {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(muteTexture);
-            GlStateManager.color(1.0F, 1.0F, 1.0F);
-            Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
-        }
-        int amount = 1;
-        for (Long id : talkingData.keySet()) {
-            if (users.containsKey(id)) {
-                if (talkingData.get(id)) {
-                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
-                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
-                    } else {
-                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
+            if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
+                return;
+            ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+            if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(micTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
+            } else if (discordRPC.voiceManager().isSelfDeaf()) {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(deafenTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
+            } else if (discordRPC.voiceManager().isSelfMute()) {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(muteTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
+            }
+            int amount = 1;
+            for (Long id : talkingData.keySet()) {
+                if (users.containsKey(id)) {
+                    if (talkingData.get(id)) {
+                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
+                        } else {
+                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
+                        }
+                        if (pictures.containsKey(id)) {
+                            Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                            GlStateManager.color(1.0F, 1.0F, 1.0F);
+                            Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
+                        }
+                        amount++;
+                    } else if (Settings.showNonTalking) {
+                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
+                        } else {
+                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
+                        }
+                        if (pictures.containsKey(id)) {
+                            Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                            GlStateManager.color(0.6F, 0.6F, 0.6F);
+                            Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
+                        }
+                        amount++;
                     }
-                    if (pictures.containsKey(id)) {
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
-                        GlStateManager.color(1.0F, 1.0F, 1.0F);
-                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
-                    }
-                    amount++;
-                } else if (Settings.showNonTalking) {
-                    if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
-                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
-                    } else {
-                        Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
-                    }
-                    if (pictures.containsKey(id)) {
-                        Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
-                        GlStateManager.color(0.6F, 0.6F, 0.6F);
-                        Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
-                    }
-                    amount++;
                 }
             }
+        }catch (IllegalStateException e){
+            e.printStackTrace();
         }
     }
 

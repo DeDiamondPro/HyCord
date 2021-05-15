@@ -103,8 +103,12 @@ public class VoiceBrowser extends GuiScreen {
                 GlStateManager.color(1.0F, 1.0F, 1.0F);
                 Gui.drawModalRectWithCustomSizedTexture(7, 36 * amount - 29, 0, 0, 20, 20, 20, 20);
             }
-            mc.fontRendererObj.drawStringWithShadow(LobbyManager.users.get(lobby.getOwnerId()).getUsername() + "#" +
-                    LobbyManager.users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
+            try {
+                mc.fontRendererObj.drawStringWithShadow(LobbyManager.users.get(lobby.getOwnerId()).getUsername() + "#" +
+                        LobbyManager.users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
 
             mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().getLobbyMetadata(lobby).get("game"), gameBegin, 36 * amount - 23, 0xFFFFFF);
 

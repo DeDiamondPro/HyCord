@@ -191,11 +191,11 @@ public class hycord {
     });
     CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            //if(LobbyManager.lobbyId != null) {
-            //    ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
-            //}else{
+            if(LobbyManager.lobbyId != null) {
+                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            }else{
                 ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
-            //}
+            }
         }
     });
 

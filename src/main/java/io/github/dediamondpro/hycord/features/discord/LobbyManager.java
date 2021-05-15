@@ -68,6 +68,7 @@ public class LobbyManager {
             discordRPC.userManager().getUser(id, (r, discordUser) -> {
                 if (r == Result.OK) {
                     users.put(id, discordUser);
+                    talkingData.put(id, false);
                     if (!pictures.containsKey(id)) {
                         try {
                             URL url = new URL("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64");
@@ -200,16 +201,22 @@ public class LobbyManager {
                     }
                 }
             }
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             e.printStackTrace();
         }
     }
 
     public static void leave() {
         if (lobbyId == null) return;
+        discordRPC.lobbyManager().disconnectVoice(lobbyId,System.out::println);
         discordRPC.lobbyManager().disconnectLobby(lobbyId);
         users.clear();
         talkingData.clear();
         lobbyId = null;
+    }
+
+    public static void join(Lobby lobby) {
+        discordRPC.lobbyManager().connectLobby(lobby, LobbyManager::startVoice);
+        lobbyId = lobby.getId();
     }
 }

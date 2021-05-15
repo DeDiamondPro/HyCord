@@ -4,6 +4,7 @@ import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
+import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -21,7 +22,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
@@ -36,6 +36,7 @@ public class VoiceBrowser extends GuiScreen {
     private int topicBegin = 0;
     private int capacityBegin = 0;
     private int joinButtonBegin = 0;
+    private HashMap<Long, DiscordUser> users = new HashMap<>();
 
     @Override
     public boolean doesGuiPauseGame() {
@@ -71,7 +72,7 @@ public class VoiceBrowser extends GuiScreen {
                         System.out.println("An error occurred while fetching users");
                         return;
                     }
-                    LobbyManager.users.put(lobby.getOwnerId(), user);
+                    users.put(lobby.getOwnerId(), user);
                     if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
                         try {
                             URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
@@ -104,8 +105,8 @@ public class VoiceBrowser extends GuiScreen {
                 Gui.drawModalRectWithCustomSizedTexture(7, 36 * amount - 29, 0, 0, 20, 20, 20, 20);
             }
             try {
-                mc.fontRendererObj.drawStringWithShadow(LobbyManager.users.get(lobby.getOwnerId()).getUsername() + "#" +
-                        LobbyManager.users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
+                mc.fontRendererObj.drawStringWithShadow(users.get(lobby.getOwnerId()).getUsername() + "#" +
+                        users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
             }catch (NullPointerException e){
                 e.printStackTrace();
             }
@@ -144,7 +145,8 @@ public class VoiceBrowser extends GuiScreen {
             int amount = 1;
             for(Lobby lobby : matches){
                 if(mouseY >= 36 * amount - 26 + scroll && mouseY <= 36 * amount - 12 + scroll){
-                    discordRPC.lobbyManager().connectLobby(lobby, LobbyManager::startVoice);
+                    LobbyManager.join(lobby);
+                    ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
                     break;
                 }
                 amount++;

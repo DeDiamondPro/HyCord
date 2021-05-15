@@ -3,7 +3,6 @@ package io.github.dediamondpro.hycord;
 import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
-import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
 import io.github.dediamondpro.hycord.core.CommandHandler;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -28,8 +27,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-
-import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {

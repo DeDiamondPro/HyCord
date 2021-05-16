@@ -17,18 +17,21 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NickNameController {
     public static HashMap<String, String> nicknames = new HashMap<>();
+    Pattern killFeed = Pattern.compile("(.*)([0-9a-zA-Z_]{3,16})(.*)(by|of|to|for|with)(.*)");
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
-        if(Utils.isHypixel() && event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
+        if (Utils.isHypixel() && event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
             String name = Utils.getName(msg);
             if (name != null && GetDiscord.discordNameCache.containsKey(name) && GetDiscord.discordNameCache.get(name) != null) {
-                event.message = hoverAdder(name,GetDiscord.discordNameCache.get(name),event.message);
-            }else if(name != null && !GetDiscord.discordNameCache.containsKey(name)){
+                event.message = hoverAdder(name, GetDiscord.discordNameCache.get(name), event.message);
+            } else if (name != null && !GetDiscord.discordNameCache.containsKey(name)) {
                 Thread fetchDiscord = new Thread(() -> {
                     GetDiscord.discord(name);
                 });
@@ -36,48 +39,55 @@ public class NickNameController {
             }
         }
 
-        if(!Settings.enableNicknames)return;
+        if (!Settings.enableNicknames) return;
         for (String element : nicknames.keySet()) {
             if (msg.contains(element)) {
+                String replacer;
+                Matcher m = killFeed.matcher(msg);
+                if (Settings.disableColorKill && m.matches()) {
+                    replacer = nicknames.get(element).replaceAll("§[0-9a-z]", "");
+                } else {
+                    replacer = nicknames.get(element);
+                }
                 if (event.message.getSiblings().size() > 0) {
                     ChatComponentText replacement = new ChatComponentText("");
                     if (event.message.getUnformattedTextForChat().contains(element)) {
-                        replacement.appendSibling(new ChatComponentText(event.message.getUnformattedTextForChat().replace(element, nicknames.get(element))
-                                + Utils.getLastColor(event.message.getUnformattedTextForChat().split(element)[0])).setChatStyle(hoverNickThingy(element, event.message.getChatStyle())));
+                        replacement.appendSibling(new ChatComponentText(event.message.getUnformattedTextForChat().replace(element, replacer)
+                                + Utils.getLastColor(event.message.getUnformattedTextForChat().split(element)[0])).setChatStyle(hoverNickThingy(element, event.message.getChatStyle(), replacer)));
                     } else {
                         replacement.appendSibling(new ChatComponentText(event.message.getUnformattedTextForChat()).setChatStyle(event.message.getChatStyle()));
                     }
                     for (IChatComponent sibling : event.message.getSiblings()) {
-                        replacement.appendSibling(siblingHandler(sibling, element));
+                        replacement.appendSibling(siblingHandler(sibling, element, replacer));
                     }
                     event.message = replacement;
                 } else {
-                    event.message = new ChatComponentText(event.message.getFormattedText().replace(element, nicknames.get(element)
+                    event.message = new ChatComponentText(event.message.getFormattedText().replace(element, replacer
                             + Utils.getLastColor(msg.split(element)[0]))).setChatStyle(event.message.getChatStyle());
                 }
             }
         }
     }
 
-    IChatComponent hoverAdder(String name, String added, IChatComponent message){
+    IChatComponent hoverAdder(String name, String added, IChatComponent message) {
         IChatComponent response = message;
         if (message.getSiblings().size() > 0) {
             ChatComponentText replacement = new ChatComponentText("");
             if (message.getUnformattedTextForChat().contains(name)) {
-                if(message.getChatStyle() == null){
+                if (message.getChatStyle() == null) {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(new ChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                     new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added)))));
-                } else if(message.getChatStyle().getChatHoverEvent() == null) {
+                } else if (message.getChatStyle().getChatHoverEvent() == null) {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                     new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added)))));
-                }else if(message.getChatStyle().getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT)){
+                } else if (message.getChatStyle().getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT)) {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat())
                             .setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    new ChatComponentText( message.getChatStyle().getChatHoverEvent().getValue().getFormattedText()
+                                    new ChatComponentText(message.getChatStyle().getChatHoverEvent().getValue().getFormattedText()
                                             + "\n" + EnumChatFormatting.BLUE + "Discord: " + added)))));
-                }else{
+                } else {
                     replacement.appendSibling(new ChatComponentText(message.getUnformattedTextForChat()).setChatStyle(message.getChatStyle()));
                 }
             } else {
@@ -88,11 +98,12 @@ public class NickNameController {
             }
             response = replacement;
         } else {
-            if(message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent() == null) { ;
+            if (message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent() == null) {
+                ;
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added))));
-            }else if(message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent().getAction()
-                    .equals(HoverEvent.Action.SHOW_TEXT) && !message.getChatStyle().getChatHoverEvent().getValue().getFormattedText().contains("Discord: ")){
+            } else if (message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent().getAction()
+                    .equals(HoverEvent.Action.SHOW_TEXT) && !message.getChatStyle().getChatHoverEvent().getValue().getFormattedText().contains("Discord: ")) {
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ChatComponentText(message.getChatStyle().getChatHoverEvent().getValue().getFormattedText() + "\n"
                                 + EnumChatFormatting.BLUE + "Discord: " + added))));
@@ -101,26 +112,26 @@ public class NickNameController {
         return response;
     }
 
-    IChatComponent siblingHandler(IChatComponent sibling, String element) {
+    IChatComponent siblingHandler(IChatComponent sibling, String element, String replacer) {
         if (sibling.getSiblings().size() == 0) {
             if (sibling.getFormattedText().contains(element)) {
-                sibling = new ChatComponentText(sibling.getFormattedText().replace(element, nicknames.get(element)
-                        + Utils.getLastColor(sibling.getFormattedText().split(element)[0]))).setChatStyle(hoverNickThingy(element, sibling.getChatStyle()));
+                sibling = new ChatComponentText(sibling.getFormattedText().replace(element, replacer
+                        + Utils.getLastColor(sibling.getFormattedText().split(element)[0]))).setChatStyle(hoverNickThingy(element, sibling.getChatStyle(), replacer));
             }
             return sibling;
         } else {
             ChatComponentText replacement = new ChatComponentText("");
             for (IChatComponent siblingsSibling : sibling.getSiblings()) {
-                replacement.appendSibling(siblingHandler(siblingsSibling, element));
+                replacement.appendSibling(siblingHandler(siblingsSibling, element, replacer));
             }
             return replacement;
         }
     }
 
-    ChatStyle hoverNickThingy(String element, ChatStyle style) {
+    ChatStyle hoverNickThingy(String element, ChatStyle style, String replacer) {
         if (style != null && style.getChatHoverEvent() != null && style.getChatHoverEvent().getValue().getFormattedText().contains(element) && style.getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT)) {
             style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(style.getChatHoverEvent().getValue().getFormattedText().
-                    replace(element, nicknames.get(element) + Utils.getLastColor(style.getChatHoverEvent().getValue().getFormattedText().split(element)[0])))));
+                    replace(element, replacer + Utils.getLastColor(style.getChatHoverEvent().getValue().getFormattedText().split(element)[0])))));
         }
         return style;
     }

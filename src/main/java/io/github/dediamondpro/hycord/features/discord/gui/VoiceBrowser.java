@@ -50,42 +50,47 @@ public class VoiceBrowser extends GuiScreen {
         capacityBegin = this.width / 5 * 3;
         joinButtonBegin = this.width / 5 * 4;
 
-        LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
-        System.out.println("Searching for lobbies");
-        discordRPC.lobbyManager().search(query, result -> {
-            if (result != Result.OK) {
-                System.out.println("An error occurred");
-                return;
-            }
+        try {
+            LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
+            System.out.println("Searching for lobbies");
+            discordRPC.lobbyManager().search(query, result -> {
+                if (result != Result.OK) {
+                    System.out.println("An error occurred");
+                    return;
+                }
 
-            java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
-            System.out.println(lobbies.size());
+                java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
+                System.out.println(lobbies.size());
 
-            matches = lobbies.stream()
-                    .filter(l -> l.getCapacity() > discordRPC.lobbyManager().memberCount(l))
-                    .filter(l -> discordRPC.lobbyManager().getLobbyMetadata(l).get("type").equals("voice"))
-                    .collect(Collectors.toList());
-            System.out.println("Found " + matches.size() + " match(es)");
-            for (Lobby lobby : matches) {
-                discordRPC.userManager().getUser(lobby.getOwnerId(), (r, user) -> {
-                    if (r != Result.OK) {
-                        System.out.println("An error occurred while fetching users");
-                        return;
-                    }
-                    users.put(lobby.getOwnerId(), user);
-                    if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
-                        try {
-                            URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
-                            HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                            httpcon.addRequestProperty("User-Agent", "");
-                            LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(httpcon.getInputStream()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                matches = lobbies.stream()
+                        .filter(l -> l.getCapacity() > discordRPC.lobbyManager().memberCount(l))
+                        .filter(l -> discordRPC.lobbyManager().getLobbyMetadata(l).get("type").equals("voice"))
+                        .collect(Collectors.toList());
+                System.out.println("Found " + matches.size() + " match(es)");
+                for (Lobby lobby : matches) {
+                    discordRPC.userManager().getUser(lobby.getOwnerId(), (r, user) -> {
+                        if (r != Result.OK) {
+                            System.out.println("An error occurred while fetching users");
+                            return;
                         }
-                    }
-                });
-            }
-        });
+                        users.put(lobby.getOwnerId(), user);
+                        if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
+                            try {
+                                URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
+                                HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+                                httpcon.addRequestProperty("User-Agent", "");
+                                LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(httpcon.getInputStream()));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
+            });
+        }catch (IllegalStateException e){
+            mc.displayGuiScreen(null);
+            e.printStackTrace();
+        }
     }
 
     @Override

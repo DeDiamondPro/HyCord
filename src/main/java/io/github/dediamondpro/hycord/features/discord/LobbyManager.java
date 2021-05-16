@@ -16,9 +16,11 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -143,8 +145,8 @@ public class LobbyManager {
     }
 
     @SubscribeEvent
-    void onRender(TickEvent.RenderTickEvent event) {
-        if (!Utils.isHypixel()) return;
+    void onRender(RenderGameOverlayEvent.Post event) {
+        if (!Utils.isHypixel() || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         try {
             try {
                 for (Long id : bufferedPictures.keySet()) {
@@ -208,7 +210,7 @@ public class LobbyManager {
 
     public static void leave() {
         if (lobbyId == null) return;
-        discordRPC.lobbyManager().disconnectVoice(lobbyId,System.out::println);
+        discordRPC.lobbyManager().disconnectVoice(lobbyId, System.out::println);
         discordRPC.lobbyManager().disconnectLobby(lobbyId);
         users.clear();
         talkingData.clear();

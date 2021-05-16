@@ -63,6 +63,14 @@ public class Settings extends Vigilant {
     public static boolean enableNicknames = true;
 
     @Property(
+            type = PropertyType.SWITCH, name = "Disable color in kill feed",
+            description = "Disable the color of nicknames in the kill feed to avoid team confusion in games like bedwars.",
+            category = "Miscellaneous",
+            subcategory = "Nicknames"
+    )
+    public static boolean disableColorKill = false;
+
+    @Property(
             type = PropertyType.SWITCH, name = "Show Discord tag on hover",
             description = "Enable the option to show a players discord name when you hover over their minecraft name. Requires your " +
                     "API key to be set.",

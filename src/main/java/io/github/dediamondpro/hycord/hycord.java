@@ -31,7 +31,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre2.1";
+    public static final String VERSION = "1.2.0-pre2.2";
 
     private final Settings config = new Settings();
 
@@ -246,7 +246,11 @@ public class hycord {
                     String data = myReader.nextLine();
                     System.out.println(data);
                     String[] split = data.split(",");
-                    NickNameController.nicknames.put(split[0], split[1]);
+                    if(split.length == 2) {
+                        NickNameController.nicknames.put(split[0], split[1]);
+                    }else{
+                        System.out.println("Error loading a nick");
+                    }
                 }
                 myReader.close();
             }

@@ -22,6 +22,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,7 +34,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre2.2";
+    public static final String VERSION = "1.2.0-pre2.3";
 
     private final Settings config = new Settings();
 
@@ -201,24 +204,29 @@ public class hycord {
         config.preload();
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
 
+        if(!SystemUtils.IS_OS_MAC) {
+            ClientCommandHandler.instance.registerCommand(partySize);
+            ClientCommandHandler.instance.registerCommand(replyYesCommand);
+            ClientCommandHandler.instance.registerCommand(replyNoCommand);
+            ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
+            ClientCommandHandler.instance.registerCommand(getStatus);
+            ClientCommandHandler.instance.registerCommand(voice);
+
+            MinecraftForge.EVENT_BUS.register(new JoinHandler());
+            MinecraftForge.EVENT_BUS.register(new RichPresence());
+            MinecraftForge.EVENT_BUS.register(new LobbyManager());
+        }else{
+            MinecraftForge.EVENT_BUS.register(new MacWarning());
+        }
+        MinecraftForge.EVENT_BUS.register(new AutoFl());
+        MinecraftForge.EVENT_BUS.register(new NickNameController());
+
         ClientCommandHandler.instance.registerCommand(mainCommand);
-        ClientCommandHandler.instance.registerCommand(partySize);
-        ClientCommandHandler.instance.registerCommand(replyYesCommand);
-        ClientCommandHandler.instance.registerCommand(replyNoCommand);
-        ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
         ClientCommandHandler.instance.registerCommand(setNick);
         ClientCommandHandler.instance.registerCommand(clearNick);
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
-        ClientCommandHandler.instance.registerCommand(getStatus);
-        ClientCommandHandler.instance.registerCommand(voice);
-
-        MinecraftForge.EVENT_BUS.register(new AutoFl());
-        MinecraftForge.EVENT_BUS.register(new JoinHandler());
-        MinecraftForge.EVENT_BUS.register(new RichPresence());
-        MinecraftForge.EVENT_BUS.register(new NickNameController());
-        MinecraftForge.EVENT_BUS.register(new LobbyManager());
 
         try {
             RichPresence.init();
@@ -256,6 +264,20 @@ public class hycord {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+}
+
+class MacWarning{
+    boolean sent = false;
+
+    @SubscribeEvent
+    void onTick(TickEvent.ClientTickEvent event){
+        if(!sent){
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
+                    "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
+                    "currently don't work on MacOs,\nthese features have been automatically disabled."));
+            sent = true;
         }
     }
 }

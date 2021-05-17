@@ -44,7 +44,7 @@ public class RichPresence {
     String secondLine = "In a party";
     String imageText = "";
     String gameMode = "";
-    boolean enabled = true;
+    public static boolean enabled = false;
     private static String joinSecret = UUID.randomUUID().toString();
     private static String partyId = UUID.randomUUID().toString();
     //public String mainId = null;

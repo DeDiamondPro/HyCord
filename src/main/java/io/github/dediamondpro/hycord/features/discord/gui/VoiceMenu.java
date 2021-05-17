@@ -161,9 +161,6 @@ public class VoiceMenu extends GuiScreen {
             amount = 1;
             if (mouseX >= 153 && mouseX <= 323) {
                 for (DiscordUser user : LobbyManager.users.values()) {
-                    System.out.println(mouseY);
-                    System.out.println(36 * amount - 11 + scroll);
-                    System.out.println(36 + scroll * amount);
                     if (mouseY >= 36 * amount - 11 + scroll && mouseY <= 36 * amount + scroll && user.getUserId() != LobbyManager.currentUser) {
                         editing = true;
                         editUser = user.getUserId();

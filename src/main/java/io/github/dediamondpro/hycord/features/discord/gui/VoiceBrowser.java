@@ -6,6 +6,7 @@ import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -50,46 +51,48 @@ public class VoiceBrowser extends GuiScreen {
         capacityBegin = this.width / 5 * 3;
         joinButtonBegin = this.width / 5 * 4;
 
-        try {
-            LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
-            System.out.println("Searching for lobbies");
-            discordRPC.lobbyManager().search(query, result -> {
-                if (result != Result.OK) {
-                    System.out.println("An error occurred");
-                    return;
-                }
+        if (RichPresence.enabled) {
+            try {
+                LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
+                System.out.println("Searching for lobbies");
+                discordRPC.lobbyManager().search(query, result -> {
+                    if (result != Result.OK) {
+                        System.out.println("An error occurred");
+                        return;
+                    }
 
-                java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
-                System.out.println(lobbies.size());
+                    java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
+                    System.out.println(lobbies.size());
 
-                matches = lobbies.stream()
-                        .filter(l -> l.getCapacity() > discordRPC.lobbyManager().memberCount(l))
-                        .filter(l -> discordRPC.lobbyManager().getLobbyMetadata(l).get("type").equals("voice"))
-                        .collect(Collectors.toList());
-                System.out.println("Found " + matches.size() + " match(es)");
-                for (Lobby lobby : matches) {
-                    discordRPC.userManager().getUser(lobby.getOwnerId(), (r, user) -> {
-                        if (r != Result.OK) {
-                            System.out.println("An error occurred while fetching users");
-                            return;
-                        }
-                        users.put(lobby.getOwnerId(), user);
-                        if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
-                            try {
-                                URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
-                                HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                                httpcon.addRequestProperty("User-Agent", "");
-                                LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(httpcon.getInputStream()));
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                    matches = lobbies.stream()
+                            .filter(l -> l.getCapacity() > discordRPC.lobbyManager().memberCount(l))
+                            .filter(l -> discordRPC.lobbyManager().getLobbyMetadata(l).get("type").equals("voice"))
+                            .collect(Collectors.toList());
+                    System.out.println("Found " + matches.size() + " match(es)");
+                    for (Lobby lobby : matches) {
+                        discordRPC.userManager().getUser(lobby.getOwnerId(), (r, user) -> {
+                            if (r != Result.OK) {
+                                System.out.println("An error occurred while fetching users");
+                                return;
                             }
-                        }
-                    });
-                }
-            });
-        }catch (IllegalStateException e){
-            mc.displayGuiScreen(null);
-            e.printStackTrace();
+                            users.put(lobby.getOwnerId(), user);
+                            if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
+                                try {
+                                    URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
+                                    HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+                                    httpcon.addRequestProperty("User-Agent", "");
+                                    LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(httpcon.getInputStream()));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                });
+            } catch (IllegalStateException e) {
+                mc.displayGuiScreen(null);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -100,37 +103,44 @@ public class VoiceBrowser extends GuiScreen {
         mc.getTextureManager().bindTexture(plus);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         Gui.drawModalRectWithCustomSizedTexture(this.width - 20, 4, 0, 0, 16, 16, 16, 16);
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0, scroll, 0);
-        int amount = 1;
-        for (Lobby lobby : matches) {
-            if (LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
-                mc.getTextureManager().bindTexture(LobbyManager.pictures.get(lobby.getOwnerId()));
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(7, 36 * amount - 29, 0, 0, 20, 20, 20, 20);
+
+        if (!RichPresence.enabled) {
+            mc.fontRendererObj.drawStringWithShadow("Core not enabled", this.width / 2f - mc.fontRendererObj.
+                    getStringWidth("Core not enabled") / 2f, this.height / 2f, new Color(255, 0, 0).getRGB());
+        } else {
+
+            GL11.glPushMatrix();
+            GL11.glTranslatef(0, scroll, 0);
+            int amount = 1;
+            for (Lobby lobby : matches) {
+                if (LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
+                    mc.getTextureManager().bindTexture(LobbyManager.pictures.get(lobby.getOwnerId()));
+                    GlStateManager.color(1.0F, 1.0F, 1.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(7, 36 * amount - 29, 0, 0, 20, 20, 20, 20);
+                }
+                try {
+                    mc.fontRendererObj.drawStringWithShadow(users.get(lobby.getOwnerId()).getUsername() + "#" +
+                            users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+
+                mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().getLobbyMetadata(lobby).get("game"), gameBegin, 36 * amount - 23, 0xFFFFFF);
+
+                mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().getLobbyMetadata(lobby).get("topic"), topicBegin, 36 * amount - 23, 0xFFFFFF);
+
+                mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().memberCount(lobby) + "/" + lobby.getCapacity(), capacityBegin,
+                        36 * amount - 23, 0xFFFFFF);
+
+                Gui.drawRect(joinButtonBegin - 1, 36 * amount - 26, joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 5, 36 * amount - 12, new Color(255, 255, 255).getRGB());
+                Gui.drawRect(joinButtonBegin, 36 * amount - 25, joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 4, 36 * amount - 13, new Color(0, 0, 0).getRGB());
+                mc.fontRendererObj.drawStringWithShadow("Join", joinButtonBegin + 2, 36 * amount - 23, 0xFFFFFF);
+
+                amount++;
             }
-            try {
-                mc.fontRendererObj.drawStringWithShadow(users.get(lobby.getOwnerId()).getUsername() + "#" +
-                        users.get(lobby.getOwnerId()).getDiscriminator(), 32, 36 * amount - 23, 0xFFFFFF);
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-
-            mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().getLobbyMetadata(lobby).get("game"), gameBegin, 36 * amount - 23, 0xFFFFFF);
-
-            mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().getLobbyMetadata(lobby).get("topic"), topicBegin, 36 * amount - 23, 0xFFFFFF);
-
-            mc.fontRendererObj.drawStringWithShadow(discordRPC.lobbyManager().memberCount(lobby) + "/" + lobby.getCapacity(), capacityBegin,
-                    36 * amount - 23, 0xFFFFFF);
-
-            Gui.drawRect(joinButtonBegin - 1, 36 * amount - 26, joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 5, 36 * amount - 12,new Color(255,255,255).getRGB());
-            Gui.drawRect(joinButtonBegin, 36 * amount - 25, joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 4, 36 * amount - 13,new Color(0,0,0).getRGB());
-            mc.fontRendererObj.drawStringWithShadow("Join", joinButtonBegin + 2, 36 * amount - 23, 0xFFFFFF);
-
-            amount++;
+            totalAmount = amount;
+            GL11.glPopMatrix();
         }
-        totalAmount = amount;
-        GL11.glPopMatrix();
     }
 
     @Override
@@ -146,10 +156,10 @@ public class VoiceBrowser extends GuiScreen {
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 + scroll && mouseY >= 4 + scroll) {
             ModCore.getInstance().getGuiHandler().open(new VoiceCreator());
-        }else if(mouseX >= joinButtonBegin-1 && mouseX <= joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 5){
+        } else if (mouseX >= joinButtonBegin - 1 && mouseX <= joinButtonBegin + mc.fontRendererObj.getStringWidth("Join") + 5) {
             int amount = 1;
-            for(Lobby lobby : matches){
-                if(mouseY >= 36 * amount - 26 + scroll && mouseY <= 36 * amount - 12 + scroll){
+            for (Lobby lobby : matches) {
+                if (mouseY >= 36 * amount - 26 + scroll && mouseY <= 36 * amount - 12 + scroll) {
                     LobbyManager.join(lobby);
                     ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
                     break;

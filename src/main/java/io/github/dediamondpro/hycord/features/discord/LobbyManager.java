@@ -146,7 +146,7 @@ public class LobbyManager {
 
     @SubscribeEvent
     void onRender(RenderGameOverlayEvent.Post event) {
-        if (!Utils.isHypixel() || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
+        if (!RichPresence.enabled || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         try {
             try {
                 for (Long id : bufferedPictures.keySet()) {
@@ -203,7 +203,7 @@ public class LobbyManager {
                     }
                 }
             }
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
         }
     }

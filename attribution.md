@@ -14,5 +14,6 @@ A list of all amazing icons used by HyCord:
 Icon | Creator | License | use
 ------------ | ------------- | ------------- | -------------
 [Mute](https://www.flaticon.com/free-icon/mute_565295) | [Google](https://www.flaticon.com/authors/google) | [CC 3.0 BY](https://creativecommons.org/licenses/by/3.0/) | deafen icon
-[Voice](https://www.flaticon.com/free-icon/voice_59116k) | [Freepik](https://www.flaticon.com/authors/freepik) | Flaticon License | microphone icon
-[Voice](https://www.flaticon.com/free-icon/mute-microphone_59120) | [Freepik](https://www.flaticon.com/authors/freepik) | Flaticon License | mute icon
+[Voice](https://www.flaticon.com/free-icon/voice_59116) | [Freepik](https://www.flaticon.com/authors/freepik) | [Flaticon License](https://media.flaticon.com/license/license.pdf) | microphone icon
+[Voice](https://www.flaticon.com/free-icon/mute-microphone_59120) | [Freepik](https://www.flaticon.com/authors/freepik) | [Flaticon License](https://media.flaticon.com/license/license.pdf) | mute icon
+[Settings](https://www.flaticon.com/free-icon/settings_3524659) | [Pixel Perfext](https://www.flaticon.com/authors/pixel-perfect) | [Flaticon License](https://media.flaticon.com/license/license.pdf) | settings icon

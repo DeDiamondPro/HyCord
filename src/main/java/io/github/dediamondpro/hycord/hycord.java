@@ -34,7 +34,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre2.3";
+    public static final String VERSION = "1.2.0-pre2.4";
 
     private final Settings config = new Settings();
 
@@ -191,7 +191,9 @@ public class hycord {
     });
     CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if(LobbyManager.lobbyId != null) {
+            if (args.length > 0) {
+                ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
+            }else if(LobbyManager.lobbyId != null) {
                 ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
             }else{
                 ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
@@ -215,6 +217,12 @@ public class hycord {
             MinecraftForge.EVENT_BUS.register(new JoinHandler());
             MinecraftForge.EVENT_BUS.register(new RichPresence());
             MinecraftForge.EVENT_BUS.register(new LobbyManager());
+
+            try {
+                RichPresence.init();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }else{
             MinecraftForge.EVENT_BUS.register(new MacWarning());
         }
@@ -227,12 +235,6 @@ public class hycord {
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
-
-        try {
-            RichPresence.init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate()) {
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());

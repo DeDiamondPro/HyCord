@@ -10,6 +10,10 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -192,15 +196,21 @@ public class Utils {
 
     static Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
 
-    public static String getName(String message){
+    public static String getName(String message) {
         Matcher m = getNamePattern.matcher(message);
-        if(m.matches()) {
+        if (m.matches()) {
             return m.group("username");
         }
         return null;
     }
 
-    public static float map(float input, float inMin, float inMax, float outMin, float outMax){
-        return (input-inMin)/(inMax-inMin) * (outMax-outMin) + outMin;
+    public static float map(float input, float inMin, float inMax, float outMin, float outMax) {
+        return (input - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+    }
+
+    public static void copyToClipBoard(String text) {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable selection = new StringSelection(text);
+        clipboard.setContents(selection, null);
     }
 }

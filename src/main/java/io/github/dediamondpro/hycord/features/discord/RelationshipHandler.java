@@ -2,6 +2,7 @@ package io.github.dediamondpro.hycord.features.discord;
 
 import de.jcm.discordgamesdk.activity.ActivityType;
 import de.jcm.discordgamesdk.user.Relationship;
+import de.jcm.discordgamesdk.user.RelationshipType;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.HoverEvent;
@@ -19,7 +20,8 @@ public class RelationshipHandler {
     public static void Handler(Relationship relation) {
         Relationship previous = cache.get(relation.getUser().getUserId());
 
-        if ((previous == null || previous.getPresence().getStatus() != relation.getPresence().getStatus()) && Settings.enableFriendNotifs) {
+        if ((previous == null || previous.getPresence().getStatus() != relation.getPresence().getStatus()) && Settings.enableFriendNotifs
+                && relation.getType() == RelationshipType.FRIEND) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Discord "
                     + relation.getType().toString().toLowerCase(Locale.ROOT) + " > " + EnumChatFormatting.BLUE +
                     relation.getUser().getUsername() + "#" + relation.getUser().getDiscriminator() + EnumChatFormatting.YELLOW + " is now "
@@ -30,14 +32,14 @@ public class RelationshipHandler {
     }
 
     public static ChatComponentText status(String user) {
-        for (Relationship element: cache.values()) {
-            if(user.contains("#")){
-                if(element.getUser().getUsername().equalsIgnoreCase(user.split("#",2)[0]) &&
-                        element.getUser().getDiscriminator().equals(user.split("#",2)[1])){
+        for (Relationship element : cache.values()) {
+            if (user.contains("#")) {
+                if (element.getUser().getUsername().equalsIgnoreCase(user.split("#", 2)[0]) &&
+                        element.getUser().getDiscriminator().equals(user.split("#", 2)[1])) {
                     return getiChatComponents(element);
                 }
-            }else{
-                if(element.getUser().getUsername().equalsIgnoreCase(user)){
+            } else {
+                if (element.getUser().getUsername().equalsIgnoreCase(user)) {
                     return getiChatComponents(element);
                 }
             }

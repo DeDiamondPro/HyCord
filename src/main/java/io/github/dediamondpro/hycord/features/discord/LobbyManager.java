@@ -2,6 +2,7 @@ package io.github.dediamondpro.hycord.features.discord;
 
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.Lobby;
+import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
 import de.jcm.discordgamesdk.lobby.LobbyTransaction;
 import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
@@ -20,7 +21,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -28,8 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
@@ -38,12 +37,17 @@ public class LobbyManager {
     ResourceLocation muteTexture = new ResourceLocation("hycord", "microphone_mute.png");
     ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
 
-    public static HashMap<Long, Boolean> talkingData = new HashMap<>();
-    public static HashMap<Long, DiscordUser> users = new HashMap<>();
-    public static HashMap<Long, ResourceLocation> pictures = new HashMap<>();
-    public static HashMap<Long, BufferedImage> bufferedPictures = new HashMap<>();
+    public static ConcurrentHashMap<Long, Boolean> talkingData = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, DiscordUser> users = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, ResourceLocation> pictures = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
+
+     //Filters for VoiceBrowser.java
+     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
+     public static String game = "";
+     public static String topic = "";
 
     public static void createVoice(int capacity, LobbyType privacy, String game, String topic, boolean locked) {
         LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
@@ -148,15 +152,12 @@ public class LobbyManager {
     void onRender(RenderGameOverlayEvent.Post event) {
         if (!RichPresence.enabled || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         try {
-            try {
-                for (Long id : bufferedPictures.keySet()) {
-                    pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
-                    bufferedPictures.remove(id);
-                }
-            } catch (ConcurrentModificationException e) {
-                e.printStackTrace();
+            for (Long id : bufferedPictures.keySet()) {
+                pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
+                bufferedPictures.remove(id);
             }
 
+            if(lobbyId == null)return;
             if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
                 return;
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
@@ -220,5 +221,17 @@ public class LobbyManager {
     public static void join(Lobby lobby) {
         discordRPC.lobbyManager().connectLobby(lobby, LobbyManager::startVoice);
         lobbyId = lobby.getId();
+    }
+
+    public static void editVoice(int capacity, LobbyType privacy, String game, String topic, boolean locked) {
+        LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyUpdateTransaction(lobbyId);
+        transaction.setCapacity(capacity);
+        transaction.setLocked(locked);
+        transaction.setType(privacy);
+        transaction.setMetadata("type", "voice");
+        transaction.setMetadata("game", game);
+        transaction.setMetadata("topic", topic);
+
+        discordRPC.lobbyManager().updateLobby(LobbyManager.lobbyId,transaction,System.out::println);
     }
 }

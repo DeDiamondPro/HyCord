@@ -1,14 +1,10 @@
 package io.github.dediamondpro.hycord.features.discord.gui;
 
 import club.sk1er.mods.core.ModCore;
-import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
-import de.jcm.discordgamesdk.lobby.LobbyTransaction;
 import de.jcm.discordgamesdk.lobby.LobbyType;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
-import io.github.dediamondpro.hycord.features.discord.RichPresence;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -16,21 +12,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VoiceCreator extends GuiScreen {
-    Minecraft mc = Minecraft.getMinecraft();
-    private LobbyType privacy = LobbyType.PUBLIC;
-    private boolean locked = false;
-    private int capacity = 10;
-    private boolean editing = false;
+public class VoiceFilters extends GuiScreen {
     private List<String> games = new ArrayList<>();
     private List<String> topics = new ArrayList<>();
-    private String selectedGame = "General";
-    private String selectedTopic = "Just chatting";
-
-    @Override
-    public boolean doesGuiPauseGame() {
-        return false;
-    }
+    private List<String> distances = new ArrayList<>();
+    private String selectedDistance = "";
+    private String selectedGame = LobbyManager.game;
+    private String selectedTopic = LobbyManager.topic;
 
     @Override
     public void initGui() {
@@ -59,12 +47,24 @@ public class VoiceCreator extends GuiScreen {
         topics.add("Game discussion");
         topics.add("Strategy discussion");
 
-        if (LobbyManager.lobbyId != null) {
-            Lobby lobby = RichPresence.discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId);
-            privacy = lobby.getType();
-            capacity = lobby.getCapacity();
-            selectedTopic = RichPresence.discordRPC.lobbyManager().getLobbyMetadataValue(LobbyManager.lobbyId,"topic");
-            selectedGame = RichPresence.discordRPC.lobbyManager().getLobbyMetadataValue(LobbyManager.lobbyId,"game");
+        distances.add("Same region");
+        distances.add("Same and adjacent regions");
+        distances.add("Far distances");
+        distances.add("Global");
+
+        switch (LobbyManager.distance) {
+            case LOCAL:
+                selectedDistance = "Same region";
+                break;
+            case DEFAULT:
+                selectedDistance = "Same and adjacent regions";
+                break;
+            case EXTENDED:
+                selectedDistance = "Far distances";
+                break;
+            case GLOBAL:
+                selectedDistance = "Global";
+                break;
         }
     }
 
@@ -74,26 +74,12 @@ public class VoiceCreator extends GuiScreen {
 
         Gui.drawRect(this.width / 2 - 50, this.height - 30, this.width / 2 + 50, this.height - 10, new Color(255, 255, 255).getRGB());
         Gui.drawRect(this.width / 2 - 49, this.height - 29, this.width / 2 + 49, this.height - 11, new Color(0, 0, 0).getRGB());
-        if (LobbyManager.lobbyId == null) {
-            mc.fontRendererObj.drawStringWithShadow("Create", this.width / 2f - mc.fontRendererObj.getStringWidth("Create") / 2f, this.height - 24, new Color(255, 255, 255).getRGB());
-        } else {
-            mc.fontRendererObj.drawStringWithShadow("Apply", this.width / 2f - mc.fontRendererObj.getStringWidth("Create") / 2f, this.height - 24, new Color(255, 255, 255).getRGB());
-        }
-
-        mc.fontRendererObj.drawStringWithShadow("Private voice call:", 4, 4, new Color(255, 255, 255).getRGB());
-        Gui.drawRect(96, 3, 106, 13, new Color(255, 255, 255).getRGB());
-        Gui.drawRect(97, 4, 105, 12, new Color(0, 0, 0).getRGB());
-        if (privacy == LobbyType.PRIVATE) {
-            Gui.drawRect(98, 5, 104, 11, new Color(255, 0, 0).getRGB());
-        }
-
-        mc.fontRendererObj.drawStringWithShadow("Capacity: " + capacity, 4, 16, new Color(255, 255, 255).getRGB());
-        Gui.drawRect(70, 17, 270, 22, new Color(50, 50, 50).getRGB());
-        Gui.drawRect((int) Utils.map(capacity, 1, 100, 70, 270), 15, (int) Utils.map(capacity, 1, 100, 73, 273), 24, new Color(200, 200, 200).getRGB());
+        mc.fontRendererObj.drawStringWithShadow("Apply", this.width / 2f - mc.fontRendererObj.getStringWidth("Apply") / 2f, this.height - 24, new Color(255, 255, 255).getRGB());
 
         int length = 6;
-        int height = 45;
-        mc.fontRendererObj.drawStringWithShadow("Game:", 4, 28, new Color(255, 255, 255).getRGB());
+        int height = 6;
+        mc.fontRendererObj.drawStringWithShadow("Game:", 4, height, new Color(255, 255, 255).getRGB());
+        height += 17;
         for (String game : games) {
             if (mc.fontRendererObj.getStringWidth(game) + length >= this.width) {
                 height += 20;
@@ -124,38 +110,58 @@ public class VoiceCreator extends GuiScreen {
             mc.fontRendererObj.drawStringWithShadow(topic, length, height, new Color(255, 255, 255).getRGB());
             length += mc.fontRendererObj.getStringWidth(topic) + 8;
         }
+        height += 17;
+        mc.fontRendererObj.drawStringWithShadow("Distance:", 4, height, new Color(255, 255, 255).getRGB());
+        height += 17;
+        length = 6;
+        for (String distance : distances) {
+            if (mc.fontRendererObj.getStringWidth(distance) + length >= this.width) {
+                height += 20;
+                length = 6;
+            }
+            Gui.drawRect(length - 3, height - 5, length + mc.fontRendererObj.getStringWidth(distance) + 3, height + 12, new Color(255, 255, 255).getRGB());
+            Gui.drawRect(length - 2, height - 4, length + mc.fontRendererObj.getStringWidth(distance) + 2, height + 11, new Color(0, 0, 0).getRGB());
+            if (distance.equals(selectedDistance)) {
+                Gui.drawRect(length - 1, height - 3, length + mc.fontRendererObj.getStringWidth(distance) + 1, height + 10, new Color(255, 0, 0).getRGB());
+            }
+            mc.fontRendererObj.drawStringWithShadow(distance, length, height, new Color(255, 255, 255).getRGB());
+            length += mc.fontRendererObj.getStringWidth(distance) + 8;
+        }
     }
 
-    @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         if (mouseX >= this.width / 2 - 50 && mouseX <= this.width / 2 + 50 && mouseY >= this.height - 30 && mouseY <= this.height - 10) {
-            if (LobbyManager.lobbyId == null) {
-                LobbyManager.createVoice(capacity, privacy, selectedGame, selectedTopic, false);
-            } else {
-                LobbyManager.editVoice(capacity, privacy, selectedGame, selectedTopic, false);
+            LobbyManager.game = selectedGame;
+            LobbyManager.topic = selectedTopic;
+            switch (selectedDistance){
+                case "Same region":
+                    LobbyManager.distance = LobbySearchQuery.Distance.LOCAL;
+                    break;
+                case "Same and adjacent regions":
+                    LobbyManager.distance = LobbySearchQuery.Distance.DEFAULT;
+                    break;
+                case "Far distances":
+                    LobbyManager.distance = LobbySearchQuery.Distance.EXTENDED;
+                    break;
+                case "Global":
+                    LobbyManager.distance = LobbySearchQuery.Distance.GLOBAL;
+                    break;
             }
-            ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
-        } else if (mouseX >= 95 && mouseX <= 105 && mouseY >= 3 && mouseY <= 13) {
-            if (privacy == LobbyType.PRIVATE) {
-                privacy = LobbyType.PUBLIC;
-            } else {
-                privacy = LobbyType.PRIVATE;
-            }
-        } else if (mouseX >= 83 && mouseX <= 93 && mouseY >= 15 && mouseY <= 25) {
-            locked = !locked;
-        } else if (mouseX >= 70 && mouseX <= 270 && mouseY >= 15 && mouseY <= 24) {
-            editing = true;
-            capacity = (int) Utils.map(mouseX, 70, 270, 1, 100);
+            ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
         } else {
             int length = 6;
-            int height = 45;
+            int height = 23;
             for (String game : games) {
                 if (mc.fontRendererObj.getStringWidth(game) + length >= this.width) {
                     height += 20;
                     length = 6;
                 }
                 if (mouseX >= length - 3 && mouseX <= length + mc.fontRendererObj.getStringWidth(game) + 3 && mouseY >= height - 5 && mouseY <= height + 12) {
-                    selectedGame = game;
+                    if(selectedGame.equals(game)){
+                        selectedGame = "";
+                    }else {
+                        selectedGame = game;
+                    }
                     break;
                 }
                 length += mc.fontRendererObj.getStringWidth(game) + 8;
@@ -168,28 +174,28 @@ public class VoiceCreator extends GuiScreen {
                     length = 6;
                 }
                 if (mouseX >= length - 3 && mouseX <= length + mc.fontRendererObj.getStringWidth(topic) + 3 && mouseY >= height - 5 && mouseY <= height + 12) {
-                    selectedTopic = topic;
+                    if(selectedTopic.equals(topic)){
+                        selectedTopic = "";
+                    }else {
+                        selectedTopic = topic;
+                    }
                     break;
                 }
                 length += mc.fontRendererObj.getStringWidth(topic) + 8;
             }
+            height += 34;
+            length = 6;
+            for (String distance : distances) {
+                if (mc.fontRendererObj.getStringWidth(distance) + length >= this.width) {
+                    height += 20;
+                    length = 6;
+                }
+                if (mouseX >= length - 3 && mouseX <= length + mc.fontRendererObj.getStringWidth(distance) + 3 && mouseY >= height - 5 && mouseY <= height + 12) {
+                    selectedDistance = distance;
+                    break;
+                }
+                length += mc.fontRendererObj.getStringWidth(distance) + 8;
+            }
         }
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if (!editing) return;
-        if (mouseX >= 270) capacity = 100;
-        else if (mouseX <= 70) capacity = 1;
-        else capacity = (int) Utils.map(mouseX, 70, 270, 1, 100);
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        if (!editing) return;
-        if (mouseX >= 270) capacity = 100;
-        else if (mouseX <= 70) capacity = 1;
-        else capacity = (int) Utils.map(mouseX, 70, 270, 1, 100);
-        editing = false;
     }
 }

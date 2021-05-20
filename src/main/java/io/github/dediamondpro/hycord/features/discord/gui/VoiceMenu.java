@@ -1,8 +1,10 @@
 package io.github.dediamondpro.hycord.features.discord.gui;
 
 import club.sk1er.mods.core.ModCore;
+import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.voice.VoiceInputMode;
+import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
 import net.minecraft.client.Minecraft;
@@ -15,7 +17,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
@@ -27,7 +28,8 @@ public class VoiceMenu extends GuiScreen {
     private long editUser = 0;
     private int scroll = 0;
     private int totalAmount = 0;
-    private final ResourceLocation leave_icon = new ResourceLocation("hycord","leave_icon.png");
+    private final ResourceLocation leave_icon = new ResourceLocation("hycord", "leave_icon.png");
+    private final ResourceLocation settingsIcon = new ResourceLocation("hycord", "settings.png");
 
     @Override
     public boolean doesGuiPauseGame() {
@@ -40,12 +42,19 @@ public class VoiceMenu extends GuiScreen {
 
         mc.getTextureManager().bindTexture(leave_icon);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        Gui.drawModalRectWithCustomSizedTexture(this.width-20,4,0,0,16,16,16,16);
+        Gui.drawModalRectWithCustomSizedTexture(this.width - 20, 4, 0, 0, 16, 16, 16, 16);
+        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+            mc.getTextureManager().bindTexture(settingsIcon);
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            Gui.drawModalRectWithCustomSizedTexture(this.width - 40, 4, 0, 0, 16, 16, 16, 16);
+        }
 
         GL11.glPushMatrix();
         GL11.glTranslatef(0, scroll, 0);
 
-        int amount = 1;
+        TextUtils.drawTextMaxLengthCentered("Click to copy voice chat id.", 0, 18, new Color(255, 255, 255).getRGB(), true, this.width);
+
+        int amount = 2;
         try {
             for (DiscordUser user : LobbyManager.users.values()) {
                 if (LobbyManager.pictures.containsKey(user.getUserId())) {
@@ -88,14 +97,14 @@ public class VoiceMenu extends GuiScreen {
                     if (!editing || editUser != user.getUserId()) {
                         mc.fontRendererObj.drawStringWithShadow("Volume: " + discordRPC.voiceManager().getLocalVolume(user.getUserId()) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                         Gui.drawRect((int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 153, 320), 36 * amount - 11, (int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 156, 323), 36 * amount, new Color(200, 200, 200).getRGB());
-                    } else if(editUser == user.getUserId()) {
+                    } else if (editUser == user.getUserId()) {
                         mc.fontRendererObj.drawStringWithShadow("Volume: " + (int) Utils.map(x, 153, 323, 0, 200) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                         Gui.drawRect(x, 36 * amount - 11, x + 3, 36 * amount, new Color(200, 200, 200).getRGB());
                     }
                 }
                 amount++;
             }
-        }catch (NullPointerException | ConcurrentModificationException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
 
@@ -107,12 +116,19 @@ public class VoiceMenu extends GuiScreen {
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         if (mouseButton != 0) return;
-        if(mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 && mouseY >= 4){
+        if (mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 && mouseY >= 4) {
             LobbyManager.leave();
             ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
-        }else {
-            int amount = 1;
-            if (mouseX >= 72 && mouseX <= 82) {
+        } else if (mouseX >= this.width - 40 && mouseX <= this.width - 24 && mouseY <= 20 && mouseY >= 4
+                && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+            ModCore.getInstance().getGuiHandler().open(new VoiceCreator());
+        } else {
+            int amount = 2;
+            if (mouseY >= 10 && mouseY <= 26) {
+                if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId) != null) {
+                    Utils.copyToClipBoard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
+                }
+            } else if (mouseX >= 72 && mouseX <= 82) {
                 for (DiscordUser user : LobbyManager.users.values()) {
                     if (mouseY >= 36 * amount - 12 + scroll && mouseY <= 36 * amount - 2 + scroll) {
                         if (user.getUserId() != LobbyManager.currentUser) {
@@ -158,7 +174,7 @@ public class VoiceMenu extends GuiScreen {
                     amount++;
                 }
             }
-            amount = 1;
+            amount = 2;
             if (mouseX >= 153 && mouseX <= 323) {
                 for (DiscordUser user : LobbyManager.users.values()) {
                     if (mouseY >= 36 * amount - 11 + scroll && mouseY <= 36 * amount + scroll && user.getUserId() != LobbyManager.currentUser) {
@@ -167,7 +183,6 @@ public class VoiceMenu extends GuiScreen {
                         x = mouseX;
                         break;
                     }
-                    System.out.println(amount);
                     amount++;
                 }
             }

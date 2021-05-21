@@ -1,5 +1,6 @@
 package io.github.dediamondpro.hycord.features.discord;
 
+import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
@@ -7,6 +8,7 @@ import de.jcm.discordgamesdk.lobby.LobbyTransaction;
 import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.core.Utils;
+import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -44,10 +46,10 @@ public class LobbyManager {
     public static Long currentUser;
     public static Long lobbyId = null;
 
-     //Filters for VoiceBrowser.java
-     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
-     public static String game = "";
-     public static String topic = "";
+    //Filters for VoiceBrowser.java
+    public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
+    public static String game = "";
+    public static String topic = "";
 
     public static void createVoice(int capacity, LobbyType privacy, String game, String topic, boolean locked) {
         LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
@@ -157,7 +159,7 @@ public class LobbyManager {
                 bufferedPictures.remove(id);
             }
 
-            if(lobbyId == null)return;
+            if (lobbyId == null) return;
             if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
                 return;
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
@@ -180,8 +182,10 @@ public class LobbyManager {
                     if (talkingData.get(id)) {
                         if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
                             Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
+                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(255, 0, 0).getRGB());
                         } else {
                             Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
+                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(0, 255, 0).getRGB());
                         }
                         if (pictures.containsKey(id)) {
                             Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
@@ -192,8 +196,10 @@ public class LobbyManager {
                     } else if (Settings.showNonTalking) {
                         if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
                             Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
+                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(255, 0, 0).getRGB());
                         } else {
                             Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
+                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(170, 170, 170).getRGB());
                         }
                         if (pictures.containsKey(id)) {
                             Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
@@ -232,6 +238,18 @@ public class LobbyManager {
         transaction.setMetadata("game", game);
         transaction.setMetadata("topic", topic);
 
-        discordRPC.lobbyManager().updateLobby(LobbyManager.lobbyId,transaction,System.out::println);
+        discordRPC.lobbyManager().updateLobby(LobbyManager.lobbyId, transaction, System.out::println);
+    }
+
+    public static void joinSecret(String secret) {
+        discordRPC.lobbyManager().connectLobbyWithActivitySecret(secret, (result, lobby) -> {
+            if (result != Result.OK) {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat"));
+                Minecraft.getMinecraft().displayGuiScreen(null);
+            } else {
+                startVoice(result, lobby);
+                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            }
+        });
     }
 }

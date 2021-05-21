@@ -7,13 +7,17 @@ import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
 import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.core.TextUtils;
+import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import javafx.scene.input.KeyCode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -41,6 +45,9 @@ public class VoiceBrowser extends GuiScreen {
     private int capacityBegin = 0;
     private int joinButtonBegin = 0;
     private HashMap<Long, DiscordUser> users = new HashMap<>();
+    private boolean typing = false;
+    private String enteredText = "";
+    private boolean selected = false;
 
     @Override
     public boolean doesGuiPauseGame() {
@@ -115,19 +122,43 @@ public class VoiceBrowser extends GuiScreen {
             mc.fontRendererObj.drawStringWithShadow("Core not enabled", this.width / 2f - mc.fontRendererObj.
                     getStringWidth("Core not enabled") / 2f, this.height / 2f, new Color(255, 0, 0).getRGB());
         } else {
-            Gui.drawRect(gameBegin - 3, 0, gameBegin - 2, this.height, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(topicBegin - 3, 0, topicBegin - 2, this.height, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(capacityBegin - 3, 0, capacityBegin - 2, this.height, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(joinButtonBegin - 3, 0, joinButtonBegin - 2, this.height, new Color(0, 0, 0, 75).getRGB());
-
             GL11.glPushMatrix();
             GL11.glTranslatef(0, scroll, 0);
-            Gui.drawRect(0, 0, this.width, 18, new Color(0, 0, 0, 75).getRGB());
-            TextUtils.drawTextMaxLengthCentered("Owner name", 32, 3, new Color(255, 255, 255).getRGB(), false, gameBegin);
-            TextUtils.drawTextMaxLengthCentered("Game", gameBegin, 3, new Color(255, 255, 255).getRGB(), false, topicBegin);
-            TextUtils.drawTextMaxLengthCentered("Topic", topicBegin, 3, new Color(255, 255, 255).getRGB(), false, capacityBegin);
-            TextUtils.drawTextMaxLengthCentered("Capacity", capacityBegin, 3, new Color(255, 255, 255).getRGB(), false, joinButtonBegin);
-            TextUtils.drawTextMaxLengthCentered("Join", joinButtonBegin, 3, new Color(255, 255, 255).getRGB(), false, this.width);
+
+            Gui.drawRect(gameBegin - 3, scroll + 44, gameBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(topicBegin - 3, scroll + 44, topicBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(capacityBegin - 3, scroll + 44, capacityBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(joinButtonBegin - 3, scroll + 44, joinButtonBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+
+            Gui.drawRect(0, 0, this.width, 44, new Color(0, 0, 0, 75).getRGB());
+            TextUtils.drawTextMaxLengthCentered("Owner name", 32, 29, new Color(255, 255, 255).getRGB(), false, gameBegin);
+            TextUtils.drawTextMaxLengthCentered("Game", gameBegin, 29, new Color(255, 255, 255).getRGB(), false, topicBegin);
+            TextUtils.drawTextMaxLengthCentered("Topic", topicBegin, 29, new Color(255, 255, 255).getRGB(), false, capacityBegin);
+            TextUtils.drawTextMaxLengthCentered("Capacity", capacityBegin, 29, new Color(255, 255, 255).getRGB(), false, joinButtonBegin);
+            TextUtils.drawTextMaxLengthCentered("Join", joinButtonBegin, 29, new Color(255, 255, 255).getRGB(), false, this.width);
+
+            if (!typing && enteredText.equals("")) {
+                mc.fontRendererObj.drawStringWithShadow("Enter Voice Chat Id...", 15, 7, new Color(255, 255, 255).getRGB());
+            } else {
+                if (selected) {
+                    Gui.drawRect(14, 6, Math.min(mc.fontRendererObj.getStringWidth(enteredText) + 16, this.width - 65), 16, new Color(0, 75, 200).getRGB());
+                }
+                TextUtils.drawTextMaxLength(enteredText, 15, 7, new Color(255, 255, 255).getRGB(), true, this.width - 67);
+                if (typing) {
+                    Gui.drawRect(Math.min(mc.fontRendererObj.getStringWidth(enteredText) + 16, this.width - 65), 6,
+                            Math.min(mc.fontRendererObj.getStringWidth(enteredText) + 17, this.width - 66), 16, new Color(255, 255, 255).getRGB());
+                }
+            }
+            Gui.drawRect(this.width - 62,
+                    4,
+                    this.width - 58 + mc.fontRendererObj.getStringWidth("Join"),
+                    15, new Color(255, 255, 255).getRGB());
+            Gui.drawRect(this.width - 61,
+                    5,
+                    this.width - 59 + mc.fontRendererObj.getStringWidth("Join"),
+                    14, new Color(0, 0, 0).getRGB());
+            TextUtils.drawTextCentered("Join", this.width - 60 + mc.fontRendererObj.getStringWidth("Join") / 2f, 6, 0xFFFFFF, true);
+            Gui.drawRect(10, 20, this.width - 65, 21, new Color(0, 0, 0).getRGB());
 
             mc.getTextureManager().bindTexture(plus);
             GlStateManager.color(1.0F, 1.0F, 1.0F);
@@ -137,7 +168,7 @@ public class VoiceBrowser extends GuiScreen {
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             Gui.drawModalRectWithCustomSizedTexture(this.width - 33, 1, 0, 0, 16, 16, 16, 16);
 
-            int amount = 2;
+            int amount = 3;
             for (Lobby lobby : matches) {
                 if (LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
                     mc.getTextureManager().bindTexture(LobbyManager.pictures.get(lobby.getOwnerId()));
@@ -189,7 +220,9 @@ public class VoiceBrowser extends GuiScreen {
             ModCore.getInstance().getGuiHandler().open(new VoiceFilters());
         } else if (mouseX >= joinButtonBegin + (this.width - joinButtonBegin) / 2 - mc.fontRendererObj.getStringWidth("Join") / 2 - 2 &&
                 mouseX <= joinButtonBegin + (this.width - joinButtonBegin) / 2 + mc.fontRendererObj.getStringWidth("Join") / 2 + 2) {
-            int amount = 2;
+            typing = false;
+            Keyboard.enableRepeatEvents(false);
+            int amount = 3;
             for (Lobby lobby : matches) {
                 if (mouseY >= 26 * amount - 26 + scroll && mouseY <= 26 * amount - 12 + scroll) {
                     LobbyManager.join(lobby);
@@ -198,6 +231,66 @@ public class VoiceBrowser extends GuiScreen {
                 }
                 amount++;
             }
+        } else if (mouseY <= 21 && mouseX <= this.width - 65) {
+            typing = true;
+            Keyboard.enableRepeatEvents(true);
+        } else {
+            typing = false;
+            Keyboard.enableRepeatEvents(false);
+        }
+        if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseX >= 4 && mouseY <= 15) {
+            LobbyManager.joinSecret(enteredText);
+        }
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (typing) {
+            if (keyCode == Keyboard.KEY_ESCAPE) {
+                typing = false;
+                Keyboard.enableRepeatEvents(false);
+            } else if (keyCode == Keyboard.KEY_BACK && enteredText.length() > 0) {
+                if (selected) {
+                    enteredText = "";
+                    selected = false;
+                } else {
+                    enteredText = enteredText.substring(0, enteredText.length() - 1);
+                }
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_V)) {
+                String clipboard = Utils.getClipBoard();
+                if (clipboard != null) {
+                    if (selected) {
+                        enteredText = clipboard;
+                        selected = false;
+                    } else {
+                        enteredText += clipboard;
+                    }
+                }
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_C)) {
+                if (selected = true) {
+                    Utils.copyToClipBoard(enteredText);
+                    selected = false;
+                }
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_A)) {
+                selected = true;
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_X)) {
+                if (selected = true) {
+                    Utils.copyToClipBoard(enteredText);
+                    enteredText = "";
+                    selected = false;
+                }
+            } else if (keyCode == Keyboard.KEY_RETURN) {
+                LobbyManager.joinSecret(enteredText);
+            } else if (ChatAllowedCharacters.isAllowedCharacter(typedChar)) {
+                if (selected) {
+                    enteredText = String.valueOf(typedChar);
+                    selected = false;
+                } else {
+                    enteredText += typedChar;
+                }
+            }
+        } else {
+            super.keyTyped(typedChar, keyCode);
         }
     }
 }

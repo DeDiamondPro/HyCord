@@ -11,9 +11,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -212,5 +211,16 @@ public class Utils {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         Transferable selection = new StringSelection(text);
         clipboard.setContents(selection, null);
+    }
+
+    public static String getClipBoard(){
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Clipboard clipboard = toolkit.getSystemClipboard();
+        try {
+            return (String) clipboard.getData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

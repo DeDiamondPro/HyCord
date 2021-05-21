@@ -34,7 +34,7 @@ import java.util.Scanner;
 @Mod(modid = hycord.MODID, version = hycord.VERSION)
 public class hycord {
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre2.4";
+    public static final String VERSION = "1.2.0-pre3";
 
     private final Settings config = new Settings();
 
@@ -141,9 +141,9 @@ public class hycord {
     });
     CommandHandler nickList = new CommandHandler("nicklist", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames: \n");
+            ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames:");
             for (String element : NickNameController.nicknames.keySet()) {
-                message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element) + "\n"));
+                message.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element)));
             }
             Minecraft.getMinecraft().thePlayer.addChatMessage(message);
         }
@@ -154,7 +154,7 @@ public class hycord {
                     EnumChatFormatting.YELLOW + "/setnick <player> <nickname>: set the nickname of a player\n" +
                     EnumChatFormatting.YELLOW + "/clearnick <player>: clear the nickname of a player\n" +
                     EnumChatFormatting.YELLOW + "/nicklist: lists all nicknames\n" +
-                    EnumChatFormatting.YELLOW + "/nickhelp: shows this page\n"));
+                    EnumChatFormatting.YELLOW + "/nickhelp: shows this page"));
         }
     });
     CommandHandler getDiscord = new CommandHandler("getdiscord", new CommandHandler.ProcessCommandRunnable() {
@@ -191,11 +191,9 @@ public class hycord {
     });
     CommandHandler voice = new CommandHandler("voice", new CommandHandler.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if (args.length > 0) {
-                ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
-            }else if(LobbyManager.lobbyId != null) {
+            if (LobbyManager.lobbyId != null) {
                 ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
-            }else{
+            } else {
                 ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
             }
         }
@@ -206,7 +204,7 @@ public class hycord {
         config.preload();
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
 
-        if(!SystemUtils.IS_OS_MAC) {
+        if (!SystemUtils.IS_OS_MAC) {
             ClientCommandHandler.instance.registerCommand(partySize);
             ClientCommandHandler.instance.registerCommand(replyYesCommand);
             ClientCommandHandler.instance.registerCommand(replyNoCommand);
@@ -223,7 +221,7 @@ public class hycord {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else{
+        } else {
             MinecraftForge.EVENT_BUS.register(new MacWarning());
         }
         MinecraftForge.EVENT_BUS.register(new AutoFl());
@@ -256,9 +254,9 @@ public class hycord {
                     String data = myReader.nextLine();
                     System.out.println(data);
                     String[] split = data.split(",");
-                    if(split.length == 2) {
+                    if (split.length == 2) {
                         NickNameController.nicknames.put(split[0], split[1]);
-                    }else{
+                    } else {
                         System.out.println("Error loading a nick");
                     }
                 }
@@ -270,12 +268,12 @@ public class hycord {
     }
 }
 
-class MacWarning{
+class MacWarning {
     boolean sent = false;
 
     @SubscribeEvent
-    void onTick(TickEvent.ClientTickEvent event){
-        if(!sent){
+    void onTick(TickEvent.ClientTickEvent event) {
+        if (!sent) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
                     "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
                     "currently don't work on MacOs,\nthese features have been automatically disabled."));

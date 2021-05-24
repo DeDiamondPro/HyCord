@@ -88,12 +88,36 @@ public class Settings extends Vigilant {
     public static boolean enableFriendNotifs = false;
 
     @Property(
+            type = PropertyType.SWITCH, name = "Show user list",
+            description = "Show the list of users in your voice call on your screen.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showUserList = true;
+
+    @Property(
             type = PropertyType.SWITCH, name = "Show people that aren't talking",
             description = "Show people that aren't talking when in a voice chat.",
             category = "Discord",
             subcategory = "Voice"
     )
     public static boolean showNonTalking = true;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "Show talking indicator",
+            description = "Show an indicator on your screen when you're talking.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showIndicator = true;
+
+    @Property(
+            type = PropertyType.SWITCH, name = "Show talking ring",
+            description = "Show a ring around someone when they're is talking",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showIndicatorOther = true;
 
     @Property(
             type = PropertyType.SWITCH, name = "Auto Friend List",

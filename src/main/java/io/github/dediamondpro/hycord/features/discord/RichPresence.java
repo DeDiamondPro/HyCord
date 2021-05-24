@@ -6,8 +6,6 @@ import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.DiscordEventAdapter;
 import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.activity.Activity;
-import de.jcm.discordgamesdk.lobby.LobbyTransaction;
-import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -58,8 +56,8 @@ public class RichPresence {
         System.out.println("Setting sdk");
         if (SystemUtils.IS_OS_WINDOWS) {
             fileName = "discord_game_sdk.dll";
-        } else if (SystemUtils.IS_OS_MAC) {
-            fileName = "discord_game_sdk.dylib";
+        /*} else if (SystemUtils.IS_OS_MAC) {
+            fileName = "discord_game_sdk.dylib";*/
         } else {
             fileName = "discord_game_sdk.so";
         }
@@ -188,6 +186,10 @@ public class RichPresence {
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         if (enabled) {
+            if(LobbyManager.lobbyId != null){
+                discordRPC.lobbyManager().disconnectVoice(LobbyManager.lobbyId, System.out::println);
+                discordRPC.lobbyManager().disconnectLobby(LobbyManager.lobbyId, System.out::println);
+            }
             try {
                 discordRPC.close();
             }catch (GameSDKException e){

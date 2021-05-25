@@ -21,7 +21,6 @@ public class TextUtils {
 
     public static void drawTextMaxLengthCentered(String text, int x, int y, int color, boolean shadow, int max) {
         int center = x + (max - x) / 2;
-        //System.out.println(center);
         int length = mc.fontRendererObj.getStringWidth(text);
         if (length <= max - x) {
             mc.fontRendererObj.drawString(text, center - length / 2f, y, color, shadow);

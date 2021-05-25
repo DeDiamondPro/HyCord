@@ -1,6 +1,6 @@
 package io.github.dediamondpro.hycord.tweaker;
 
-import io.github.dediamondpro.hycord.ModCoreInstaller;
+import club.sk1er.modcore.ModCoreInstaller;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 

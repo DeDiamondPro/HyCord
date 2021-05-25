@@ -36,7 +36,7 @@ public class CommandHandler extends CommandBase {
         return "/" + Commandname;
     }
 
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public void processCommand(ICommandSender sender, String[] args) {
         runnable.processCommand(sender, args);
     }
 }

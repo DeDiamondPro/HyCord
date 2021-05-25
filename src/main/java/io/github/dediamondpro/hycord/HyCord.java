@@ -1,10 +1,11 @@
 package io.github.dediamondpro.hycord;
 
+import club.sk1er.modcore.ModCoreInstaller;
 import club.sk1er.mods.core.ModCore;
+import club.sk1er.mods.core.util.WebUtil;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
 import io.github.dediamondpro.hycord.core.CommandHandler;
-import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
@@ -31,8 +32,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-@Mod(modid = hycord.MODID, version = hycord.VERSION)
-public class hycord {
+@Mod(modid = HyCord.MODID, version = HyCord.VERSION, name = HyCord.MODNAME)
+public class HyCord {
+    public static final String MODNAME = "HyCord";
     public static final String MODID = "hycord";
     public static final String VERSION = "1.2.0-pre3.1";
 
@@ -43,7 +45,7 @@ public class hycord {
             if (args.length > 0 && args[0].equalsIgnoreCase("setkey")) {
                 if (args.length > 1) {
                     Thread checkKey = new Thread(() -> {
-                        if (NetworkUtils.GetRequest("https://api.hypixel.net/key?key=" + args[1]) == null) {
+                        if (WebUtil.fetchJSON("https://api.hypixel.net/key?key=" + args[1]) == null) {
                             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Invalid API key."));
                         } else {
                             Settings.apiKey = args[1];
@@ -276,7 +278,7 @@ class MacWarning {
         if (!sent) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
                     "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
-                    "currently don't work on MacOs,\nthese features have been automatically disabled."));
+                    "currently don't work on MacOS,\nthese features have been automatically disabled."));
             sent = true;
         }
     }

@@ -31,17 +31,15 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
 }
 
 repositories {
-    flatDir dirs: 'libs'
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    provided files("modcore")
+    provided files("libs/modcore.jar")
     shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
     implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.3'
 }

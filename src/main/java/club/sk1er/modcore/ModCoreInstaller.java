@@ -1,4 +1,4 @@
-package io.github.dediamondpro.hycord;
+package club.sk1er.modcore;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

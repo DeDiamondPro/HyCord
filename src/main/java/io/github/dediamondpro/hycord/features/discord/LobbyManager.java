@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
+import static io.github.dediamondpro.hycord.options.SettingsHandler.locations;
 
 public class LobbyManager {
     ResourceLocation micTexture = new ResourceLocation("hycord", "microphone.png");
@@ -158,55 +159,74 @@ public class LobbyManager {
                 pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
                 bufferedPictures.remove(id);
             }
-
             if (lobbyId == null) return;
             if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
                 return;
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-            if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
-                Minecraft.getMinecraft().getTextureManager().bindTexture(micTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
-            } else if (discordRPC.voiceManager().isSelfDeaf()) {
-                Minecraft.getMinecraft().getTextureManager().bindTexture(deafenTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
-            } else if (discordRPC.voiceManager().isSelfMute()) {
-                Minecraft.getMinecraft().getTextureManager().bindTexture(muteTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(sr.getScaledWidth() - 28, sr.getScaledHeight() - 28, 0, 0, 20, 20, 20, 20);
+            if (Settings.showIndicator) {
+                if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(micTexture);
+                    GlStateManager.color(1.0F, 1.0F, 1.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                            locations.get("mic").getYScaled(sr.getScaledHeight()),
+                            0, 0, 20, 20, 20, 20);
+                } else if (discordRPC.voiceManager().isSelfDeaf()) {
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(deafenTexture);
+                    GlStateManager.color(1.0F, 1.0F, 1.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                            locations.get("mic").getYScaled(sr.getScaledHeight()),
+                            0, 0, 20, 20, 20, 20);
+                } else if (discordRPC.voiceManager().isSelfMute()) {
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(muteTexture);
+                    GlStateManager.color(1.0F, 1.0F, 1.0F);
+                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                            locations.get("mic").getYScaled(sr.getScaledHeight()),
+                            0, 0, 20, 20, 20, 20);
+                }
             }
-            int amount = 1;
-            for (Long id : talkingData.keySet()) {
-                if (users.containsKey(id)) {
-                    if (talkingData.get(id)) {
-                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
-                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
-                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(255, 0, 0).getRGB());
-                        } else {
-                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xFFFFFF);
-                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(0, 255, 0).getRGB());
+            if (Settings.showUserList) {
+                int amount = 0;
+                int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
+                if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * (talkingData.size() * 5) > sr.getScaledHeight()) {
+                    originalYCoord = sr.getScaledHeight() - 19 * (talkingData.size() * 5);
+                }
+                for (Long id : talkingData.keySet()) {
+                    if (users.containsKey(id)) {
+                        int yCoord = originalYCoord + 19 * amount;
+                        int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
+                        if (talkingData.get(id)) {
+                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                                if (Settings.showIndicatorOther)
+                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
+                            } else {
+                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xFFFFFF);
+                                if (Settings.showIndicatorOther)
+                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(0, 255, 0).getRGB());
+                            }
+                            if (pictures.containsKey(id)) {
+                                Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                                Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
+                            }
+                            amount++;
+                        } else if (Settings.showNonTalking) {
+                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                                if (Settings.showIndicatorOther)
+                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
+                            } else {
+                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xaaaaaa);
+                                if (Settings.showIndicatorOther)
+                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(170, 170, 170).getRGB());
+                            }
+                            if (pictures.containsKey(id)) {
+                                Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                                GlStateManager.color(0.6F, 0.6F, 0.6F);
+                                Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
+                            }
+                            amount++;
                         }
-                        if (pictures.containsKey(id)) {
-                            Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
-                            GlStateManager.color(1.0F, 1.0F, 1.0F);
-                            Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
-                        }
-                        amount++;
-                    } else if (Settings.showNonTalking) {
-                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
-                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, new Color(255, 0, 0).getRGB());
-                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(255, 0, 0).getRGB());
-                        } else {
-                            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), 30, 18 * amount - 8, 0xaaaaaa);
-                            Gui.drawRect(6, 18 * amount - 13, 24, 18 * amount + 5, new Color(170, 170, 170).getRGB());
-                        }
-                        if (pictures.containsKey(id)) {
-                            Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
-                            GlStateManager.color(0.6F, 0.6F, 0.6F);
-                            Gui.drawModalRectWithCustomSizedTexture(7, 18 * amount - 12, 0, 0, 16, 16, 16, 16);
-                        }
-                        amount++;
                     }
                 }
             }

@@ -14,6 +14,8 @@ import io.github.dediamondpro.hycord.features.discord.*;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
+import io.github.dediamondpro.hycord.options.SettingsHandler;
+import io.github.dediamondpro.hycord.options.gui.MoveGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -36,7 +38,7 @@ import java.util.Scanner;
 public class HyCord {
     public static final String MODNAME = "HyCord";
     public static final String MODID = "hycord";
-    public static final String VERSION = "1.2.0-pre3.1";
+    public static final String VERSION = "1.2.0-pre4.1";
 
     private final Settings config = new Settings();
 
@@ -64,6 +66,8 @@ public class HyCord {
                 RichPresence.discordRPC.overlayManager().openGuildInvite("ZBNS8jsAMd", System.out::println);
             } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
                 RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
+                ModCore.getInstance().getGuiHandler().open(new MoveGui());
             } else {
                 ModCore.getInstance().getGuiHandler().open(config.gui());
             }
@@ -235,6 +239,7 @@ public class HyCord {
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
+        SettingsHandler.init();
 
         if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate()) {
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());

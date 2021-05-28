@@ -1,4 +1,5 @@
 # HyCord
+
 <p align="center">
 <a href="https://github.com/DeDiamondPro/HyCord/releases" target="_blank">
 <img alt="release" src="https://img.shields.io/github/v/release/DeDiamondPro/HyCord?color=00FFFF&style=for-the-badge" />
@@ -17,16 +18,14 @@
   </a>
  </p>
  HyCord is a mod to improve integration with Hypixel and Discord.
- 
+
 # Features
-- Very nice Discord Rich Presence
 
-![Rich Presence demo](https://user-images.githubusercontent.com/67508414/115116493-086be200-9f9a-11eb-9cb8-2d77c0da96f3.png)
+- Very nice Discord Rich Presence\
+  ![Rich Presence demo](https://user-images.githubusercontent.com/67508414/115116493-086be200-9f9a-11eb-9cb8-2d77c0da96f3.png)
 
-- Party invites in discord
-
-![Join invites](https://user-images.githubusercontent.com/67508414/115116511-20dbfc80-9f9a-11eb-8e49-7cde1deec12b.png)
-
+- Party invites in discord\
+  ![Join invites](https://user-images.githubusercontent.com/67508414/115116511-20dbfc80-9f9a-11eb-8e49-7cde1deec12b.png)
 - Ask to join button on profile
 - Automatically do /friend list when you join Hypixel
 

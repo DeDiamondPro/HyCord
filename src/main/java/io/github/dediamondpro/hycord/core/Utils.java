@@ -112,18 +112,18 @@ public class Utils {
      */
     public static List<String> getSidebarLines() {
         List<String> lines = new ArrayList<>();
-        if (Minecraft.getMinecraft().theWorld == null) return lines;
+        if (Minecraft.getMinecraft().theWorld == null)
+            return lines;
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
-        if (scoreboard == null) return lines;
+        if (scoreboard == null)
+            return lines;
 
         ScoreObjective objective = scoreboard.getObjectiveInDisplaySlot(1);
-        if (objective == null) return lines;
+        if (objective == null)
+            return lines;
 
         Collection<Score> scores = scoreboard.getSortedScores(objective);
-        List<Score> list = scores.stream()
-                .filter(input -> input != null && input.getPlayerName() != null && !input.getPlayerName()
-                        .startsWith("#"))
-                .collect(Collectors.toList());
+        List<Score> list = scores.stream().filter(input -> input != null && input.getPlayerName() != null && !input.getPlayerName().startsWith("#")).collect(Collectors.toList());
 
         if (list.size() > 15) {
             scores = Lists.newArrayList(Iterables.skip(list, scores.size() - 15));
@@ -192,9 +192,9 @@ public class Utils {
 
     static Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
 
-    public static String getName(String message){
+    public static String getName(String message) {
         Matcher m = getNamePattern.matcher(message);
-        if(m.matches()) {
+        if (m.matches()) {
             return m.group("username");
         }
         return null;

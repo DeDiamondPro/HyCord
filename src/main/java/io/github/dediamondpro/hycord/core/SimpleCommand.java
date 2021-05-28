@@ -11,17 +11,14 @@ import net.minecraft.command.ICommandSender;
  *
  * @author MoulBerry
  */
-public class CommandHandler extends CommandBase {
-    private String Commandname;
-    private ProcessCommandRunnable runnable;
+public class SimpleCommand extends CommandBase {
 
-    public CommandHandler(String Commandname, ProcessCommandRunnable runnable) {
-        this.Commandname = Commandname;
+    private final String commandName;
+    private final ProcessCommandRunnable runnable;
+
+    public SimpleCommand(String commandName, ProcessCommandRunnable runnable) {
+        this.commandName = commandName;
         this.runnable = runnable;
-    }
-
-    public abstract static class ProcessCommandRunnable {
-        public abstract void processCommand(ICommandSender sender, String[] args);
     }
 
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
@@ -29,14 +26,19 @@ public class CommandHandler extends CommandBase {
     }
 
     public String getCommandName() {
-        return Commandname;
+        return commandName;
     }
 
     public String getCommandUsage(ICommandSender sender) {
-        return "/" + Commandname;
+        return "/" + commandName;
     }
 
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         runnable.processCommand(sender, args);
     }
+
+    public abstract static class ProcessCommandRunnable {
+        public abstract void processCommand(ICommandSender sender, String[] args);
+    }
+
 }

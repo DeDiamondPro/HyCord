@@ -24,7 +24,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class RichPresence {
-    int ticks;
+
+    int tickCounter;
     String invited = null;
     Instant time = Instant.now();
     int partyMembers = 1;
@@ -38,24 +39,21 @@ public class RichPresence {
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
-        ticks++;
-        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
+        tickCounter++;
+        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
-            if (sCleaned.contains("Mode: ")) {
+            if (sCleaned.contains("Mode: "))
                 secondLine = sCleaned.replaceAll("Mode: ", "");
-            } else if (sCleaned.contains(" ⏣ ")) {
+            else if (sCleaned.contains(" ⏣ "))
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
-            }
-            if (sCleaned.contains("Map: ")) {
+            if (sCleaned.contains("Map: "))
                 imageText = sCleaned.replaceAll("Map: ", "");
-            }
         }
-        if (secondLine.equals("Your Island")) {
+        if (secondLine.equals("Your Island"))
             secondLine = "Private Island";
-        }
         Scoreboard title = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = title.getObjectiveInDisplaySlot(1);
         if (sidebarObjective != null) {
@@ -69,21 +67,17 @@ public class RichPresence {
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
         imageText = "";
-        if (partyMembers > 1) {
+        if (partyMembers > 1)
             secondLine = "In a party";
-        } else {
+        else
             secondLine = "On Hypixel";
-        }
         gameMode = "";
     }
 
     @SubscribeEvent
     void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         if (MinecraftUtils.isHypixel()) {
-            DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
-                    .setJoinGameEventHandler(JoinHandler::Handler)
-                    .setJoinRequestEventHandler(JoinRequestHandler::Handler)
-                    .build();
+            DiscordEventHandlers handlers = new DiscordEventHandlers.Builder().setJoinGameEventHandler(JoinHandler::Handler).setJoinRequestEventHandler(JoinRequestHandler::handle).build();
             DiscordRPC.discordInitialize("819625966627192864", handlers, true);
             FMLLog.getLogger().log(Level.INFO, "started RPC");
             enabled = true;
@@ -144,7 +138,7 @@ public class RichPresence {
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if (invited != null && msg.contains(invited)) {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID() + " HyCordPId&" + PartyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
             secondLine = "In a party";
@@ -175,11 +169,9 @@ public class RichPresence {
             secondLine = "In a party";
         } else if (msg.startsWith("§eYou'll be partying with:")) {
             partyMembers = 3;
-            for (int i = 0; i < msg.length(); i++) {
-                if (msg.charAt(i) == ',') {
+            for (int i = 0; i < msg.length(); i++)
+                if (msg.charAt(i) == ',')
                     partyMembers++;
-                }
-            }
             secondLine = "In a party";
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
@@ -201,7 +193,7 @@ public class RichPresence {
             String[] message = msg.split("[9/]");
             partyMembers = Integer.parseInt(message[1]);
             secondLine = "In a party";
-        }else if (msg.equals("§cYou are not currently in a party.§r")){
+        } else if (msg.equals("§cYou are not currently in a party.§r")) {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
@@ -214,9 +206,8 @@ public class RichPresence {
         presence.setStartTimestamps(time.toEpochMilli());
         presence.setParty(PartyId, partyMembers, Settings.maxPartySize);
         presence.setBigImage(Utils.getDiscordPic(gameMode), imageText);
-        if (canInvite && Settings.enableInvites) {
+        if (canInvite && Settings.enableInvites)
             presence.setSecrets(joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName(), "");
-        }
         DiscordRPC.discordUpdatePresence(presence.build());
     }
 }

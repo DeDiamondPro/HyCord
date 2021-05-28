@@ -1,8 +1,22 @@
-plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'net.minecraftforge.gradle.forge' version 'b13624b'
+buildscript {
+    repositories {
+        maven {
+            name = "Forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "JitPack"
+            url = "https://jitpack.io"
+        }
+    }
+    dependencies {
+        classpath "com.github.asbyth:ForgeGradle:86b2392"
+        classpath 'com.github.johnrengelman:shadow:4.0.4'
+    }
 }
+
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 version = project.mod_ver
 group = project.mod_group
@@ -20,30 +34,14 @@ minecraft {
 }
 
 repositories {
-    maven {
-        name = 'JitPack'
-        url = 'https://jitpack.io' }
-}
-
-configurations {
-    include
-    implementation.extendsFrom(include)
+    flatDir dirs: 'libs'
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     provided files('libs/modcore.jar')
-
-    include 'com.github.jncrmx:discord-game-sdk4j:v0.5.3'
-}
-
-jar {
-    manifest {
-        attributes (
-                'FMLCorePlugin': 'io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin',
-                'ModSide': 'CLIENT',
-                'FMLCorePluginContainsFMLMod': 'Yes, yes it does'
-        )
-    }
+    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
 }
 
 processResources {
@@ -52,6 +50,7 @@ processResources {
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
+
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
@@ -60,22 +59,20 @@ processResources {
     }
 }
 
-// Forge does not import resources properly.
-task moveResources {
-    doLast {
-        ant.move file: "${buildDir}/resources/main",
-                todir: "${buildDir}/classes/java"
-    }
-}
-
-tasks.moveResources.dependsOn processResources
-tasks.classes.dependsOn moveResources
-
 shadowJar {
-    configurations = [project.configurations.include]
-    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    project.configurations.shadow.setTransitive(true);
+    configurations = [project.configurations.shadow]
+    manifest.attributes(
+            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+            "ModSide": "CLIENT",
+            "FMLCorePluginContainsFMLMod": true
+    )
 
-    archiveClassifier.set('')
+    classifier '' // Replace the default JAR
 }
 
-jar.dependsOn shadowJar
+reobf {
+    shadowJar {} // Reobfuscate the shadowed JAR
+}
+
+jar.finalizedBy('reobfJar')

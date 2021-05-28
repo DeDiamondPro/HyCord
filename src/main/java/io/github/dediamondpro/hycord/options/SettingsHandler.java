@@ -1,6 +1,6 @@
 package io.github.dediamondpro.hycord.options;
 
-import io.github.dediamondpro.hycord.core.Locations;
+import io.github.dediamondpro.hycord.core.Location;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,11 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SettingsHandler {
 
-    public static final ConcurrentHashMap<String, Locations> locations = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, Location> locations = new ConcurrentHashMap<>();
 
     public static void init() {
-        locations.put("mic", new Locations(1892, 1052, 20, 20, 1920, 1080));
-        locations.put("voice users", new Locations(6,6,75,50,1920,1080));
+        locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
+        locations.put("voice users", new Location(6,6,75,50,1920,1080));
 
         File configFile = new File("./config/HyCordConfig.txt");
         try {
@@ -33,7 +33,7 @@ public class SettingsHandler {
                     System.out.println(data);
                     String[] split = data.split(":");
                     if (split.length == 2) {
-                        locations.put(split[0], new Locations(split[1]));
+                        locations.put(split[0], new Location(split[1]));
                     } else {
                         System.out.println("Error loading a nick");
                     }

@@ -2,10 +2,7 @@ package io.github.dediamondpro.hycord.features.discord;
 
 import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
-import de.jcm.discordgamesdk.lobby.Lobby;
-import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
-import de.jcm.discordgamesdk.lobby.LobbyTransaction;
-import de.jcm.discordgamesdk.lobby.LobbyType;
+import de.jcm.discordgamesdk.lobby.*;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
@@ -137,14 +134,14 @@ public class LobbyManager {
         if (!Utils.isHypixel()) return;
         if (Keyboard.isKeyDown(Keyboard.KEY_M) && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
             if (!pressed) {
+                setOwnData(!discordRPC.voiceManager().isSelfMute());
                 discordRPC.voiceManager().setSelfMute(!discordRPC.voiceManager().isSelfMute());
-                System.out.println("muting");
                 pressed = true;
             }
         } else if (Keyboard.isKeyDown(Keyboard.KEY_D) && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
             if (!pressed) {
+                setOwnData(!discordRPC.voiceManager().isSelfDeaf() || discordRPC.voiceManager().isSelfMute());
                 discordRPC.voiceManager().setSelfDeaf(!discordRPC.voiceManager().isSelfDeaf());
-                System.out.println("deafening");
                 pressed = true;
             }
         } else {
@@ -188,15 +185,16 @@ public class LobbyManager {
             if (Settings.showUserList) {
                 int amount = 0;
                 int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
-                if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * (talkingData.size() * 5) > sr.getScaledHeight()) {
-                    originalYCoord = sr.getScaledHeight() - 19 * (talkingData.size() * 5);
+                if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * talkingData.size() > sr.getScaledHeight()) {
+                    originalYCoord = sr.getScaledHeight() - 19 * talkingData.size();
                 }
                 for (Long id : talkingData.keySet()) {
                     if (users.containsKey(id)) {
                         int yCoord = originalYCoord + 19 * amount;
                         int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
                         if (talkingData.get(id)) {
-                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
+                                    || discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).containsValue("mute") && Boolean.parseBoolean(discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).get("mute"))) {
                                 Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
@@ -212,7 +210,8 @@ public class LobbyManager {
                             }
                             amount++;
                         } else if (Settings.showNonTalking) {
-                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))) {
+                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
+                                    || discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).containsValue("mute") && Boolean.parseBoolean(discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).get("mute"))) {
                                 Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
@@ -272,5 +271,11 @@ public class LobbyManager {
                 ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
             }
         });
+    }
+
+    public static void setOwnData(boolean muted) {
+        LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
+        memberTransaction.setMetadata("mute", String.valueOf(muted));
+        discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction);
     }
 }

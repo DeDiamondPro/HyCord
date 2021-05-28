@@ -30,7 +30,7 @@ public class NickNameController {
                 event.message = hoverAdder(name, GetDiscord.discordNameCache.get(name), event.message);
             } else {
                 Thread fetchDiscord = new Thread(() -> {
-                    GetDiscord.discord(name);
+                    GetDiscord.get(name);
                 });
                 fetchDiscord.start();
             }

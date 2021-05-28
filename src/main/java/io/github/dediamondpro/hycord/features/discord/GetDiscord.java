@@ -10,7 +10,7 @@ public class GetDiscord {
 
     public static HashMap<String, String> discordNameCache = new HashMap<>();
 
-    public static String discord(String name) {
+    public static String get(String name) {
         if (name != null) {
             String uuid = NetworkUtils.GetUuid(name);
             if (uuid == null)

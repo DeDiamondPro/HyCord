@@ -152,7 +152,7 @@ public class HyCord {
                     if (GetDiscord.discordNameCache.containsKey(args[0]))
                         discord = GetDiscord.discordNameCache.get(args[0]);
                     else
-                        discord = GetDiscord.discord(args[0]);
+                        discord = GetDiscord.get(args[0]);
                     if (discord != null)
                         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + args[0] + "'s Discord is: " + discord));
                     else

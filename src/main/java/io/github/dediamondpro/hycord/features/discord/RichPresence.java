@@ -88,8 +88,8 @@ public class RichPresence {
             String sCleaned = Utils.cleanSB(s);
             if (sCleaned.contains("Mode: "))
                 secondLine = sCleaned.replaceAll("Mode: ", "");
-            else if (sCleaned.contains(" \u23E33 "))
-                secondLine = sCleaned.replaceAll(" \u23E3 ", "");
+            else if (sCleaned.contains(" ⏣ "))
+                secondLine = sCleaned.replaceAll(" ⏣ ", "");
             if (sCleaned.contains("Map: "))
                 imageText = sCleaned.replaceAll("Map: ", "");
         }

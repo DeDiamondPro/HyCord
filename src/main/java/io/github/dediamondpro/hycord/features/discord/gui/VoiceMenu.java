@@ -134,6 +134,7 @@ public class VoiceMenu extends GuiScreen {
                             discordRPC.voiceManager().setLocalMute(user.getUserId(),
                                     !discordRPC.voiceManager().isLocalMute(user.getUserId()));
                         } else {
+                            LobbyManager.setOwnData(!discordRPC.voiceManager().isSelfMute());
                             discordRPC.voiceManager().setSelfMute(
                                     !discordRPC.voiceManager().isSelfMute());
                         }
@@ -144,6 +145,7 @@ public class VoiceMenu extends GuiScreen {
             } else if (mouseX >= 124 && mouseX <= 134) {
                 for (DiscordUser user : LobbyManager.users.values()) {
                     if (mouseY >= 36 * amount - 12 + scroll && mouseY <= 36 * amount - 2 + scroll && user.getUserId() == LobbyManager.currentUser) {
+                        LobbyManager.setOwnData(!discordRPC.voiceManager().isSelfDeaf() || discordRPC.voiceManager().isSelfMute());
                         discordRPC.voiceManager().setSelfDeaf(
                                 !discordRPC.voiceManager().isSelfDeaf());
                         break;

@@ -1,6 +1,6 @@
 package io.github.dediamondpro.hycord.core;
 
-public class Locations {
+public class Location {
     public int x;
     public int y;
     public int height;
@@ -10,7 +10,7 @@ public class Locations {
     private boolean alignRight = false;
     private boolean alignBottem = false;
 
-    public Locations(int x, int y, int width, int height, int displayWidth, int displayHeight) {
+    public Location(int x, int y, int width, int height, int displayWidth, int displayHeight) {
         if (x > displayWidth / 2) {
             this.x = displayWidth - (x - this.width);
             alignRight = true;
@@ -69,7 +69,7 @@ public class Locations {
         return this.x + "," + this.y + "," + this.width + "," + this.height + "," + displayWidth + "," + displayHeight + "," + alignRight + "," + alignBottem;
     }
 
-    public Locations(String str) {
+    public Location(String str) {
         String[] split = str.split(",");
         this.x = Integer.parseInt(split[0]);
         this.y = Integer.parseInt(split[1]);

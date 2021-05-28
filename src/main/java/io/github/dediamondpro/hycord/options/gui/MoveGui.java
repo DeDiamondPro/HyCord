@@ -1,6 +1,6 @@
 package io.github.dediamondpro.hycord.options.gui;
 
-import io.github.dediamondpro.hycord.core.Locations;
+import io.github.dediamondpro.hycord.core.Location;
 import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.options.SettingsHandler;
 import net.minecraft.client.gui.Gui;
@@ -28,7 +28,7 @@ public class MoveGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         Gui.drawRect(0, 0, this.width, this.height, new Color(0, 0, 0, 125).getRGB());
         for (String element : locations.keySet()) {
-            Locations location = locations.get(element);
+            Location location = locations.get(element);
             if (editObject != null && editObject.equals(element)) {
                 Gui.drawRect(location.getXScaled(this.width), location.getYScaled(this.height), location.getXScaled(this.width) + location.width,
                         location.getYScaled(this.height) + location.height, new Color(255, 255, 255, 170).getRGB());
@@ -45,7 +45,7 @@ public class MoveGui extends GuiScreen {
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         for (String element : locations.keySet()) {
-            Locations location = locations.get(element);
+            Location location = locations.get(element);
             if (mouseX >= location.getXScaled(this.width) && mouseX <= location.getXScaled(this.width) + location.width &&
                     mouseY >= location.getYScaled(this.height) && mouseY <= location.getYScaled(this.height) + location.height) {
                 editing = true;

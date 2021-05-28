@@ -10,6 +10,9 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -198,5 +201,26 @@ public class Utils {
             return m.group("username");
         }
         return null;
+    }
+
+    public static float map(float input, float inMin, float inMax, float outMin, float outMax) {
+        return (input - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+    }
+
+    public static void copyToClipBoard(String text) {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable selection = new StringSelection(text);
+        clipboard.setContents(selection, null);
+    }
+
+    public static String getClipBoard(){
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Clipboard clipboard = toolkit.getSystemClipboard();
+        try {
+            return (String) clipboard.getData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

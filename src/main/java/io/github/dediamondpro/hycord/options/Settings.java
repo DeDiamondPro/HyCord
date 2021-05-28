@@ -37,7 +37,8 @@ public class Settings extends Vigilant {
     public static boolean enableRP = true;
 
     @Property(
-            type = PropertyType.SLIDER, name = "Maximum discord party size",
+            type = PropertyType.SLIDER,
+            name = "Maximum discord party size",
             description = "Sets the maximum Discord party size.",
             category = "Discord",
             min = 1,
@@ -65,6 +66,15 @@ public class Settings extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Disable color in kill feed",
+            description = "Disable the color of nicknames in the kill feed to avoid team confusion in games like bedwars.",
+            category = "Miscellaneous",
+            subcategory = "Nicknames"
+    )
+    public static boolean disableColorKill = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Show Discord tag on hover",
             description = "Enable the option to show a players discord name when you hover over their minecraft name. Requires your" + "API key to be set.",
             category = "Discord",
@@ -72,6 +82,50 @@ public class Settings extends Vigilant {
     )
     public static boolean enableDiscordHover = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show Discord friend notifications",
+            description = "Put a message in chat when a discord friend changes their state.",
+            category = "Discord",
+            subcategory = "Relationships"
+    )
+    public static boolean enableFriendNotifs = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show user list",
+            description = "Show the list of users in your voice call on your screen.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showUserList = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show people that aren't talking",
+            description = "Show people that aren't talking when in a voice chat.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showNonTalking = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show talking indicator",
+            description = "Show an indicator on your screen when you're talking.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showIndicator = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Show talking ring",
+            description = "Show a ring around someone when they're is talking",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+    public static boolean showIndicatorOther = true;
 
     @Property(
             type = PropertyType.SWITCH,

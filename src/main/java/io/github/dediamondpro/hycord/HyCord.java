@@ -2,17 +2,20 @@ package io.github.dediamondpro.hycord;
 
 import club.sk1er.mods.core.ModCore;
 import club.sk1er.mods.core.ModCoreInstaller;
+import de.jcm.discordgamesdk.activity.ActivityActionType;
+import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.SimpleCommand;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
-import io.github.dediamondpro.hycord.features.discord.GetDiscord;
-import io.github.dediamondpro.hycord.features.discord.JoinHandler;
-import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import io.github.dediamondpro.hycord.features.discord.*;
+import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
+import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
-import libraries.net.arikia.dev.drpc.DiscordRPC;
+import io.github.dediamondpro.hycord.options.SettingsHandler;
+import io.github.dediamondpro.hycord.options.gui.MoveGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -22,17 +25,20 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+
 @Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION)
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
-
     private final Settings config = new Settings();
 
     SimpleCommand mainCommand = new SimpleCommand("hycord", new SimpleCommand.ProcessCommandRunnable() {
@@ -54,6 +60,12 @@ public class HyCord {
                     checkKey.start();
                 } else
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify an API key. You can generate a new one by doing /api new"));
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("discord")) {
+                RichPresence.discordRPC.overlayManager().openGuildInvite("ZBNS8jsAMd", System.out::println);
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
+                RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
+                ModCore.getInstance().getGuiHandler().open(new MoveGui());
             } else
                 ModCore.getInstance().getGuiHandler().open(config.gui());
         }
@@ -72,7 +84,7 @@ public class HyCord {
     SimpleCommand replyYesCommand = new SimpleCommand("$hycordreplyyes", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.YES);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.YES);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Accepted the request."));
             } else
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -81,7 +93,7 @@ public class HyCord {
     SimpleCommand replyNoCommand = new SimpleCommand("$hycordreplyno", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.NO);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.NO);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Denied the request."));
             } else
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -90,7 +102,7 @@ public class HyCord {
     SimpleCommand replyIgnoreCommand = new SimpleCommand("$hycordreplyignore", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
-                DiscordRPC.discordRespond(args[0], DiscordRPC.DiscordReply.IGNORE);
+                RichPresence.discordRPC.activityManager().sendRequestReply(Long.parseLong(args[0]), ActivityJoinRequestReply.IGNORE);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "Ignored the request."));
             } else
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not find user."));
@@ -125,23 +137,16 @@ public class HyCord {
     });
     SimpleCommand nickList = new SimpleCommand("nicklist", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames: \n");
+            ChatComponentText message = new ChatComponentText(EnumChatFormatting.YELLOW + "All nicknames:");
             for (String element : NickNameController.nicknames.keySet()) {
-                message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element) + "\n"));
+                message.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.YELLOW + element + ", " + NickNameController.nicknames.get(element)));
             }
             Minecraft.getMinecraft().thePlayer.addChatMessage(message);
         }
     });
     SimpleCommand nickHelp = new SimpleCommand("nickhelp", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "HyCord Nickname Help:\n" + EnumChatFormatting.YELLOW + "/setnick <player> <nickname>: set the nickname of a player\n" + EnumChatFormatting.YELLOW + "/clearnick <player>: clear the nickname of a player\n" + EnumChatFormatting.YELLOW + "/nicklist: lists all nicknames\n" + EnumChatFormatting.YELLOW + "/nickhelp: shows this page\n"));
-        }
-    });
-    SimpleCommand devstats = new SimpleCommand("hycorddevstats", new SimpleCommand.ProcessCommandRunnable() {
-        public void processCommand(ICommandSender sender, String[] args) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("discordCache length " + GetDiscord.discordNameCache.size()));
-            for (String element : GetDiscord.discordNameCache.keySet())
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(element + " -> " + GetDiscord.discordNameCache.get(element)));
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "HyCord Nickname Help:\n" + EnumChatFormatting.YELLOW + "/setnick <player> <nickname>: set the nickname of a player\n" + EnumChatFormatting.YELLOW + "/clearnick <player>: clear the nickname of a player\n" + EnumChatFormatting.YELLOW + "/nicklist: lists all nicknames\n" + EnumChatFormatting.YELLOW + "/nickhelp: shows this page"));
         }
     });
     SimpleCommand getDiscord = new SimpleCommand("getdiscord", new SimpleCommand.ProcessCommandRunnable() {
@@ -164,28 +169,60 @@ public class HyCord {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player."));
         }
     });
+    SimpleCommand getStatus = new SimpleCommand("getstatus", new SimpleCommand.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            if (args.length > 0) {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(RelationshipHandler.status(args[0]));
+            } else {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a Discord user."));
+            }
+        }
+    });
+    SimpleCommand voice = new SimpleCommand("voice", new SimpleCommand.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            if (LobbyManager.lobbyId != null) {
+                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            } else {
+                ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
+            }
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
         config.preload();
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
 
+        if (!SystemUtils.IS_OS_MAC) {
+            ClientCommandHandler.instance.registerCommand(partySize);
+            ClientCommandHandler.instance.registerCommand(replyYesCommand);
+            ClientCommandHandler.instance.registerCommand(replyNoCommand);
+            ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
+            ClientCommandHandler.instance.registerCommand(getStatus);
+            ClientCommandHandler.instance.registerCommand(voice);
+
+            MinecraftForge.EVENT_BUS.register(new JoinHandler());
+            MinecraftForge.EVENT_BUS.register(new RichPresence());
+            MinecraftForge.EVENT_BUS.register(new LobbyManager());
+
+            try {
+                RichPresence.init();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            MinecraftForge.EVENT_BUS.register(new MacWarning());
+        }
+        MinecraftForge.EVENT_BUS.register(new AutoFl());
+        MinecraftForge.EVENT_BUS.register(new NickNameController());
+
         ClientCommandHandler.instance.registerCommand(mainCommand);
-        ClientCommandHandler.instance.registerCommand(partySize);
-        ClientCommandHandler.instance.registerCommand(replyYesCommand);
-        ClientCommandHandler.instance.registerCommand(replyNoCommand);
-        ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
         ClientCommandHandler.instance.registerCommand(setNick);
         ClientCommandHandler.instance.registerCommand(clearNick);
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
-        ClientCommandHandler.instance.registerCommand(devstats);
         ClientCommandHandler.instance.registerCommand(getDiscord);
-
-        MinecraftForge.EVENT_BUS.register(new AutoFl());
-        MinecraftForge.EVENT_BUS.register(new JoinHandler());
-        MinecraftForge.EVENT_BUS.register(new RichPresence());
-        MinecraftForge.EVENT_BUS.register(new NickNameController());
+        SettingsHandler.init();
 
         if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate())
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());
@@ -194,9 +231,6 @@ public class HyCord {
         try {
             if (nickNameSave.createNewFile()) {
                 System.out.println("File created: " + nickNameSave.getName());
-                NickNameController.nicknames.put("DeDiamondPro", "§bDeD§3iam§9ond§1Pro");
-                NickNameController.nicknames.put("Strebbypatty", "§4Strebbypatty");
-                NickNameController.nicknames.put("Unseaded", "§aUn§2sea§1ded");
                 FileWriter writer = new FileWriter(String.valueOf(nickNameSave.toPath()));
                 for (String str : NickNameController.nicknames.keySet())
                     writer.write(str + "," + NickNameController.nicknames.get(str) + System.lineSeparator());
@@ -208,12 +242,30 @@ public class HyCord {
                     String data = myReader.nextLine();
                     System.out.println(data);
                     String[] split = data.split(",");
-                    NickNameController.nicknames.put(split[0], split[1]);
+                    if (split.length == 2) {
+                        NickNameController.nicknames.put(split[0], split[1]);
+                    } else {
+                        System.out.println("Error loading a nick");
+                    }
                 }
                 myReader.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+}
+
+class MacWarning {
+    boolean sent = false;
+
+    @SubscribeEvent
+    void onTick(TickEvent.ClientTickEvent event) {
+        if (!sent) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
+                    "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
+                    "currently don't work on MacOs,\nthese features have been automatically disabled."));
+            sent = true;
         }
     }
 }

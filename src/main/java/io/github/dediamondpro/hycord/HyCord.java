@@ -16,7 +16,7 @@ import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import io.github.dediamondpro.hycord.options.SettingsHandler;
-import io.github.dediamondpro.hycord.options.gui.MoveGui;
+import io.github.dediamondpro.hycord.options.gui.GuiMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -38,8 +38,7 @@ import java.net.URI;
 import java.util.Scanner;
 import java.util.UUID;
 
-
-@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION)
+@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION, clientSideOnly = true)
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
@@ -69,7 +68,7 @@ public class HyCord {
             } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
                 RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
             } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
-                ModCore.getInstance().getGuiHandler().open(new MoveGui());
+                ModCore.getInstance().getGuiHandler().open(new GuiMove());
             } else
                 ModCore.getInstance().getGuiHandler().open(config.gui());
         }
@@ -274,18 +273,20 @@ public class HyCord {
             e.printStackTrace();
         }
     }
-}
 
-class MacWarning {
-    boolean sent = false;
+    private static class MacWarning {
 
-    @SubscribeEvent
-    void onTick(TickEvent.ClientTickEvent event) {
-        if (!sent) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
-                    "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
-                    "currently don't work on MacOS,\nthese features have been automatically disabled."));
-            sent = true;
+        private boolean sent = false;
+
+        @SubscribeEvent
+        public void onTick(TickEvent.ClientTickEvent event) {
+            if (!sent) {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
+                        "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
+                        "currently don't work on MacOS,\nthese features have been automatically disabled."));
+                sent = true;
+            }
+
         }
     }
 }

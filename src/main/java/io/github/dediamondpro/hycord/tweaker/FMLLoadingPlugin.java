@@ -7,6 +7,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import java.util.Map;
 
 public class FMLLoadingPlugin implements IFMLLoadingPlugin {
+
     @Override
     public String[] getASMTransformerClass() {
         int initialize = ModCoreInstaller.initialize(Launch.minecraftHome, "1.8.9");

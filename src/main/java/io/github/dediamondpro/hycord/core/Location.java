@@ -7,8 +7,8 @@ public class Location {
     public int width;
     public int displayHeight;
     public int displayWidth;
-    private boolean alignRight = false;
-    private boolean alignBottem = false;
+    private boolean alignRight;
+    private boolean alignBottom;
 
     public Location(int x, int y, int width, int height, int displayWidth, int displayHeight) {
         if (x > displayWidth / 2) {
@@ -20,15 +20,27 @@ public class Location {
         }
         if (y > displayHeight / 2) {
             this.y = displayHeight - (y + this.height);
-            alignBottem = true;
+            alignBottom = true;
         } else {
             this.y = y;
-            alignBottem = false;
+            alignBottom = false;
         }
         this.height = height;
         this.width = width;
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
+    }
+
+    public Location(String str) {
+        String[] split = str.split(",");
+        this.x = Integer.parseInt(split[0]);
+        this.y = Integer.parseInt(split[1]);
+        this.width = Integer.parseInt(split[2]);
+        this.height = Integer.parseInt(split[3]);
+        this.displayWidth = Integer.parseInt(split[4]);
+        this.displayHeight = Integer.parseInt(split[5]);
+        this.alignRight = Boolean.parseBoolean(split[6]);
+        this.alignBottom = Boolean.parseBoolean(split[7]);
     }
 
     public int getXScaled(int displayWidth) {
@@ -39,7 +51,7 @@ public class Location {
     }
 
     public int getYScaled(int displayHeight) {
-        if (!alignBottem) {
+        if (!alignBottom) {
             return (int) Utils.map(this.y, 0, this.displayHeight, 0, displayHeight);
         }
         return displayHeight - ((int) Utils.map(this.y, 0, this.displayHeight, 0, displayHeight) + this.height);
@@ -55,10 +67,10 @@ public class Location {
         }
         if (y > displayHeight / 2) {
             this.y = displayHeight - (y + this.height);
-            alignBottem = true;
+            alignBottom = true;
         } else {
             this.y = y;
-            alignBottem = false;
+            alignBottom = false;
         }
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
@@ -66,18 +78,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return this.x + "," + this.y + "," + this.width + "," + this.height + "," + displayWidth + "," + displayHeight + "," + alignRight + "," + alignBottem;
-    }
+        return this.x + "," + this.y + "," + this.width + "," + this.height + "," + displayWidth + "," + displayHeight + "," + alignRight + "," + alignBottom;
 
-    public Location(String str) {
-        String[] split = str.split(",");
-        this.x = Integer.parseInt(split[0]);
-        this.y = Integer.parseInt(split[1]);
-        this.width = Integer.parseInt(split[2]);
-        this.height = Integer.parseInt(split[3]);
-        this.displayWidth = Integer.parseInt(split[4]);
-        this.displayHeight = Integer.parseInt(split[5]);
-        this.alignRight = Boolean.parseBoolean(split[6]);
-        this.alignBottem = Boolean.parseBoolean(split[7]);
     }
 }

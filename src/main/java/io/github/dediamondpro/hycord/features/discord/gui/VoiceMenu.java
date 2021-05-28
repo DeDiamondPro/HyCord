@@ -20,7 +20,7 @@ import java.io.IOException;
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
 public class VoiceMenu extends GuiScreen {
-    Minecraft mc = Minecraft.getMinecraft();
+
     private boolean selecting = false;
     private boolean editing = false;
     private int x = 0;
@@ -125,7 +125,7 @@ public class VoiceMenu extends GuiScreen {
             int amount = 2;
             if (mouseY >= 10 && mouseY <= 26) {
                 if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId) != null) {
-                    Utils.copyToClipBoard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
+                    Utils.copyToClipboard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
                 }
             } else if (mouseX >= 72 && mouseX <= 82) {
                 for (DiscordUser user : LobbyManager.users.values()) {

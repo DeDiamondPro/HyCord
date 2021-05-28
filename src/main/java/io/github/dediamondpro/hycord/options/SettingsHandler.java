@@ -9,7 +9,8 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SettingsHandler {
-    public static ConcurrentHashMap<String, Location> locations = new ConcurrentHashMap<>();
+
+    public static final ConcurrentHashMap<String, Location> locations = new ConcurrentHashMap<>();
 
     public static void init() {
         locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
@@ -44,7 +45,7 @@ public class SettingsHandler {
         }
     }
 
-    public static void save(){
+    public static void save() {
         try {
             FileWriter writer = new FileWriter("./config/HyCordConfig.txt");
             for (String str : locations.keySet()) {

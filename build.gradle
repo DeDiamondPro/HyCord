@@ -1,22 +1,8 @@
-buildscript {
-    repositories {
-        maven {
-            name = "Forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "JitPack"
-            url = "https://jitpack.io"
-        }
-    }
-    dependencies {
-        classpath "com.github.asbyth:ForgeGradle:86b2392"
-        classpath 'com.github.johnrengelman:shadow:4.0.4'
-    }
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'net.minecraftforge.gradle.forge' version 'b13624b'
 }
-
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: 'com.github.johnrengelman.shadow'
 
 version = project.mod_ver
 group = project.mod_group
@@ -26,22 +12,38 @@ sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
 minecraft {
-    version = project.forge_ver
+    version = '1.8.9-11.15.1.2318-1.8.9'
     runDir = "run"
     replace('@VER@', project.version)
-    mappings = project.minecraft_mappings
+    mappings = 'stable_22'
+    makeObfSourceJar = false
 }
 
 repositories {
-    flatDir dirs: 'libs'
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven {
+        name = 'JitPack'
+        url = 'https://jitpack.io' }
+}
+
+configurations {
+    include
+    implementation.extendsFrom(include)
 }
 
 dependencies {
     provided files('libs/modcore.jar')
-    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
-    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.3'
+
+    include 'com.github.jncrmx:discord-game-sdk4j:v0.5.3'
+}
+
+jar {
+    manifest {
+        attributes (
+                'FMLCorePlugin': 'io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin',
+                'ModSide': 'CLIENT',
+                'FMLCorePluginContainsFMLMod': 'Yes, yes it does'
+        )
+    }
 }
 
 processResources {
@@ -50,7 +52,6 @@ processResources {
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
@@ -59,20 +60,22 @@ processResources {
     }
 }
 
+// Forge does not import resources properly.
+task moveResources {
+    doLast {
+        ant.move file: "${buildDir}/resources/main",
+                todir: "${buildDir}/classes/java"
+    }
+}
+
+tasks.moveResources.dependsOn processResources
+tasks.classes.dependsOn moveResources
+
 shadowJar {
-    project.configurations.shadow.setTransitive(true);
-    configurations = [project.configurations.shadow]
-    manifest.attributes(
-            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
-            "ModSide": "CLIENT",
-            "FMLCorePluginContainsFMLMod": true
-    )
+    configurations = [project.configurations.include]
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
 
-    classifier '' // Replace the default JAR
+    archiveClassifier.set('')
 }
 
-reobf {
-    shadowJar {} // Reobfuscate the shadowed JAR
-}
-
-jar.finalizedBy('reobfJar')
+jar.dependsOn shadowJar

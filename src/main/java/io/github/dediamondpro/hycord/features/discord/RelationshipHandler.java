@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class RelationshipHandler {
+
     private static final HashMap<Long, Relationship> cache = new HashMap<>();
 
     public static void Handler(Relationship relation) {
@@ -26,7 +27,7 @@ public class RelationshipHandler {
                     + relation.getType().toString().toLowerCase(Locale.ROOT) + " > " + EnumChatFormatting.BLUE +
                     relation.getUser().getUsername() + "#" + relation.getUser().getDiscriminator() + EnumChatFormatting.YELLOW + " is now "
                     + relation.getPresence().getStatus().toString().toLowerCase(Locale.ROOT).replaceAll("_", " ")).setChatStyle(
-                    new ChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, getiChatComponents(relation)))));
+                    new ChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, getChatComponents(relation)))));
         }
         cache.put(relation.getUser().getUserId(), relation);
     }
@@ -36,11 +37,11 @@ public class RelationshipHandler {
             if (user.contains("#")) {
                 if (element.getUser().getUsername().equalsIgnoreCase(user.split("#", 2)[0]) &&
                         element.getUser().getDiscriminator().equals(user.split("#", 2)[1])) {
-                    return getiChatComponents(element);
+                    return getChatComponents(element);
                 }
             } else {
                 if (element.getUser().getUsername().equalsIgnoreCase(user)) {
-                    return getiChatComponents(element);
+                    return getChatComponents(element);
                 }
             }
         }
@@ -48,7 +49,7 @@ public class RelationshipHandler {
     }
 
     @NotNull
-    private static ChatComponentText getiChatComponents(Relationship element) {
+    private static ChatComponentText getChatComponents(Relationship element) {
         ChatComponentText statusText = new ChatComponentText(EnumChatFormatting.BLUE + element.getUser().getUsername() + "#" +
                 element.getUser().getDiscriminator() + "'s status:");
         statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "Status: " + element.getPresence().getStatus().toString().toLowerCase(Locale.ROOT)));

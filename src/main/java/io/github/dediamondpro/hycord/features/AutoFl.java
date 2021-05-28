@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 public class AutoFl {
 
     public boolean send = false;
-    int tickCounter = 0;
+    private int tickCounter = 0;
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {

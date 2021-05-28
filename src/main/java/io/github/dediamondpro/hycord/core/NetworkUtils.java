@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class NetworkUtils {
+
     public static JsonElement getRequest(String site) {
         try {
             URL url = new URL(site);
@@ -35,7 +36,7 @@ public class NetworkUtils {
         return null;
     }
 
-    public static String GetUuid(String username) {
+    public static String getUUID(String username) {
         JsonElement response = getRequest("https://api.mojang.com/users/profiles/minecraft/" + username);
         if (response == null)
             return null;

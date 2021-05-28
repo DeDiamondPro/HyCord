@@ -17,13 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VoiceCreator extends GuiScreen {
-    Minecraft mc = Minecraft.getMinecraft();
+
     private LobbyType privacy = LobbyType.PUBLIC;
     private boolean locked = false;
     private int capacity = 10;
     private boolean editing = false;
-    private List<String> games = new ArrayList<>();
-    private List<String> topics = new ArrayList<>();
+    private final List<String> games = new ArrayList<>();
+    private final List<String> topics = new ArrayList<>();
     private String selectedGame = "General";
     private String selectedTopic = "Just chatting";
 

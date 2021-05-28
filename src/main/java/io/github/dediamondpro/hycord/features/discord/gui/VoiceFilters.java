@@ -13,9 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VoiceFilters extends GuiScreen {
-    private List<String> games = new ArrayList<>();
-    private List<String> topics = new ArrayList<>();
-    private List<String> distances = new ArrayList<>();
+
+    private final List<String> games = new ArrayList<>();
+    private final List<String> topics = new ArrayList<>();
+    private final List<String> distances = new ArrayList<>();
     private String selectedDistance = "";
     private String selectedGame = LobbyManager.game;
     private String selectedTopic = LobbyManager.topic;
@@ -23,6 +24,7 @@ public class VoiceFilters extends GuiScreen {
     @Override
     public void initGui() {
         if (games.size() > 0) return;
+
         games.add("General");
         games.add("Bedwars");
         games.add("Skywars");

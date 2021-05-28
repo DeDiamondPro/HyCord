@@ -4,13 +4,11 @@ import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.lobby.LobbySearchQuery;
-import de.jcm.discordgamesdk.lobby.LobbyType;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
-import javafx.scene.input.KeyCode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,17 +32,17 @@ import java.util.stream.Collectors;
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
 public class VoiceBrowser extends GuiScreen {
+
     private int scroll = 0;
     private int totalAmount = 0;
     private final ResourceLocation plus = new ResourceLocation("hycord", "plus.png");
     private final ResourceLocation filter = new ResourceLocation("hycord", "filter.png");
     private List<Lobby> matches = new ArrayList<>();
-    Minecraft mc = Minecraft.getMinecraft();
     private int gameBegin = 0;
     private int topicBegin = 0;
     private int capacityBegin = 0;
     private int joinButtonBegin = 0;
-    private HashMap<Long, DiscordUser> users = new HashMap<>();
+    private final HashMap<Long, DiscordUser> users = new HashMap<>();
     private boolean typing = false;
     private String enteredText = "";
     private boolean selected = false;
@@ -97,9 +95,9 @@ public class VoiceBrowser extends GuiScreen {
                             if (!LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
                                 try {
                                     URL url = new URL("https://cdn.discordapp.com/avatars/" + lobby.getOwnerId() + "/" + user.getAvatar() + ".png?size=64");
-                                    HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                                    httpcon.addRequestProperty("User-Agent", "");
-                                    LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(httpcon.getInputStream()));
+                                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                    con.addRequestProperty("User-Agent", "");
+                                    LobbyManager.bufferedPictures.put(lobby.getOwnerId(), ImageIO.read(con.getInputStream()));
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -257,7 +255,7 @@ public class VoiceBrowser extends GuiScreen {
                     enteredText = enteredText.substring(0, enteredText.length() - 1);
                 }
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_V)) {
-                String clipboard = Utils.getClipBoard();
+                String clipboard = Utils.getClipboard();
                 if (clipboard != null) {
                     if (selected) {
                         enteredText = clipboard;
@@ -268,14 +266,14 @@ public class VoiceBrowser extends GuiScreen {
                 }
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_C)) {
                 if (selected = true) {
-                    Utils.copyToClipBoard(enteredText);
+                    Utils.copyToClipboard(enteredText);
                     selected = false;
                 }
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_A)) {
                 selected = true;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_X)) {
                 if (selected = true) {
-                    Utils.copyToClipBoard(enteredText);
+                    Utils.copyToClipboard(enteredText);
                     enteredText = "";
                     selected = false;
                 }

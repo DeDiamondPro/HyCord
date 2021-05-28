@@ -6,7 +6,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class JoinHandler {
 
-    static String inviting = null;
+    private static String inviting = null;
 
     public static void Handler(String user) {
         String[] secret = user.split("&", 2);
@@ -17,15 +17,15 @@ public class JoinHandler {
     }
 
     @SubscribeEvent
-    void onMsg(ClientChatReceivedEvent event) {
+    public void onMsg(ClientChatReceivedEvent event) {
         if (inviting == null)
             return;
-        String msg = event.message.getFormattedText();
-        if (msg.startsWith("§9§m-----------------------------§r§9") && msg.endsWith("§r§9§m-----------------------------§r") && msg.contains(inviting) && msg.contains("§r§ehas invited you to join their party!")) {
+        String msg = event.message.getUnformattedText();
+        if (msg.startsWith("-----------------------------") && msg.endsWith("-----------------------------") && msg.contains(inviting) && msg.contains("has invited you to join their party!")) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + inviting);
             event.setCanceled(true);
             inviting = null;
-        } else if ((msg.startsWith("§dTo") || msg.startsWith("§r§dTo")) && msg.contains(inviting) && msg.contains("&"))
+        } else if ((msg.startsWith("To") && msg.contains(inviting) && msg.contains("&")))
             event.setCanceled(true);
     }
 }

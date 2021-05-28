@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import static io.github.dediamondpro.hycord.options.SettingsHandler.locations;
 
-public class MoveGui extends GuiScreen {
+public class GuiMove extends GuiScreen {
     private boolean editing = false;
     private static int attachmentPointX;
     private static int attachmentPointY;
@@ -87,7 +87,7 @@ public class MoveGui extends GuiScreen {
         super.keyTyped(typedChar, keyCode);
     }
 
-    void editObj(int x, int y) {
+    private void editObj(int x, int y) {
         if (x < 0) {
             x = 0;
         } else if (x + locations.get(editObject).width > this.width) {
@@ -101,5 +101,10 @@ public class MoveGui extends GuiScreen {
         }
 
         locations.get(editObject).set(x, y, this.width, this.height);
+    }
+
+    @Override
+    public void onGuiClosed() {
+        Keyboard.enableRepeatEvents(false);
     }
 }

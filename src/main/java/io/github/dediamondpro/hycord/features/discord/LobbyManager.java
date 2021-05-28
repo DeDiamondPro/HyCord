@@ -36,9 +36,10 @@ import static io.github.dediamondpro.hycord.features.discord.RichPresence.discor
 import static io.github.dediamondpro.hycord.options.SettingsHandler.locations;
 
 public class LobbyManager {
-    ResourceLocation micTexture = new ResourceLocation("hycord", "microphone.png");
-    ResourceLocation muteTexture = new ResourceLocation("hycord", "microphone_mute.png");
-    ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
+
+    private static final ResourceLocation micTexture = new ResourceLocation("hycord", "microphone.png");
+    private static final ResourceLocation muteTexture = new ResourceLocation("hycord", "microphone_mute.png");
+    private static final ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
 
     public static ConcurrentHashMap<Long, Boolean> talkingData = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, DiscordUser> users = new ConcurrentHashMap<>();
@@ -81,9 +82,9 @@ public class LobbyManager {
                     if (!pictures.containsKey(id)) {
                         try {
                             URL url = new URL("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64");
-                            HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                            httpcon.addRequestProperty("User-Agent", "");
-                            bufferedPictures.put(id, ImageIO.read(httpcon.getInputStream()));
+                            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                            con.addRequestProperty("User-Agent", "");
+                            bufferedPictures.put(id, ImageIO.read(con.getInputStream()));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -102,9 +103,9 @@ public class LobbyManager {
                         + EnumChatFormatting.GREEN + discordUser.getUsername() + "#" + discordUser.getDiscriminator() + " joined the voice chat"));
                 try {
                     URL url = new URL("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64");
-                    HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-                    httpcon.addRequestProperty("User-Agent", "");
-                    bufferedPictures.put(discordUser.getUserId(), ImageIO.read(httpcon.getInputStream()));
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.addRequestProperty("User-Agent", "");
+                    bufferedPictures.put(discordUser.getUserId(), ImageIO.read(con.getInputStream()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -129,10 +130,10 @@ public class LobbyManager {
         }
     }
 
-    boolean pressed = false;
+    private boolean pressed = false;
 
     @SubscribeEvent
-    void onTick(TickEvent.ClientTickEvent event) {
+    public void onTick(TickEvent.ClientTickEvent event) {
         if (!Utils.isHypixel()) return;
         if (Keyboard.isKeyDown(Keyboard.KEY_M) && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
             if (!pressed) {
@@ -152,7 +153,7 @@ public class LobbyManager {
     }
 
     @SubscribeEvent
-    void onRender(RenderGameOverlayEvent.Post event) {
+    public void onRender(RenderGameOverlayEvent.Post event) {
         if (!RichPresence.enabled || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         try {
             for (Long id : bufferedPictures.keySet()) {

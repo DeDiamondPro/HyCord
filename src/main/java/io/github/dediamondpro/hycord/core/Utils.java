@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    private static final Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
+
     public static boolean isHypixel() {
         Minecraft mc = Minecraft.getMinecraft();
 
@@ -31,7 +34,7 @@ public class Utils {
         return false;
     }
 
-    public static String getDiscordPic(String arg) {
+    public static String getDiscordPicture(String arg) {
         String game = arg.toLowerCase(Locale.ROOT).replaceAll(" ", "_");
         if (game.contains("bed_wars")) {
             return "bedwars";
@@ -96,7 +99,7 @@ public class Utils {
     public static String cleanSB(String scoreboard) {
         char[] nvString = StringUtils.stripControlCodes(scoreboard).toCharArray();
         StringBuilder cleaned = new StringBuilder();
-        char sbChar = "⏣".charAt(0); // Added skyblock location char
+        char sbChar = "\u23E3".charAt(0); // Added skyblock location char
 
         for (char c : nvString) {
             if ((int) c > 20 && (int) c < 127 || c == sbChar) { //added exception for skyblock char
@@ -186,14 +189,12 @@ public class Utils {
     public static String getLastColor(String text) {
         char[] charList = text.toCharArray();
         for (int i = charList.length - 1; i >= 0; i--) {
-            if (charList[i] == "§".charAt(0) && charList[i + 1] != "l".charAt(0)) {
+            if (charList[i] == "\u00A7".charAt(0) && charList[i + 1] != "l".charAt(0)) {
                 return String.valueOf(charList[i]) + charList[i + 1];
             }
         }
         return "";
     }
-
-    static Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
 
     public static String getName(String message) {
         Matcher m = getNamePattern.matcher(message);
@@ -207,13 +208,13 @@ public class Utils {
         return (input - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
     }
 
-    public static void copyToClipBoard(String text) {
+    public static void copyToClipboard(String text) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         Transferable selection = new StringSelection(text);
         clipboard.setContents(selection, null);
     }
 
-    public static String getClipBoard(){
+    public static String getClipboard() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Clipboard clipboard = toolkit.getSystemClipboard();
         try {

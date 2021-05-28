@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.net.URI;
 
 public class UpdateChecker {
-    static JsonElement latest;
+
+    public static JsonElement latest;
 
     public static boolean checkUpdate() {
         JsonElement data = NetworkUtils.getRequest("https://api.github.com/repos/dediamondpro/hycord/releases");
@@ -33,15 +34,15 @@ public class UpdateChecker {
     }
 
     @Mod.EventHandler
-    void onFMLLoadComplete(FMLLoadCompleteEvent e) {
+    public void onFMLLoadComplete(FMLLoadCompleteEvent e) {
         try {
-            Notifications.INSTANCE.pushNotification("Hycord version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available", "Click here to open GitHub", this::openTab);
+            Notifications.INSTANCE.pushNotification("Hycord version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available", "Click here to open GitHub", UpdateChecker::openTab);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    Unit openTab() {
+    private static Unit openTab() {
         try {
             Desktop.getDesktop().browse(URI.create(latest.getAsJsonObject().get("html_url").getAsString()));
         } catch (IOException e) {

@@ -4,10 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 
 public class TextUtils {
-    static Minecraft mc = Minecraft.getMinecraft();
+
+    private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static void drawTextMaxLength(String text, int x, int y, int color, boolean shadow, int max) {
         int length = mc.fontRendererObj.getStringWidth(text);
+
         if (length <= max - x) {
             mc.fontRendererObj.drawString(text, x, y, color, shadow);
         } else {
@@ -21,8 +23,8 @@ public class TextUtils {
 
     public static void drawTextMaxLengthCentered(String text, int x, int y, int color, boolean shadow, int max) {
         int center = x + (max - x) / 2;
-        //System.out.println(center);
         int length = mc.fontRendererObj.getStringWidth(text);
+
         if (length <= max - x) {
             mc.fontRendererObj.drawString(text, center - length / 2f, y, color, shadow);
         } else {

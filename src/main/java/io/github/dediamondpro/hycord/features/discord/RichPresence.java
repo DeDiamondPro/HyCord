@@ -299,13 +299,13 @@ public class RichPresence {
         }
     }
 
-    void updateRPC() {
+    private void updateRPC() {
         try (Activity activity = new Activity()) {
             activity.setDetails(gameMode);
             activity.setState(secondLine);
             activity.party().size().setMaxSize(Settings.maxPartySize);
             activity.party().size().setCurrentSize(partyMembers);
-            activity.assets().setLargeImage(Utils.getDiscordPic(gameMode));
+            activity.assets().setLargeImage(Utils.getDiscordPicture(gameMode));
             activity.assets().setLargeText(imageText);
             activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));

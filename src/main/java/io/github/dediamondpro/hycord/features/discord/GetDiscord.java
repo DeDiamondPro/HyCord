@@ -12,7 +12,7 @@ public class GetDiscord {
 
     public static String get(String name) {
         if (name != null) {
-            String uuid = NetworkUtils.GetUuid(name);
+            String uuid = NetworkUtils.getUUID(name);
             if (uuid == null)
                 return null;
             JsonElement response = NetworkUtils.getRequest("https://api.hypixel.net/player?key=" + Settings.apiKey + "&uuid=" + uuid);

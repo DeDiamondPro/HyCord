@@ -1,37 +1,35 @@
 buildscript {
     repositories {
-        jcenter()
         maven {
-            name = "forge"
-            url = "https://maven.minecraftforge.net/"
+            name = "Forge"
+            url = "http://files.minecraftforge.net/maven"
         }
         maven {
-            name = "jitpack"
-            url = "https://jitpack.io/"
+            name = "JitPack"
+            url = "https://jitpack.io"
         }
-        flatDir dirs: 'libs'
     }
     dependencies {
         classpath "com.github.asbyth:ForgeGradle:86b2392"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        classpath 'com.github.johnrengelman:shadow:4.0.4'
     }
 }
 
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = "1.2.0-pre4.1"
-group = "io.github.dediamondpro"
-archivesBaseName = "hycord"
+version = project.mod_ver
+group = project.mod_group
+archivesBaseName = project.mod_name
+
 sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
 minecraft {
-    version = "1.8.9-11.15.1.2318-1.8.9"
+    version = project.forge_ver
     runDir = "run"
-    mappings = "stable_22"
-    makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
+    replace('@VER@', project.version)
+    mappings = project.minecraft_mappings
 }
 
 repositories {
@@ -41,25 +39,21 @@ repositories {
 }
 
 dependencies {
-    provided files("modcore")
+    provided files('libs/modcore.jar')
     shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
     implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.3'
 }
 
 processResources {
-    // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
-    // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        // replace version and mcversion
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
-    // copy everything else, that's not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
@@ -68,7 +62,8 @@ processResources {
 shadowJar {
     project.configurations.shadow.setTransitive(true);
     configurations = [project.configurations.shadow]
-    manifest.attributes( "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+    manifest.attributes(
+            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
             "ModSide": "CLIENT",
             "FMLCorePluginContainsFMLMod": true
     )

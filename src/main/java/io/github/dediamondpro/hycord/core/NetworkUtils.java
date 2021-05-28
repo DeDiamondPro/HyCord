@@ -10,8 +10,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class NetworkUtils {
-    public static JsonElement GetRequest(String site){
-        try{
+    public static JsonElement getRequest(String site) {
+        try {
             URL url = new URL(site);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
             con.setRequestMethod("GET");
@@ -35,9 +35,10 @@ public class NetworkUtils {
         return null;
     }
 
-    public static String GetUuid(String username){
-        JsonElement response = GetRequest("https://api.mojang.com/users/profiles/minecraft/" + username);
-        if(response == null)return null;
+    public static String GetUuid(String username) {
+        JsonElement response = getRequest("https://api.mojang.com/users/profiles/minecraft/" + username);
+        if (response == null)
+            return null;
         return response.getAsJsonObject().get("id").getAsString();
     }
 }

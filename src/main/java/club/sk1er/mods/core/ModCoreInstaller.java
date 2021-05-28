@@ -1,4 +1,4 @@
-package io.github.dediamondpro.hycord;
+package club.sk1er.mods.core;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -59,7 +59,7 @@ public class ModCoreInstaller {
             invalidClasses.setAccessible(true);
             Object obj = invalidClasses.get(ModCoreInstaller.class.getClassLoader());
             ((Set<String>) obj).remove(className);
-            return Class.forName("club.sk1er.mods.core.ModCore") != null;
+            return Class.forName(className) != null;
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
             ignored.printStackTrace();
         }

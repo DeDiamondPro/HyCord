@@ -33,8 +33,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class RichPresence {
+
+    int tickCounter;
     public static Core discordRPC;
-    int ticks;
     String invited = null;
     Instant time = Instant.now();
     int partyMembers = 1;
@@ -47,7 +48,7 @@ public class RichPresence {
     private static String partyId = UUID.randomUUID().toString();
     //public String mainId = null;
 
-    public static String getPartyId(){
+    public static String getPartyId() {
         return partyId;
     }
 
@@ -79,24 +80,21 @@ public class RichPresence {
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
-        ticks++;
-        if (ticks % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
+        tickCounter++;
+        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
-            if (sCleaned.contains("Mode: ")) {
+            if (sCleaned.contains("Mode: "))
                 secondLine = sCleaned.replaceAll("Mode: ", "");
-            } else if (sCleaned.contains(" ⏣ ")) {
+            else if (sCleaned.contains(" ⏣ "))
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
-            }
-            if (sCleaned.contains("Map: ")) {
+            if (sCleaned.contains("Map: "))
                 imageText = sCleaned.replaceAll("Map: ", "");
-            }
         }
-        if (secondLine.equals("Your Island")) {
+        if (secondLine.equals("Your Island"))
             secondLine = "Private Island";
-        }
         Scoreboard title = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = title.getObjectiveInDisplaySlot(1);
         if (sidebarObjective != null) {
@@ -110,11 +108,10 @@ public class RichPresence {
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
         imageText = "";
-        if (partyMembers > 1) {
+        if (partyMembers > 1)
             secondLine = "In a party";
-        } else {
+        else
             secondLine = "On Hypixel";
-        }
         gameMode = "";
         /*if(mainId == null){
             LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
@@ -142,7 +139,7 @@ public class RichPresence {
 
                 @Override
                 public void onActivityJoinRequest(DiscordUser user) {
-                    JoinRequestHandler.Handler(user);
+                    JoinRequestHandler.handle(user);
                 }
 
                 @Override
@@ -186,13 +183,13 @@ public class RichPresence {
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         if (enabled) {
-            if(LobbyManager.lobbyId != null){
+            if (LobbyManager.lobbyId != null) {
                 discordRPC.lobbyManager().disconnectVoice(LobbyManager.lobbyId, System.out::println);
                 discordRPC.lobbyManager().disconnectLobby(LobbyManager.lobbyId, System.out::println);
             }
             try {
                 discordRPC.close();
-            }catch (GameSDKException e){
+            } catch (GameSDKException e) {
                 e.printStackTrace();
             }
             enabled = false;
@@ -233,7 +230,7 @@ public class RichPresence {
         } else if (msg.endsWith("§r§ejoined the party.§r")) {
             partyMembers++;
             if (invited != null && msg.contains(invited)) {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID().toString() + " HyCordPId&" + partyId);//first random uuid is to bypass you can't send the same message twice
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID() + " HyCordPId&" + partyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
             secondLine = "In a party";
@@ -264,11 +261,9 @@ public class RichPresence {
             secondLine = "In a party";
         } else if (msg.startsWith("§eYou'll be partying with:")) {
             partyMembers = 3;
-            for (int i = 0; i < msg.length(); i++) {
-                if (msg.charAt(i) == ',') {
+            for (int i = 0; i < msg.length(); i++)
+                if (msg.charAt(i) == ',')
                     partyMembers++;
-                }
-            }
             secondLine = "In a party";
         } else if (msg.startsWith("§eYou have been kicked from the party by")) {
             partyMembers = 1;
@@ -294,12 +289,12 @@ public class RichPresence {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
-        }else if (msg.equals("§cThe party was disbanded because the party leader disconnected.§r")){
+        } else if (msg.equals("§cThe party was disbanded because the party leader disconnected.§r")) {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
             partyId = UUID.randomUUID().toString();
-        }else if (msg.endsWith("because they were offline.§r") && msg.startsWith("§eKicked")){
+        } else if (msg.endsWith("because they were offline.§r") && msg.startsWith("§eKicked")) {
             partyMembers += -1;
         }
     }
@@ -314,9 +309,8 @@ public class RichPresence {
             activity.assets().setLargeText(imageText);
             activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
-            if (canInvite && Settings.enableInvites) {
+            if (canInvite && Settings.enableInvites)
                 activity.secrets().setJoinSecret(joinSecret);
-            }
             discordRPC.activityManager().updateActivity(activity);
         }
     }

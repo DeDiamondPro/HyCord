@@ -1,7 +1,6 @@
 package io.github.dediamondpro.hycord.features.discord.gui;
 
 import club.sk1er.mods.core.ModCore;
-import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.voice.VoiceInputMode;
 import io.github.dediamondpro.hycord.core.TextUtils;
@@ -43,7 +42,7 @@ public class VoiceMenu extends GuiScreen {
         mc.getTextureManager().bindTexture(leave_icon);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         Gui.drawModalRectWithCustomSizedTexture(this.width - 20, 4, 0, 0, 16, 16, 16, 16);
-        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null && LobbyManager.currentUser != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
             mc.getTextureManager().bindTexture(settingsIcon);
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             Gui.drawModalRectWithCustomSizedTexture(this.width - 40, 4, 0, 0, 16, 16, 16, 16);

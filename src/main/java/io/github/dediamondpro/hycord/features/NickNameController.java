@@ -21,11 +21,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NickNameController {
+
     public static HashMap<String, String> nicknames = new HashMap<>();
-    Pattern killFeed = Pattern.compile("(.*)([0-9a-zA-Z_]{3,16})(.*)(by|of|to|for|with)(.*)");
+    public static final Pattern killFeed = Pattern.compile("(.*)([0-9a-zA-Z_]{3,16})(.*)(by|of|to|for|with)(.*)");
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    void onMsg(ClientChatReceivedEvent event) {
+    public void onMsg(ClientChatReceivedEvent event) {
         String msg = event.message.getFormattedText();
         if (Utils.isHypixel() && event.type == 0 && Settings.enableDiscordHover && !Settings.apiKey.equals("")) {
             String name = Utils.getName(msg);
@@ -68,7 +69,7 @@ public class NickNameController {
         }
     }
 
-    IChatComponent hoverAdder(String name, String added, IChatComponent message) {
+    private IChatComponent hoverAdder(String name, String added, IChatComponent message) {
         IChatComponent response = message;
         if (message.getSiblings().size() > 0) {
             ChatComponentText replacement = new ChatComponentText("");
@@ -91,7 +92,6 @@ public class NickNameController {
             response = replacement;
         } else {
             if (message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent() == null) {
-                ;
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.BLUE + "Discord: " + added))));
             } else if (message.getFormattedText().contains(name) && message.getChatStyle().getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT) && !message.getChatStyle().getChatHoverEvent().getValue().getFormattedText().contains("Discord: ")) {
                 response = message.setChatStyle(message.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(message.getChatStyle().getChatHoverEvent().getValue().getFormattedText() + "\n" + EnumChatFormatting.BLUE + "Discord: " + added))));
@@ -100,7 +100,7 @@ public class NickNameController {
         return response;
     }
 
-    IChatComponent siblingHandler(IChatComponent sibling, String element, String replacer) {
+    private IChatComponent siblingHandler(IChatComponent sibling, String element, String replacer) {
         if (sibling.getSiblings().size() == 0) {
             if (sibling.getFormattedText().contains(element)) {
                 sibling = new ChatComponentText(sibling.getFormattedText().replace(element, replacer + Utils.getLastColor(sibling.getFormattedText().split(element)[0]))).setChatStyle(hoverNickThingy(element, sibling.getChatStyle(), replacer));
@@ -115,7 +115,7 @@ public class NickNameController {
         }
     }
 
-    ChatStyle hoverNickThingy(String element, ChatStyle style, String replacer) {
+    private ChatStyle hoverNickThingy(String element, ChatStyle style, String replacer) {
         if (style != null && style.getChatHoverEvent() != null && style.getChatHoverEvent().getValue().getFormattedText().contains(element) && style.getChatHoverEvent().getAction().equals(HoverEvent.Action.SHOW_TEXT)) {
             style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(style.getChatHoverEvent().getValue().getFormattedText().replace(element, replacer + Utils.getLastColor(style.getChatHoverEvent().getValue().getFormattedText().split(element)[0])))));
         }
@@ -123,7 +123,7 @@ public class NickNameController {
     }
 
     @SubscribeEvent
-    void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+    public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         try {
             FileWriter writer = new FileWriter("./config/HyCordNickNames.txt");
             for (String str : NickNameController.nicknames.keySet()) {
@@ -136,7 +136,7 @@ public class NickNameController {
     }
 
     @SubscribeEvent
-    void onPlayerNametagRender(PlayerEvent.NameFormat event) {
+    public void onPlayerNametagRender(PlayerEvent.NameFormat event) {
         if (nicknames.containsKey(event.displayname) && Settings.enableNicknames) {
             event.displayname = nicknames.get(event.displayname);
         }

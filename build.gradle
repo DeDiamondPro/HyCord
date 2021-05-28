@@ -1,50 +1,106 @@
 buildscript {
     repositories {
+        jcenter()
         maven {
             name = "Forge"
-            url = "http://files.minecraftforge.net/maven"
+            url = "http://maven.minecraftforge.net"
         }
         maven {
             name = "JitPack"
             url = "https://jitpack.io"
         }
+        maven {
+            name = "Sponge"
+            url = "https://repo.spongepowered.org/maven/"
+        }
     }
     dependencies {
-        classpath "com.github.asbyth:ForgeGradle:86b2392"
-        classpath 'com.github.johnrengelman:shadow:4.0.4'
+        classpath 'com.github.asbyth:ForgeGradle:f6500bf402'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
     }
 }
-
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
 
 version = project.mod_ver
 group = project.mod_group
 archivesBaseName = project.mod_name
 
 sourceCompatibility = targetCompatibility = 1.8
-compileJava.options.encoding = 'UTF-8'
+
+Dependency[] deps = [
+        new Dependency("com.github.jncrmx", "discord-game-sdk4j", "0.5.3", true),
+        new Dependency("org.spongepowered", "mixin", "0.7.11-SNAPSHOT", true, (String[])["launchwrapper", "guava", "gson", "commons-io"], true)
+]
 
 minecraft {
-    version = project.forge_ver
+    version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
-    replace('@VER@', project.version)
-    mappings = project.minecraft_mappings
+
+    replace("@VER@": project.version)
+
+    mappings = "stable_22"
 }
 
 repositories {
-    flatDir dirs: 'libs'
+    maven {
+        name = "SpongePowered"
+        url = 'https://repo.spongepowered.org/maven/'
+    }
+    maven {
+        name = "JitPack"
+        url = 'https://jitpack.io'
+    }
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    jcenter()
+}
+
+configurations {
+    embed
 }
 
 dependencies {
-    provided files('libs/modcore.jar')
-    shadow 'com.github.jncrmx:discord-game-sdk4j:0.5.3'
-    implementation 'com.github.JnCrMx:discord-game-sdk4j:v0.5.3'
+    implementation(files('libs/modcore.jar'))
+    for (Dependency dep : deps) {
+        if (dep.isShade()) embed(dep.getFullDep()) {
+            if (dep.getExcluded() != null && dep.getExcluded().length > 0)
+                for (String excluded : dep.getExcluded())
+                    exclude module: excluded
+        }
+        else implementation(dep.getFullDep()) {
+            if (dep.getExcluded() != null && !Arrays.asList(dep.getExcluded()).isEmpty())
+                for (String excluded : dep.getExcluded())
+                    exclude module: excluded
+        }
+        if (dep.getAnnotationProc()) annotationProcessor(dep.getFullDep())
+    }
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = output.classesDir
+    }
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest.attributes(
+            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+            "ModSide": "CLIENT",
+            "FMLCorePluginContainsFMLMod": true
+    )
+    configurations.compile.extendsFrom(configurations.embed)
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
 }
 
 processResources {
+    inputs.files "src/main/resources"
+    outputs.dir "build/classes/main"
+    copy {
+        from("src/main/resources")
+        into("build/classes/main")
+    }
+
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
@@ -59,20 +115,71 @@ processResources {
     }
 }
 
-shadowJar {
-    project.configurations.shadow.setTransitive(true);
-    configurations = [project.configurations.shadow]
-    manifest.attributes(
-            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
-            "ModSide": "CLIENT",
-            "FMLCorePluginContainsFMLMod": true
-    )
-
-    classifier '' // Replace the default JAR
+task fatJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    baseName = project.mod_name
+    from {
+        configurations.embed.collect {
+            it.isDirectory() ?
+                    it :
+                    zipTree(it)
+        }
+    } with jar
 }
 
-reobf {
-    shadowJar {} // Reobfuscate the shadowed JAR
-}
+tasks.build.dependsOn(tasks.fatJar)
 
-jar.finalizedBy('reobfJar')
+/* Custom dependency stuff. */
+@SuppressWarnings("unused")
+class Dependency {
+
+    String group
+    String name
+    String version
+    String[] excluded
+    boolean shade
+    boolean annotationProc
+    final String fullDep
+
+    Dependency(String group, String name, String version, boolean shade) {
+        this.group = group
+        this.name = name
+        this.version = version
+        this.shade = shade
+        this.excluded = []
+        this.annotationProc = false
+
+        this.fullDep = group + ":" + name + ":" + version
+    }
+    Dependency(String group, String name, String version, boolean shade, String[] excluded) {
+        this.group = group
+        this.name = name
+        this.version = version
+        this.shade = shade
+        this.excluded = excluded
+        this.annotationProc = false
+
+        this.fullDep = group + ":" + name + ":" + version
+    }
+    Dependency(String group, String name, String version, boolean shade, boolean annotationProc) {
+        this.group = group
+        this.name = name
+        this.version = version
+        this.shade = shade
+        this.excluded = []
+        this.annotationProc = annotationProc
+
+        this.fullDep = group + ":" + name + ":" + version
+    }
+    Dependency(String group, String name, String version, boolean shade, String[] excluded, boolean annotationProc) {
+        this.group = group
+        this.name = name
+        this.version = version
+        this.shade = shade
+        this.excluded = excluded
+        this.annotationProc = annotationProc
+
+        this.fullDep = group + ":" + name + ":" + version
+    }
+
+}

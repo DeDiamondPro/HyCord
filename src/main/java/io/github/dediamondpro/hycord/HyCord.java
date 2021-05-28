@@ -4,6 +4,7 @@ import club.sk1er.mods.core.ModCore;
 import club.sk1er.mods.core.ModCoreInstaller;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
+import io.github.dediamondpro.hycord.core.Location;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.SimpleCommand;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -15,7 +16,7 @@ import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import io.github.dediamondpro.hycord.options.SettingsHandler;
-import io.github.dediamondpro.hycord.options.gui.MoveGui;
+import io.github.dediamondpro.hycord.options.gui.GuiMove;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -29,13 +30,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.SystemUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Scanner;
+import java.util.UUID;
 
-
-@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION)
+@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION, clientSideOnly = true)
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
@@ -65,7 +68,7 @@ public class HyCord {
             } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
                 RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
             } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
-                ModCore.getInstance().getGuiHandler().open(new MoveGui());
+                ModCore.getInstance().getGuiHandler().open(new GuiMove());
             } else
                 ModCore.getInstance().getGuiHandler().open(config.gui());
         }
@@ -187,6 +190,21 @@ public class HyCord {
             }
         }
     });
+    SimpleCommand dev = new SimpleCommand("hycorddevtest", new SimpleCommand.ProcessCommandRunnable() {
+        public void processCommand(ICommandSender sender, String[] args) {
+            if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
+                SettingsHandler.locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
+                SettingsHandler.locations.put("voice users", new Location(6, 6, 75, 50, 1920, 1080));
+            } else {
+                //If you leak this you're a horrible human being
+                try {
+                    Desktop.getDesktop().browse(URI.create("https://www.youtube.com/watch?v=dQw4w9WgXcQ"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    });
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
@@ -222,6 +240,7 @@ public class HyCord {
         ClientCommandHandler.instance.registerCommand(nickList);
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
+        ClientCommandHandler.instance.registerCommand(dev);
         SettingsHandler.init();
 
         if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate())
@@ -254,18 +273,20 @@ public class HyCord {
             e.printStackTrace();
         }
     }
-}
 
-class MacWarning {
-    boolean sent = false;
+    private static class MacWarning {
 
-    @SubscribeEvent
-    void onTick(TickEvent.ClientTickEvent event) {
-        if (!sent) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
-                    "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
-                    "currently don't work on MacOs,\nthese features have been automatically disabled."));
-            sent = true;
+        private boolean sent = false;
+
+        @SubscribeEvent
+        public void onTick(TickEvent.ClientTickEvent event) {
+            if (!sent) {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
+                        "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
+                        "currently don't work on MacOS,\nthese features have been automatically disabled."));
+                sent = true;
+            }
+
         }
     }
 }

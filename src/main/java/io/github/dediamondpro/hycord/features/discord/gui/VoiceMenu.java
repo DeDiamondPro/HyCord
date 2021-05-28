@@ -1,7 +1,6 @@
 package io.github.dediamondpro.hycord.features.discord.gui;
 
 import club.sk1er.mods.core.ModCore;
-import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.voice.VoiceInputMode;
 import io.github.dediamondpro.hycord.core.TextUtils;
@@ -21,7 +20,7 @@ import java.io.IOException;
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
 
 public class VoiceMenu extends GuiScreen {
-    Minecraft mc = Minecraft.getMinecraft();
+
     private boolean selecting = false;
     private boolean editing = false;
     private int x = 0;
@@ -43,7 +42,7 @@ public class VoiceMenu extends GuiScreen {
         mc.getTextureManager().bindTexture(leave_icon);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         Gui.drawModalRectWithCustomSizedTexture(this.width - 20, 4, 0, 0, 16, 16, 16, 16);
-        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null && LobbyManager.currentUser != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
             mc.getTextureManager().bindTexture(settingsIcon);
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             Gui.drawModalRectWithCustomSizedTexture(this.width - 40, 4, 0, 0, 16, 16, 16, 16);
@@ -126,7 +125,7 @@ public class VoiceMenu extends GuiScreen {
             int amount = 2;
             if (mouseY >= 10 && mouseY <= 26) {
                 if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId) != null) {
-                    Utils.copyToClipBoard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
+                    Utils.copyToClipboard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
                 }
             } else if (mouseX >= 72 && mouseX <= 82) {
                 for (DiscordUser user : LobbyManager.users.values()) {
@@ -135,6 +134,7 @@ public class VoiceMenu extends GuiScreen {
                             discordRPC.voiceManager().setLocalMute(user.getUserId(),
                                     !discordRPC.voiceManager().isLocalMute(user.getUserId()));
                         } else {
+                            LobbyManager.setOwnData(!discordRPC.voiceManager().isSelfMute());
                             discordRPC.voiceManager().setSelfMute(
                                     !discordRPC.voiceManager().isSelfMute());
                         }
@@ -145,6 +145,7 @@ public class VoiceMenu extends GuiScreen {
             } else if (mouseX >= 124 && mouseX <= 134) {
                 for (DiscordUser user : LobbyManager.users.values()) {
                     if (mouseY >= 36 * amount - 12 + scroll && mouseY <= 36 * amount - 2 + scroll && user.getUserId() == LobbyManager.currentUser) {
+                        LobbyManager.setOwnData(!discordRPC.voiceManager().isSelfDeaf() || discordRPC.voiceManager().isSelfMute());
                         discordRPC.voiceManager().setSelfDeaf(
                                 !discordRPC.voiceManager().isSelfDeaf());
                         break;

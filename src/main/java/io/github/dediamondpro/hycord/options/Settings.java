@@ -6,7 +6,6 @@ import club.sk1er.vigilance.data.PropertyType;
 
 import java.io.File;
 
-@SuppressWarnings("unused")
 public class Settings extends Vigilant {
     @Property(
             type = PropertyType.SELECTOR,
@@ -14,7 +13,7 @@ public class Settings extends Vigilant {
             description = "Choose what type of updates you get notified for.",
             category = "General",
             subcategory = "Updates",
-            options = {"None", "Release", "Pre-Release"}
+            options = { "None", "Release", "Pre-Release" }
     )
     public static int updateChannel = 1;
 

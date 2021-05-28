@@ -62,7 +62,6 @@ public class NickNameController {
                     }
                     event.message = replacement;
                 } else {
-                    event.message = new ChatComponentText(event.message.getFormattedText().replace(element, nicknames.get(element) + Utils.getLastColor(msg.split(element)[0]))).setChatStyle(event.message.getChatStyle());
                     event.message = new ChatComponentText(event.message.getFormattedText().replace(element, replacer + Utils.getLastColor(msg.split(element)[0]))).setChatStyle(event.message.getChatStyle());
                 }
             }

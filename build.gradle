@@ -181,3 +181,4 @@ class Dependency {
 
         this.fullDep = group + ":" + name + ":" + version
     }
+}

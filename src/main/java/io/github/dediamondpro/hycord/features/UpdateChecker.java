@@ -6,8 +6,11 @@ import io.github.dediamondpro.hycord.HyCord;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.options.Settings;
 import kotlin.Unit;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
 import java.io.IOException;
@@ -33,8 +36,9 @@ public class UpdateChecker {
         return false;
     }
 
-    @Mod.EventHandler
-    public void onFMLLoadComplete(FMLLoadCompleteEvent e) {
+    @SubscribeEvent
+    public void onGuiOpen(GuiOpenEvent e) {
+        if (!(e.gui instanceof GuiMainMenu)) return;
         try {
             Notifications.INSTANCE.pushNotification("Hycord version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available", "Click here to open GitHub", UpdateChecker::openTab);
         } catch (Exception ex) {

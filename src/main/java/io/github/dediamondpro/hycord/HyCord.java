@@ -26,6 +26,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.SystemUtils;
@@ -43,6 +44,7 @@ public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
     private final Settings config = new Settings();
+    boolean requireUpdate = false;
 
     SimpleCommand mainCommand = new SimpleCommand("hycord", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
@@ -207,6 +209,15 @@ public class HyCord {
     });
 
     @EventHandler
+    public void preInit(FMLPreInitializationEvent event){
+        Thread updateCheck = new Thread(() ->{
+            requireUpdate = UpdateChecker.checkUpdate();
+            Thread.currentThread().interrupt();
+        });
+        updateCheck.start();
+    }
+
+    @EventHandler
     public void init(FMLInitializationEvent event) {
         config.preload();
         ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
@@ -243,7 +254,7 @@ public class HyCord {
         ClientCommandHandler.instance.registerCommand(dev);
         SettingsHandler.init();
 
-        if (Settings.updateChannel > 0 && UpdateChecker.checkUpdate())
+        if (requireUpdate)
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());
 
         File nickNameSave = new File("./config/HyCordNickNames.txt");

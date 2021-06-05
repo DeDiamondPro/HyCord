@@ -13,6 +13,8 @@ import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLLog;
@@ -27,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -46,15 +49,10 @@ public class RichPresence {
     public static boolean enabled = false;
     private static String joinSecret = UUID.randomUUID().toString();
     private static String partyId = UUID.randomUUID().toString();
-    //public String mainId = null;
-
-    public static String getPartyId() {
-        return partyId;
-    }
+    static boolean sent = true;
 
     public static void init() throws IOException {
         String fileName;
-        System.out.println("Setting sdk");
         if (SystemUtils.IS_OS_WINDOWS) {
             fileName = "discord_game_sdk.dll";
         /*} else if (SystemUtils.IS_OS_MAC) {
@@ -63,25 +61,27 @@ public class RichPresence {
             fileName = "discord_game_sdk.so";
         }
         String finalPath = "/hycord/libraries/game-sdk/" + fileName;
-        System.out.println(finalPath);
 
-        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName + System.nanoTime());
+        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName);
         if (!tempDir.mkdir()) {
-            throw new IOException("Could not make tmpdir");
+            System.out.println("couldn't make tempdir. Trying to continue");
         }
         tempDir.deleteOnExit();
         File temp = new File(tempDir, fileName);
         temp.deleteOnExit();
         InputStream in = RichPresence.class.getResourceAsStream(finalPath);
-        Files.copy(in, temp.toPath());
-        System.out.println(temp);
+        Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
         Core.init(temp);
     }
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
+        if(!sent && Minecraft.getMinecraft().theWorld != null){
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not initialize HyCord core, is Discord running?"));
+            sent = true;
+        }
         tickCounter++;
-        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP)
+        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP || !enabled)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -130,7 +130,7 @@ public class RichPresence {
         if (MinecraftUtils.isHypixel()) {
             CreateParams params = new CreateParams();
             params.setClientID(819625966627192864L);
-            params.setFlags(CreateParams.getDefaultFlags());
+            params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
             params.registerEventHandler(new DiscordEventAdapter() {
                 @Override
                 public void onActivityJoin(String secret) {
@@ -162,21 +162,26 @@ public class RichPresence {
                     LobbyManager.leaveHandler(userId);
                 }
             });
-            discordRPC = new Core(params);
-            FMLLog.getLogger().log(Level.INFO, "started RPC");
-            enabled = true;
-            Thread callBacks = new Thread(() -> {
-                while (enabled) {
-                    discordRPC.runCallbacks();
-                    try {
-                        Thread.sleep(16);//run callbacks at 60fps
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            try {
+                discordRPC = new Core(params);
+                FMLLog.getLogger().log(Level.INFO, "started RPC");
+                enabled = true;
+                Thread callBacks = new Thread(() -> {
+                    while (enabled) {
+                        discordRPC.runCallbacks();
+                        try {
+                            Thread.sleep(16);//run callbacks at 60fps
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-                Thread.currentThread().interrupt();
-            });
-            callBacks.start();
+                    Thread.currentThread().interrupt();
+                });
+                callBacks.start();
+            }catch (GameSDKException e){
+                System.out.println("An error occurred while trying to start the core, is Discord running?");
+                sent = false;
+            }
         }
     }
 

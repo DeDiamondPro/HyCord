@@ -4,10 +4,7 @@ import club.sk1er.mods.core.ModCore;
 import club.sk1er.mods.core.ModCoreInstaller;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
-import io.github.dediamondpro.hycord.core.Location;
-import io.github.dediamondpro.hycord.core.NetworkUtils;
-import io.github.dediamondpro.hycord.core.SimpleCommand;
-import io.github.dediamondpro.hycord.core.Utils;
+import io.github.dediamondpro.hycord.core.*;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
@@ -209,18 +206,21 @@ public class HyCord {
     });
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event){
-        Thread updateCheck = new Thread(() ->{
-            requireUpdate = UpdateChecker.checkUpdate();
-            Thread.currentThread().interrupt();
-        });
-        updateCheck.start();
+    public void preInit(FMLPreInitializationEvent event) {
+        config.preload();
+        ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
+        if(Settings.updateChannel != 0) {
+            Thread updateCheck = new Thread(() -> {
+                requireUpdate = UpdateChecker.checkUpdate();
+                Thread.currentThread().interrupt();
+            });
+            updateCheck.start();
+        }
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        config.preload();
-        ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
+        SettingsHandler.init();
 
         if (!SystemUtils.IS_OS_MAC) {
             ClientCommandHandler.instance.registerCommand(partySize);
@@ -235,7 +235,7 @@ public class HyCord {
             MinecraftForge.EVENT_BUS.register(new LobbyManager());
 
             try {
-                RichPresence.init();
+                DiscordCore.init();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -252,7 +252,6 @@ public class HyCord {
         ClientCommandHandler.instance.registerCommand(nickHelp);
         ClientCommandHandler.instance.registerCommand(getDiscord);
         ClientCommandHandler.instance.registerCommand(dev);
-        SettingsHandler.init();
 
         if (requireUpdate)
             MinecraftForge.EVENT_BUS.register(new UpdateChecker());

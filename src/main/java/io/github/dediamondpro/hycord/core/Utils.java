@@ -99,10 +99,9 @@ public class Utils {
     public static String cleanSB(String scoreboard) {
         char[] nvString = StringUtils.stripControlCodes(scoreboard).toCharArray();
         StringBuilder cleaned = new StringBuilder();
-        char sbChar = "\u23E3".charAt(0); // Added skyblock location char
 
         for (char c : nvString) {
-            if ((int) c > 20 && (int) c < 127 || c == sbChar) { //added exception for skyblock char
+            if ((int) c > 20 && (int) c < 127 || c == '\u23E3') { //added exception for skyblock char
                 cleaned.append(c);
             }
         }

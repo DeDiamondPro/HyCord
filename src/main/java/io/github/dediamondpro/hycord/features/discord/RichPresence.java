@@ -22,14 +22,8 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.Level;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -51,32 +45,9 @@ public class RichPresence {
     private static String partyId = UUID.randomUUID().toString();
     static boolean sent = true;
 
-    public static void init() throws IOException {
-        String fileName;
-        if (SystemUtils.IS_OS_WINDOWS) {
-            fileName = "discord_game_sdk.dll";
-        /*} else if (SystemUtils.IS_OS_MAC) {
-            fileName = "discord_game_sdk.dylib";*/
-        } else {
-            fileName = "discord_game_sdk.so";
-        }
-        String finalPath = "/hycord/libraries/game-sdk/" + fileName;
-
-        File tempDir = new File(System.getProperty("java.io.tmpdir"), "java-" + fileName);
-        if (!tempDir.mkdir()) {
-            System.out.println("couldn't make tempdir. Trying to continue");
-        }
-        tempDir.deleteOnExit();
-        File temp = new File(tempDir, fileName);
-        temp.deleteOnExit();
-        InputStream in = RichPresence.class.getResourceAsStream(finalPath);
-        Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        Core.init(temp);
-    }
-
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
-        if(!sent && Minecraft.getMinecraft().theWorld != null){
+        if (!sent && Minecraft.getMinecraft().theWorld != null) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not initialize HyCord core, is Discord running?"));
             sent = true;
         }
@@ -178,7 +149,7 @@ public class RichPresence {
                     Thread.currentThread().interrupt();
                 });
                 callBacks.start();
-            }catch (GameSDKException e){
+            } catch (GameSDKException e) {
                 System.out.println("An error occurred while trying to start the core, is Discord running?");
                 sent = false;
             }

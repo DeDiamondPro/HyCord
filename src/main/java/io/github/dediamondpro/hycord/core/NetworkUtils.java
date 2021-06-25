@@ -3,10 +3,13 @@ package io.github.dediamondpro.hycord.core;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class NetworkUtils {
@@ -41,5 +44,17 @@ public class NetworkUtils {
         if (response == null)
             return null;
         return response.getAsJsonObject().get("id").getAsString();
+    }
+
+    public static BufferedImage getImg(String imgUrl) {
+        try {
+            URL url = new URL(imgUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.addRequestProperty("User-Agent", "HyCord");
+            return ImageIO.read(con.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -4,6 +4,7 @@ import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.*;
 import de.jcm.discordgamesdk.user.DiscordUser;
+import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
@@ -27,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
@@ -77,14 +79,7 @@ public class LobbyManager {
                     users.put(id, discordUser);
                     talkingData.put(id, false);
                     if (!pictures.containsKey(id)) {
-                        try {
-                            URL url = new URL("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64");
-                            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                            con.addRequestProperty("User-Agent", "");
-                            bufferedPictures.put(id, ImageIO.read(con.getInputStream()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        bufferedPictures.put(id, Objects.requireNonNull(NetworkUtils.getImg("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64")));
                     }
                 }
             });
@@ -98,14 +93,7 @@ public class LobbyManager {
                 users.put(userId, discordUser);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                         + EnumChatFormatting.GREEN + discordUser.getUsername() + "#" + discordUser.getDiscriminator() + " joined the voice chat"));
-                try {
-                    URL url = new URL("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.addRequestProperty("User-Agent", "");
-                    bufferedPictures.put(discordUser.getUserId(), ImageIO.read(con.getInputStream()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                bufferedPictures.put(discordUser.getUserId(), Objects.requireNonNull(NetworkUtils.getImg("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64")));
             }
         });
     }
@@ -131,7 +119,7 @@ public class LobbyManager {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (!Utils.isHypixel()) return;
+        if (!Utils.isHypixel() || lobbyId == null) return;
         if (Keyboard.isKeyDown(Keyboard.KEY_M) && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
             if (!pressed) {
                 setOwnData(!discordRPC.voiceManager().isSelfMute());

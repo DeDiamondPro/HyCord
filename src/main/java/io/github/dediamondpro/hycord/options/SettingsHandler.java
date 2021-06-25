@@ -13,10 +13,14 @@ public class SettingsHandler {
     public static final ConcurrentHashMap<String, Location> locations = new ConcurrentHashMap<>();
 
     public static void init() {
+        System.out.println("Initializing settings menu.");
+        File dir = new File("config/HyCord");
+        System.out.print("Making dir: " + dir.mkdir());
+
         locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
         locations.put("voice users", new Location(6,6,75,50,1920,1080));
 
-        File configFile = new File("./config/HyCordConfig.txt");
+        File configFile = new File("config/HyCord/HyCordConfig.txt");
         try {
             if (configFile.createNewFile()) {
                 System.out.println("File created: " + configFile.getName());
@@ -47,7 +51,7 @@ public class SettingsHandler {
 
     public static void save() {
         try {
-            FileWriter writer = new FileWriter("./config/HyCordConfig.txt");
+            FileWriter writer = new FileWriter("config/HyCordConfig.txt");
             for (String str : locations.keySet()) {
                 writer.write(str + ":" + locations.get(str).toString() + System.lineSeparator());
             }

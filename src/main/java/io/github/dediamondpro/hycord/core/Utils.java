@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    private static final Pattern getNamePattern = Pattern.compile("(.*)(\\[(?!NPC).*] |§[a-z0-9])(?<username>[a-zA-Z0-9_]{3,16})( ?)(§[a-z0-9]|healed)+(.+)");
+    private static final Pattern getNamePattern = Pattern.compile("(.*)(?<rank>\\[(MVP((§[a-z0-9])?(\\+)){0,2}(§[a-z0-9])?|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)]|(§7))( )?(?<username>[a-zA-Z0-9_]{3,16})(§[a-z0-9])(.*)");
 
     public static boolean isHypixel() {
         Minecraft mc = Minecraft.getMinecraft();

@@ -25,8 +25,6 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.logging.log4j.Level;
 
 import java.time.Instant;
 import java.util.List;
@@ -46,7 +44,7 @@ public class RichPresence {
     String imageText = "";
     String gameMode = "";
     public static boolean enabled = false;
-    private static String joinSecret = RandomStringUtils.randomAlphanumeric(64);
+    private static String joinSecret = Utils.randomAlphaNumeric(64);
     public static String partyId = UUID.randomUUID().toString();
     static boolean sent = true;
 
@@ -146,7 +144,7 @@ public class RichPresence {
             });
             try {
                 discordRPC = new Core(params);
-                FMLLog.getLogger().log(Level.INFO, "started RPC");
+                System.out.println("started sdk");
                 enabled = true;
                 Thread callBacks = new Thread(() -> {
                     while (enabled) {
@@ -280,7 +278,7 @@ public class RichPresence {
         if(msg.startsWith(joinSecret)){
             String[] split = msg.split(":",2);
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + split[1]);
-            joinSecret = RandomStringUtils.random(64);
+            joinSecret = Utils.randomAlphaNumeric(64);
         }
     }
 }

@@ -19,10 +19,12 @@ public class JoinHandler {
     public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
 
     public static void Handler(String msg) {
-        String[] split = msg.split(":", 3);
+        String[] split = msg.split("&", 3);
+        System.out.println(msg);
         if (split.length != 3) return;
         RichPresence.discordRPC.lobbyManager().connectLobbyWithActivitySecret(split[0], (result, lobby) -> {
             if (result != Result.OK) {
+                System.out.println(result);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party."));
                 return;
             }
@@ -30,7 +32,7 @@ public class JoinHandler {
                 RichPresence.discordRPC.lobbyManager().disconnectLobby(LobbyManager.partyLobbyId);
             LobbyManager.partyLobbyId = lobby.getId();
             inviting = split[2];
-            String info = split[1] + ":" + Minecraft.getMinecraft().thePlayer.getName();
+            String info = split[1] + "&" + Minecraft.getMinecraft().thePlayer.getName();
             RichPresence.discordRPC.lobbyManager().sendLobbyMessage(lobby, info.getBytes(StandardCharsets.UTF_8), (result1 -> {
                 if(result1 != Result.OK){
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party."));

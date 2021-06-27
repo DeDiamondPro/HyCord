@@ -267,7 +267,7 @@ public class RichPresence {
             activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
             if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null)
-                activity.secrets().setJoinSecret(LobbyManager.partyLobbyId + ":" + joinSecret + ":" + Minecraft.getMinecraft().thePlayer.getName());
+                activity.secrets().setJoinSecret(LobbyManager.partyLobbyId + "&" + joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName());
             discordRPC.activityManager().updateActivity(activity);
         }
     }
@@ -276,7 +276,7 @@ public class RichPresence {
         if(lobbId != LobbyManager.partyLobbyId)return;
         String msg = new String(data);
         if(msg.startsWith(joinSecret)){
-            String[] split = msg.split(":",2);
+            String[] split = msg.split("&",2);
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + split[1]);
             joinSecret = Utils.randomAlphaNumeric(64);
         }

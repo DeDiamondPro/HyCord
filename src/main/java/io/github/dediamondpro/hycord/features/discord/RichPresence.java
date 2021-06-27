@@ -28,6 +28,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RichPresence {
 
@@ -44,6 +46,16 @@ public class RichPresence {
     private static String joinSecret = UUID.randomUUID().toString();
     private static String partyId = UUID.randomUUID().toString();
     static boolean sent = true;
+
+    public static Pattern partyListRegex = Pattern.compile("(§6Party Members \\(|§eLooting §r§cThe Catacombs Entrance §r§ewith §r§9)(?<users>[0-9]+)(\\)§r|/5 players§r§e!§r)");
+    public static Pattern disbandRegex = Pattern.compile("§cThe party was disbanded because all invites expired and the party was empty§r|(§eYou have been kicked from the party by (§r)?)?§[a-z0-9](\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ([a-zA-Z0-9_]{3,16}) (§r§ehas disbanded the party!|§r§e)§r|§eYou left the party\\.§r|§cThe party was disbanded because the party leader disconnected\\.§r");
+    public static Pattern aloneRegex = Pattern.compile("§cYou are not currently in a party\\.§r");
+    public static Pattern promoteRegex = Pattern.compile("((§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ([a-zA-Z0-9_]{3,16})§r§e has promoted|§eThe party was transferred to) §r(§[a-z0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<user>[a-zA-Z0-9_]{3,16})( §r§eto Party (Moderator|Leader)| §r§eby §r(§[a-z0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?([a-zA-Z0-9_]{3,16}))§r");
+    public static Pattern demoteRegex = Pattern.compile("(§[a-z0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ([a-zA-Z0-9_]{3,16})§r§e has demoted (§r)?(§[a-z0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) (?<user>[a-zA-Z0-9_]{3,16}) §r§eto Party Member§r");
+    public static Pattern joinRegex = Pattern.compile("(§dDungeon Finder §r§f> §r)?(§[a-b0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))?( )?(?<user>[a-zA-Z0-9_]{3,16}) §r§ejoined the (dungeon group! \\(§r§b(Berserk|Tank|Healer|Mage|Archer) Level [0-9]+§r§e\\)|party\\.)§r");
+    public static Pattern leaveRegex = Pattern.compile("(§[a-z0-9])?(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<user>[a-zA-Z0-9_]{3,16}) (§r§ehas left the party\\.|§r§ewas removed from your party because they disconnected|§r§ehas been removed from the party\\.)§r");
+    public static Pattern joinedRegex = Pattern.compile("§eYou have joined (§r)?(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<user>[a-zA-Z0-9_]{3,16})'s §r§eparty!§r");
+    public static Pattern partyWith = Pattern.compile("§eYou'll be partying with: ((§r)(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ?(?<user>[a-zA-Z0-9_]{3,16})§r(§e, )?)+");
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -84,16 +96,6 @@ public class RichPresence {
         else
             secondLine = "On Hypixel";
         gameMode = "";
-        /*if(mainId == null){
-            LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
-            transaction.setType(LobbyType.PUBLIC);
-            transaction.setCapacity(100);
-            transaction.setLocked(false);
-            transaction.setOwner(336764548017291265L);
-            transaction.setMetadata(RichPresence.getPartyId(), RichPresence.getPartyId());
-
-            discordRPC.lobbyManager().createLobby(transaction, System.out::println);
-        }*/
     }
 
     @SubscribeEvent
@@ -174,7 +176,13 @@ public class RichPresence {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     void onMsg(ClientChatReceivedEvent event) {
+        if (event.type != 0) return;
         String msg = event.message.getFormattedText();
+        Matcher pListMatcher = partyListRegex.matcher(msg);
+        Matcher promoteMatcher = promoteRegex.matcher(msg);
+        Matcher demoteMatcher = demoteRegex.matcher(msg);
+        Matcher joinMatcher = joinRegex.matcher(msg);
+        System.out.println(msg);
         if (msg.contains("HyCordPId&") && (msg.startsWith("§dFrom") || msg.startsWith("§r§dFrom") || msg.startsWith("§dTo") || msg.startsWith("§r§dTo"))) {
             String[] id = event.message.getUnformattedText().split("&");
             if (id[1].length() == 36) {
@@ -189,89 +197,55 @@ public class RichPresence {
             joinSecret = UUID.randomUUID().toString();
             updateRPC();
             event.setCanceled(true);
-        } else if (msg.startsWith("§6Party Members (")) {
-            String[] amount = msg.split("[()]");
-            partyMembers = Integer.parseInt(amount[1]);
+        } else if (pListMatcher.matches()) {
+            partyMembers = Integer.parseInt(pListMatcher.group("users"));
             secondLine = "In a party";
-        } else if (msg.startsWith("§cThe party was disbanded because all invites expired and the party was empty")) {
+            System.out.println("list");
+        } else if (disbandRegex.matcher(msg).matches()) {
             partyMembers = 1;
             canInvite = true;
             partyId = UUID.randomUUID().toString();
             secondLine = "On Hypixel";
-        } else if (msg.endsWith("§r§ehas disbanded the party!§r")) {
-            partyMembers = 1;
-            canInvite = true;
-            partyId = UUID.randomUUID().toString();
-            secondLine = "On Hypixel";
-        } else if (msg.endsWith("§r§ejoined the party.§r")) {
+            System.out.println("disband");
+        } else if (joinMatcher.matches()) {
             partyMembers++;
-            if (invited != null && msg.contains(invited)) {
+            secondLine = "In a party";
+            if (joinMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
+                canInvite = false;
+                partyId = UUID.randomUUID().toString();
+            } else if (joinMatcher.group("user").equals(invited)) {
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/msg " + invited + " " + UUID.randomUUID() + " HyCordPId&" + partyId);//first random uuid is to bypass you can't send the same message twice
                 invited = null;
             }
-            secondLine = "In a party";
-        } else if (msg.endsWith("§r§ehas left the party.§r")) {
+            System.out.println("join");
+        } else if (leaveRegex.matcher(msg).matches()) {
             partyMembers--;
             secondLine = "In a party";
-        } else if (msg.startsWith("§eYou left the party.§r")) {
-            partyMembers = 1;
-            canInvite = true;
-            partyId = UUID.randomUUID().toString();
-            secondLine = "On Hypixel";
-        } else if (msg.startsWith("§eYou have joined") && msg.endsWith("§r§eparty!§r")) {
+            System.out.println("leave");
+        } else if (joinedRegex.matcher(msg).matches()) {
             partyMembers = 2;
             canInvite = false;
             partyId = UUID.randomUUID().toString();
             secondLine = "In a party";
-        } else if (msg.contains("has promoted") && msg.contains("§r§eto Party Moderator§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
+            System.out.println("joined");
+        } else if (promoteMatcher.matches() && promoteMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
             secondLine = "In a party";
-        } else if (msg.contains("has demoted") && msg.contains("§r§eto Party Member§r") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
+            System.out.println("promote");
+        } else if (demoteMatcher.matches() && demoteMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
             secondLine = "In a party";
-        } else if (msg.startsWith("§eThe party was transferred to") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            canInvite = true;
-            secondLine = "In a party";
-        } else if (msg.endsWith("§r§ewas removed from the party because they disconnected§r")) {
-            partyMembers--;
-            secondLine = "In a party";
+            System.out.println("demote");
         } else if (msg.startsWith("§eYou'll be partying with:")) {
             partyMembers = 3;
             for (int i = 0; i < msg.length(); i++)
                 if (msg.charAt(i) == ',')
                     partyMembers++;
             secondLine = "In a party";
-        } else if (msg.startsWith("§eYou have been kicked from the party by")) {
-            partyMembers = 1;
-            canInvite = true;
-            partyId = UUID.randomUUID().toString();
-            secondLine = "On Hypixel";
-        } else if (msg.endsWith("§r§ehas been removed from the party.§r")) {
-            partyMembers--;
-            secondLine = "In a party";
-        } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!") && msg.contains(Minecraft.getMinecraft().thePlayer.getName())) {
-            canInvite = false;
-            partyMembers++;
-            partyId = UUID.randomUUID().toString();
-            secondLine = "In a party";
-        } else if (msg.startsWith("§dDungeon Finder §r§f>") && msg.contains("§r§ejoined the dungeon group!")) {
-            partyMembers++;
-            secondLine = "In a party";
-        } else if (msg.startsWith("§eLooting §r§cThe Catacombs §r§ewith")) {
-            String[] message = msg.split("[9/]");
-            partyMembers = Integer.parseInt(message[1]);
-            secondLine = "In a party";
-        } else if (msg.equals("§cYou are not currently in a party.§r")) {
+        } else if (aloneRegex.matcher(msg).matches()) {
             partyMembers = 1;
             canInvite = true;
             secondLine = "On Hypixel";
-        } else if (msg.equals("§cThe party was disbanded because the party leader disconnected.§r")) {
-            partyMembers = 1;
-            canInvite = true;
-            secondLine = "On Hypixel";
-            partyId = UUID.randomUUID().toString();
-        } else if (msg.endsWith("because they were offline.§r") && msg.startsWith("§eKicked")) {
-            partyMembers += -1;
         }
     }
 

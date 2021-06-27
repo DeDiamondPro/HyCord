@@ -184,6 +184,8 @@ public class HyCord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (LobbyManager.lobbyId != null) {
                 ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+            } else if(args.length > 0){
+                LobbyManager.joinSecret(args[0]);
             } else {
                 ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
             }

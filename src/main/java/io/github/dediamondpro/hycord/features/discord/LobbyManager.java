@@ -46,6 +46,7 @@ public class LobbyManager {
     public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
+    public static Long partyLobbyId = null;
 
     //Filters for VoiceBrowser.java
     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
@@ -86,7 +87,8 @@ public class LobbyManager {
         }
     }
 
-    public static void joinHandler(Long userId) {
+    public static void joinHandler(Long userId, long id) {
+        if (lobbyId != id) return;
         talkingData.put(userId, false);
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
             if (result == Result.OK) {
@@ -103,7 +105,8 @@ public class LobbyManager {
         System.out.println(userId + " speaking: " + speaking);
     }
 
-    public static void leaveHandler(Long userId) {
+    public static void leaveHandler(Long userId, long id) {
+        if (lobbyId != id) return;
         if (userId.equals(currentUser)) {
             talkingData.clear();
             users.clear();
@@ -265,5 +268,30 @@ public class LobbyManager {
         LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
         memberTransaction.setMetadata("mute", String.valueOf(muted));
         discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction);
+    }
+
+    public static void createPartyLobby(String partyId) {
+        System.out.println("creating party lobby");
+        if (partyLobbyId != null) {
+            discordRPC.lobbyManager().disconnectLobby(partyLobbyId);
+            partyLobbyId = null;
+        }
+        LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
+        transaction.setCapacity(100);
+        transaction.setLocked(false);
+        transaction.setType(LobbyType.PRIVATE);
+        transaction.setMetadata("type", "party");
+        transaction.setMetadata("partyId", partyId);
+
+        discordRPC.lobbyManager().createLobby(transaction, LobbyManager::createPartyLobbyCallback);
+    }
+
+    public static void createPartyLobbyCallback(Result result, Lobby lobby) {
+        if (result != Result.OK) {
+            System.out.println("failed to create party lobby");
+            return;
+        }
+        System.out.println("created party lobby");
+        partyLobbyId = lobby.getId();
     }
 }

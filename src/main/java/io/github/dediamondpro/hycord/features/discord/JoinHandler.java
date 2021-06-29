@@ -27,7 +27,6 @@ public class JoinHandler {
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party: " + result));
                 return;
             }
-            System.out.println(result);
             if(LobbyManager.partyLobbyId != null) {
                 RichPresence.discordRPC.lobbyManager().disconnectLobby(LobbyManager.partyLobbyId);
                 LobbyManager.partyLobbyId = null;
@@ -40,9 +39,7 @@ public class JoinHandler {
                 if(result1 != Result.OK){
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party: " + result));
                     System.out.println(result1);
-                    return;
                 }
-                RichPresence.partyId = RichPresence.discordRPC.lobbyManager().getLobbyMetadata(lobby).get("partyId");
             }));
         });
     }

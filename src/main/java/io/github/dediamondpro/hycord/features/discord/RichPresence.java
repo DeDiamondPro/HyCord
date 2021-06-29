@@ -192,7 +192,6 @@ public class RichPresence {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     void onMsg(ClientChatReceivedEvent event) {
         if (event.type != 0) return;
-        long time = System.nanoTime();
         String msg = event.message.getFormattedText();
         Matcher pListMatcher = partyListRegex.matcher(msg);
         Matcher promoteMatcher = promoteRegex.matcher(msg);
@@ -257,17 +256,15 @@ public class RichPresence {
                         .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/voice " + voiceMatcher.group("id")))));
                 message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + " to join."));
                 Minecraft.getMinecraft().thePlayer.addChatMessage(message);
-            } else { //if (JoinHandler.inviting != null) {
+            } else if (JoinHandler.inviting != null) {
                 Matcher matcher = invitedRegex.matcher(event.message.getUnformattedText());
-                if (matcher.matches()) System.out.println(matcher);
-                else System.out.println("no match :d");
                 if (matcher.matches() && matcher.group("user").equals(JoinHandler.inviting)) {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + JoinHandler.inviting);
                     JoinHandler.inviting = null;
+                    RichPresence.partyId = RichPresence.discordRPC.lobbyManager().getLobbyMetadata(LobbyManager.partyLobbyId).get("partyId");
                 }
             }
         }
-        System.out.println("done, took " + (System.nanoTime() - time)+ " nanoseconds");
     }
 
     private void updateRPC() {

@@ -34,7 +34,6 @@ public class JoinHandler {
             LobbyManager.partyLobbyId = lobby.getId();
             inviting = split[2];
             String info = split[0] + "&" + Minecraft.getMinecraft().thePlayer.getName();
-            System.out.println(info);
             RichPresence.discordRPC.lobbyManager().sendLobbyMessage(lobby, info.getBytes(StandardCharsets.UTF_8), (result1 -> {
                 if(result1 != Result.OK){
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party: " + result));

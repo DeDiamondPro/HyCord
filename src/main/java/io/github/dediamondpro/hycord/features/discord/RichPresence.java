@@ -197,7 +197,6 @@ public class RichPresence {
         Matcher promoteMatcher = promoteRegex.matcher(msg);
         Matcher demoteMatcher = demoteRegex.matcher(msg);
         Matcher joinMatcher = joinRegex.matcher(msg);
-        System.out.println(msg);
         if (pListMatcher.matches()) {
             partyMembers = Integer.parseInt(pListMatcher.group("users"));
             secondLine = "In a party";
@@ -261,7 +260,7 @@ public class RichPresence {
                 if (matcher.matches() && matcher.group("user").equals(JoinHandler.inviting)) {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + JoinHandler.inviting);
                     JoinHandler.inviting = null;
-                    RichPresence.partyId = RichPresence.discordRPC.lobbyManager().getLobbyMetadata(LobbyManager.partyLobbyId).get("partyId");
+                    partyId = discordRPC.lobbyManager().getLobbyMetadata(LobbyManager.partyLobbyId).get("partyId");
                 }
             }
         }
@@ -277,17 +276,13 @@ public class RichPresence {
             activity.assets().setLargeText(imageText);
             activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
-            if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null) {
+            if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null)
                 activity.secrets().setJoinSecret("%%%%" + joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
-                //System.out.println(joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
-            }
             discordRPC.activityManager().updateActivity(activity);
         }
     }
 
     public static void handleMsg(long lobbId, byte[] data) {
-        System.out.println(Arrays.toString(data));
-        System.out.println(new String(data));
         if (lobbId != LobbyManager.partyLobbyId) return;
         String msg = new String(data).replaceAll("%", "");
         if (msg.startsWith(joinSecret)) {

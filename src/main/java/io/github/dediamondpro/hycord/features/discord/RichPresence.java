@@ -6,6 +6,7 @@ import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.DiscordEventAdapter;
 import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.activity.Activity;
+import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -27,6 +28,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -58,6 +60,7 @@ public class RichPresence {
     public static Pattern joinedRegex = Pattern.compile("§eYou have joined (§r)?(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<user>[a-zA-Z0-9_]{3,16})'s §r§eparty!§r");
     public static Pattern partyWith = Pattern.compile("§eYou'll be partying with: ((§r)(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ?(?<user>[a-zA-Z0-9_]{3,16})§r(§e, )?)+");
     public static Pattern voiceRegex = Pattern.compile("(.*)(?<id>([0-9]{18})(:)([a-z0-9]{16}))(.*)");
+    public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -103,6 +106,7 @@ public class RichPresence {
     @SubscribeEvent
     void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         if (MinecraftUtils.isHypixel()) {
+            partyId = UUID.randomUUID().toString();
             CreateParams params = new CreateParams();
             params.setClientID(819625966627192864L);
             params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
@@ -188,6 +192,7 @@ public class RichPresence {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     void onMsg(ClientChatReceivedEvent event) {
         if (event.type != 0) return;
+        long time = System.nanoTime();
         String msg = event.message.getFormattedText();
         Matcher pListMatcher = partyListRegex.matcher(msg);
         Matcher promoteMatcher = promoteRegex.matcher(msg);
@@ -252,8 +257,17 @@ public class RichPresence {
                         .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/voice " + voiceMatcher.group("id")))));
                 message.appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + " to join."));
                 Minecraft.getMinecraft().thePlayer.addChatMessage(message);
+            } else { //if (JoinHandler.inviting != null) {
+                Matcher matcher = invitedRegex.matcher(event.message.getUnformattedText());
+                if (matcher.matches()) System.out.println(matcher);
+                else System.out.println("no match :d");
+                if (matcher.matches() && matcher.group("user").equals(JoinHandler.inviting)) {
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + JoinHandler.inviting);
+                    JoinHandler.inviting = null;
+                }
             }
         }
+        System.out.println("done, took " + (System.nanoTime() - time)+ " nanoseconds");
     }
 
     private void updateRPC() {
@@ -266,17 +280,21 @@ public class RichPresence {
             activity.assets().setLargeText(imageText);
             activity.party().setID(partyId);
             activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
-            if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null)
-                activity.secrets().setJoinSecret(LobbyManager.partyLobbyId + "&" + joinSecret + "&" + Minecraft.getMinecraft().thePlayer.getName());
+            if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null) {
+                activity.secrets().setJoinSecret("%%%%" + joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
+                //System.out.println(joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
+            }
             discordRPC.activityManager().updateActivity(activity);
         }
     }
 
     public static void handleMsg(long lobbId, byte[] data) {
-        if(lobbId != LobbyManager.partyLobbyId)return;
-        String msg = new String(data);
-        if(msg.startsWith(joinSecret)){
-            String[] split = msg.split("&",2);
+        System.out.println(Arrays.toString(data));
+        System.out.println(new String(data));
+        if (lobbId != LobbyManager.partyLobbyId) return;
+        String msg = new String(data).replaceAll("%", "");
+        if (msg.startsWith(joinSecret)) {
+            String[] split = msg.split("&", 2);
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + split[1]);
             joinSecret = Utils.randomAlphaNumeric(64);
         }

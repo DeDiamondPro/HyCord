@@ -15,42 +15,35 @@ import java.util.regex.Pattern;
 
 public class JoinHandler {
 
-    private static String inviting = null;
-    public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
+    public static String inviting = null;
 
     public static void Handler(String msg) {
         String[] split = msg.split("&", 3);
         System.out.println(msg);
         if (split.length != 3) return;
-        RichPresence.discordRPC.lobbyManager().connectLobbyWithActivitySecret(split[0], (result, lobby) -> {
+        RichPresence.discordRPC.lobbyManager().connectLobbyWithActivitySecret(split[1], (result, lobby) -> {
             if (result != Result.OK) {
                 System.out.println(result);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party."));
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party: " + result));
                 return;
             }
-            if(LobbyManager.partyLobbyId != null)
+            System.out.println(result);
+            if(LobbyManager.partyLobbyId != null) {
                 RichPresence.discordRPC.lobbyManager().disconnectLobby(LobbyManager.partyLobbyId);
+                LobbyManager.partyLobbyId = null;
+            }
             LobbyManager.partyLobbyId = lobby.getId();
             inviting = split[2];
-            String info = split[1] + "&" + Minecraft.getMinecraft().thePlayer.getName();
+            String info = split[0] + "&" + Minecraft.getMinecraft().thePlayer.getName();
+            System.out.println(info);
             RichPresence.discordRPC.lobbyManager().sendLobbyMessage(lobby, info.getBytes(StandardCharsets.UTF_8), (result1 -> {
                 if(result1 != Result.OK){
-                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party."));
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to join party: " + result));
+                    System.out.println(result1);
                     return;
                 }
                 RichPresence.partyId = RichPresence.discordRPC.lobbyManager().getLobbyMetadata(lobby).get("partyId");
             }));
         });
-    }
-
-    @SubscribeEvent
-    public void onMsg(ClientChatReceivedEvent event) {
-        if (inviting == null)
-            return;
-        Matcher matcher = invitedRegex.matcher(event.message.getUnformattedText());
-        if(matcher.matches() && matcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())){
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/p accept " + inviting);
-            inviting = null;
-        }
     }
 }

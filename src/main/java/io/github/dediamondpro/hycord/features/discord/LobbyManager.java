@@ -88,7 +88,8 @@ public class LobbyManager {
     }
 
     public static void joinHandler(Long userId, long id) {
-        if (lobbyId != id) return;
+        System.out.println(userId);
+        if (lobbyId == null || lobbyId != id) return;
         talkingData.put(userId, false);
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
             if (result == Result.OK) {
@@ -255,7 +256,7 @@ public class LobbyManager {
     public static void joinSecret(String secret) {
         discordRPC.lobbyManager().connectLobbyWithActivitySecret(secret, (result, lobby) -> {
             if (result != Result.OK) {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat"));
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
                 Minecraft.getMinecraft().displayGuiScreen(null);
             } else {
                 startVoice(result, lobby);

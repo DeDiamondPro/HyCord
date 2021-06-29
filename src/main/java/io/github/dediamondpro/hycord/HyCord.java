@@ -194,8 +194,8 @@ public class HyCord {
     SimpleCommand dev = new SimpleCommand("hycorddevtest", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
-                SettingsHandler.locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
-                SettingsHandler.locations.put("voice users", new Location(6, 6, 75, 50, 1920, 1080));
+                LobbyManager.createPartyLobby("0b4d470f-f2fb-4874-9334-1eaef8ba4804");
+                System.out.println(RichPresence.discordRPC.lobbyManager().getLobby(LobbyManager.partyLobbyId).toString());
             } else {
                 //If you leak this you're a horrible human being
                 try {
@@ -232,7 +232,6 @@ public class HyCord {
             ClientCommandHandler.instance.registerCommand(getStatus);
             ClientCommandHandler.instance.registerCommand(voice);
 
-            MinecraftForge.EVENT_BUS.register(new JoinHandler());
             MinecraftForge.EVENT_BUS.register(new RichPresence());
             MinecraftForge.EVENT_BUS.register(new LobbyManager());
 

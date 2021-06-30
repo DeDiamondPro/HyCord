@@ -1,12 +1,10 @@
 package io.github.dediamondpro.hycord.features.discord;
 
-import club.sk1er.mods.core.util.MinecraftUtils;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.DiscordEventAdapter;
 import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.activity.Activity;
-import de.jcm.discordgamesdk.lobby.Lobby;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
 import io.github.dediamondpro.hycord.core.Utils;
@@ -21,14 +19,12 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -48,6 +44,7 @@ public class RichPresence {
     public static boolean enabled = false;
     private static String joinSecret = Utils.randomAlphaNumeric(64);
     public static String partyId = UUID.randomUUID().toString();
+    static boolean initializedRpc;
     static boolean sent = true;
 
     public static Pattern partyListRegex = Pattern.compile("(§6Party Members \\(|§e(Looting|Visiting|Adventuring|Exploring) §r§cThe Catacombs( Entrance)? §r§ewith §r§9)(?<users>[0-9]+)(\\)§r|/5 players( §r§eon §r§6Floor [IV]+)?§r§e!§r)");
@@ -64,6 +61,10 @@ public class RichPresence {
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
+        if (!initializedRpc && Utils.isHypixel()) {
+            initializeRpc();
+            initializedRpc = true;
+        }
         if (!sent && Minecraft.getMinecraft().theWorld != null) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not initialize HyCord core, is Discord running?"));
             sent = true;
@@ -92,6 +93,70 @@ public class RichPresence {
         updateRPC();
     }
 
+    private void initializeRpc() {
+        partyId = UUID.randomUUID().toString();
+        CreateParams params = new CreateParams();
+        params.setClientID(819625966627192864L);
+        params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
+        params.registerEventHandler(new DiscordEventAdapter() {
+            @Override
+            public void onActivityJoin(String secret) {
+                JoinHandler.Handler(secret);
+            }
+
+            @Override
+            public void onActivityJoinRequest(DiscordUser user) {
+                JoinRequestHandler.handle(user);
+            }
+
+            @Override
+            public void onRelationshipUpdate(Relationship relationship) {
+                RelationshipHandler.handle(relationship);
+            }
+
+            @Override
+            public void onSpeaking(long lobbyId, long userId, boolean speaking) {
+                LobbyManager.talkHandler(userId, speaking);
+            }
+
+            @Override
+            public void onMemberConnect(long lobbyId, long userId) {
+                LobbyManager.joinHandler(userId, lobbyId);
+            }
+
+            @Override
+            public void onMemberDisconnect(long lobbyId, long userId) {
+                LobbyManager.leaveHandler(userId, lobbyId);
+            }
+
+            @Override
+            public void onLobbyMessage(long lobbyId, long userId, byte[] data) {
+                handleMsg(lobbyId, data);
+            }
+        });
+        try {
+            discordRPC = new Core(params);
+            System.out.println("started sdk");
+            enabled = true;
+            Thread callBacks = new Thread(() -> {
+                while (enabled) {
+                    discordRPC.runCallbacks();
+                    try {
+                        Thread.sleep(16);//run callbacks at 60fps
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Thread.currentThread().interrupt();
+            });
+            callBacks.start();
+        } catch (GameSDKException e) {
+            System.out.println("An error occurred while trying to start the core, is Discord running?");
+            sent = false;
+        }
+        LobbyManager.createPartyLobby(partyId);
+    }
+
     @SubscribeEvent
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
@@ -104,82 +169,14 @@ public class RichPresence {
     }
 
     @SubscribeEvent
-    void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        if (MinecraftUtils.isHypixel()) {
-            partyId = UUID.randomUUID().toString();
-            CreateParams params = new CreateParams();
-            params.setClientID(819625966627192864L);
-            params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
-            params.registerEventHandler(new DiscordEventAdapter() {
-                @Override
-                public void onActivityJoin(String secret) {
-                    JoinHandler.Handler(secret);
-                }
-
-                @Override
-                public void onActivityJoinRequest(DiscordUser user) {
-                    JoinRequestHandler.handle(user);
-                }
-
-                @Override
-                public void onRelationshipUpdate(Relationship relationship) {
-                    RelationshipHandler.Handler(relationship);
-                }
-
-                @Override
-                public void onSpeaking(long lobbyId, long userId, boolean speaking) {
-                    LobbyManager.talkHandler(userId, speaking);
-                }
-
-                @Override
-                public void onMemberConnect(long lobbyId, long userId) {
-                    LobbyManager.joinHandler(userId, lobbyId);
-                }
-
-                @Override
-                public void onMemberDisconnect(long lobbyId, long userId) {
-                    LobbyManager.leaveHandler(userId, lobbyId);
-                }
-
-                @Override
-                public void onLobbyMessage(long lobbyId, long userId, byte[] data) {
-                    handleMsg(lobbyId, data);
-                }
-            });
-            try {
-                discordRPC = new Core(params);
-                System.out.println("started sdk");
-                enabled = true;
-                Thread callBacks = new Thread(() -> {
-                    while (enabled) {
-                        discordRPC.runCallbacks();
-                        try {
-                            Thread.sleep(16);//run callbacks at 60fps
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Thread.currentThread().interrupt();
-                });
-                callBacks.start();
-            } catch (GameSDKException e) {
-                System.out.println("An error occurred while trying to start the core, is Discord running?");
-                sent = false;
-            }
-            LobbyManager.createPartyLobby(partyId);
-        }
-    }
-
-    @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         if (enabled) {
             if (LobbyManager.lobbyId != null) {
                 discordRPC.lobbyManager().disconnectVoice(LobbyManager.lobbyId, System.out::println);
                 discordRPC.lobbyManager().disconnectLobby(LobbyManager.lobbyId, System.out::println);
             }
-            if (LobbyManager.partyLobbyId != null) {
+            if (LobbyManager.partyLobbyId != null)
                 discordRPC.lobbyManager().disconnectLobby(LobbyManager.partyLobbyId, System.out::println);
-            }
             try {
                 discordRPC.close();
             } catch (GameSDKException e) {

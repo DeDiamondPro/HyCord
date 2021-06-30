@@ -9,7 +9,6 @@ import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -18,7 +17,7 @@ public class RelationshipHandler {
 
     private static final HashMap<Long, Relationship> cache = new HashMap<>();
 
-    public static void Handler(Relationship relation) {
+    public static void handle(Relationship relation) {
         Relationship previous = cache.get(relation.getUser().getUserId());
 
         if ((previous == null || previous.getPresence().getStatus() != relation.getPresence().getStatus()) && Settings.enableFriendNotifs
@@ -48,21 +47,17 @@ public class RelationshipHandler {
         return new ChatComponentText(EnumChatFormatting.RED + "No status found");
     }
 
-    @NotNull
     private static ChatComponentText getChatComponents(Relationship element) {
         ChatComponentText statusText = new ChatComponentText(EnumChatFormatting.BLUE + element.getUser().getUsername() + "#" +
                 element.getUser().getDiscriminator() + "'s status:");
         statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "Status: " + element.getPresence().getStatus().toString().toLowerCase(Locale.ROOT)));
-        if (!element.getPresence().getActivity().getName().equals("") && element.getPresence().getActivity().getType() != ActivityType.CUSTOM) {
+        if (!element.getPresence().getActivity().getName().equals("") && element.getPresence().getActivity().getType() != ActivityType.CUSTOM)
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getType().toString().charAt(0) +
                     element.getPresence().getActivity().getType().toString().substring(1).toLowerCase(Locale.ROOT) + " " + element.getPresence().getActivity().getName()));
-        }
-        if (!element.getPresence().getActivity().getDetails().equals("")) {
+        if (!element.getPresence().getActivity().getDetails().equals(""))
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getDetails()));
-        }
-        if (!element.getPresence().getActivity().getState().equals("")) {
+        if (!element.getPresence().getActivity().getState().equals(""))
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + element.getPresence().getActivity().getState()));
-        }
         if (element.getPresence().getActivity().party().size().getMaxSize() != 0) {
             statusText.appendSibling(new ChatComponentText("\n" + EnumChatFormatting.BLUE + "In a party: " + element.getPresence().getActivity()
                     .party().size().getCurrentSize() + " of " + element.getPresence().getActivity().party().size().getMaxSize()));

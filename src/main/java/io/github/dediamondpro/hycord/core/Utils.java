@@ -23,70 +23,81 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
+    private static final Minecraft mc = Minecraft.getMinecraft();
     private static final Pattern getNamePattern = Pattern.compile("(.*)(?<rank>\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<username>[a-zA-Z0-9_]{3,16})(§[a-z0-9])(.*)");
 
+    /**
+     * Adapted from TGMLib under GPL v3 license
+     * https://github.com/TGMDevelopment/TGMLib/blob/main/LICENSE
+     *
+     * @author MatthewTGM
+     */
     public static boolean isHypixel() {
-        Minecraft mc = Minecraft.getMinecraft();
+        final Pattern SERVER_BRAND_PATTERN = Pattern.compile("(.+) <- (?:.+)");
+        final String HYPIXEL_SERVER_BRAND = "Hypixel BungeeCord";
 
-        if (mc != null && mc.theWorld != null && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
-            return mc.thePlayer.getClientBrand().toLowerCase().contains("hypixel");
-        }
-        return false;
+        if (!mc.isSingleplayer() && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
+            Matcher matcher = SERVER_BRAND_PATTERN.matcher(mc.thePlayer.getClientBrand());
+
+            if (matcher.find())
+                return matcher.group(1).startsWith(HYPIXEL_SERVER_BRAND);else
+                return false;
+        } else
+            return false;
     }
 
     public static String getDiscordPicture(String arg) {
         String game = arg.toLowerCase(Locale.ROOT).replaceAll(" ", "_");
-        if (game.contains("bed_wars")) {
+        if (game.contains("bed_wars"))
             return "bedwars";
-        } else if (game.contains("speed_uhc")) {
+        else if (game.contains("speed_uhc"))
             return "speeduhc";
-        } else if (game.contains("uhc")) {
+        else if (game.contains("uhc"))
             return "uhc";
-        } else if (game.contains("skywars")) {
+        else if (game.contains("skywars"))
             return "skywars";
-        } else if (game.contains("duels")) {
+        else if (game.contains("duels"))
             return "duels";
-        } else if (game.contains("turbo_kart_racers")) {
+        else if (game.contains("turbo_kart_racers"))
             return "turbokartracers";
-        } else if (game.contains("arcade")) {
+        else if (game.contains("arcade"))
             return "arcade";
-        } else if (game.contains("arena_brawl")) {
+        else if (game.contains("arena_brawl"))
             return "arena";
-        } else if (game.contains("build_battle")) {
+        else if (game.contains("build_battle"))
             return "buildbattle";
-        } else if (game.contains("paintball")) {
+        else if (game.contains("paintball"))
             return "paintball";
-        } else if (game.contains("smash_heroes")) {
+        else if (game.contains("smash_heroes"))
             return "smashheroes";
-        } else if (game.contains("mega_walls")) {
+        else if (game.contains("mega_walls"))
             return "megawalls";
-        } else if (game.contains("cops_and_crims")) {
+        else if (game.contains("cops_and_crims"))
             return "cvc";
-        } else if (game.contains("the_walls")) {
+        else if (game.contains("the_walls"))
             return "walls";
-        } else if (game.contains("quakecraft")) {
+        else if (game.contains("quakecraft"))
             return "quakecraft";
-        } else if (game.contains("warlords")) {
+        else if (game.contains("warlords"))
             return "warlords";
-        } else if (game.contains("murder_mystery")) {
+        else if (game.contains("murder_mystery"))
             return "murdermystery";
-        } else if (game.contains("tnt") || game.equals("bow_spleef") || game.equals("pvp_run")) {
+        else if (game.contains("tnt") || game.equals("bow_spleef") || game.equals("pvp_run"))
             return "tnt";
-        } else if (game.contains("vampirez")) {
+        else if (game.contains("vampirez"))
             return "vampirez";
-        } else if (game.contains("prototype")) {
+        else if (game.contains("prototype"))
             return "prototype";
-        } else if (game.contains("skyblock")) {
+        else if (game.contains("skyblock"))
             return "skyblock";
-        } else if (game.contains("the_hypixel_pit")) {
+        else if (game.contains("the_hypixel_pit"))
             return "pit";
-        } else if (game.contains("classic_games")) {
+        else if (game.contains("classic_games"))
             return "classic";
-        } else if (game.contains("housing")) {
+        else if (game.contains("housing"))
             return "housing";
-        } else if (game.contains("blitz_sg")) {
+        else if (game.contains("blitz_sg"))
             return "blitz_sg";
-        }
         return "hypixel_logo";
     }
 
@@ -213,7 +224,7 @@ public class Utils {
         clipboard.setContents(selection, null);
     }
 
-    public static String getClipboard() {
+    public static String getClipboardContent() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Clipboard clipboard = toolkit.getSystemClipboard();
         try {

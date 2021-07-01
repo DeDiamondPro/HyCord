@@ -26,24 +26,13 @@ public class Utils {
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final Pattern getNamePattern = Pattern.compile("(.*)(?<rank>\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<username>[a-zA-Z0-9_]{3,16})(§[a-z0-9])(.*)");
 
-    /**
-     * Adapted from TGMLib under GPL v3 license
-     * https://github.com/TGMDevelopment/TGMLib/blob/main/LICENSE
-     *
-     * @author MatthewTGM
-     */
-    final static Pattern SERVER_BRAND_PATTERN = Pattern.compile("(.+) <- (?:.+)");
-    final static String HYPIXEL_SERVER_BRAND = "Hypixel BungeeCord";
     public static boolean isHypixel() {
-        if (!mc.isSingleplayer() && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
-            Matcher matcher = SERVER_BRAND_PATTERN.matcher(mc.thePlayer.getClientBrand());
+        Minecraft mc = Minecraft.getMinecraft();
 
-            if (matcher.find())
-                return matcher.group(1).startsWith(HYPIXEL_SERVER_BRAND);
-            else
-                return false;
-        } else
-            return false;
+        if (mc != null && mc.theWorld != null && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
+            return mc.thePlayer.getClientBrand().toLowerCase().contains("hypixel");
+        }
+        return false;
     }
 
     public static String getDiscordPicture(String arg) {

@@ -32,15 +32,15 @@ public class Utils {
      *
      * @author MatthewTGM
      */
+    final static Pattern SERVER_BRAND_PATTERN = Pattern.compile("(.+) <- (?:.+)");
+    final static String HYPIXEL_SERVER_BRAND = "Hypixel BungeeCord";
     public static boolean isHypixel() {
-        final Pattern SERVER_BRAND_PATTERN = Pattern.compile("(.+) <- (?:.+)");
-        final String HYPIXEL_SERVER_BRAND = "Hypixel BungeeCord";
-
         if (!mc.isSingleplayer() && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
             Matcher matcher = SERVER_BRAND_PATTERN.matcher(mc.thePlayer.getClientBrand());
 
             if (matcher.find())
-                return matcher.group(1).startsWith(HYPIXEL_SERVER_BRAND);else
+                return matcher.group(1).startsWith(HYPIXEL_SERVER_BRAND);
+            else
                 return false;
         } else
             return false;
@@ -236,10 +236,11 @@ public class Utils {
     }
 
     private static final String ALPHA_NUMERIC_STRING = "abcdefghijklmnopqrtuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
     public static String randomAlphaNumeric(int count) {
         StringBuilder builder = new StringBuilder();
         while (count-- != 0) {
-            int character = (int)(Math.random()*ALPHA_NUMERIC_STRING.length());
+            int character = (int) (Math.random() * ALPHA_NUMERIC_STRING.length());
             builder.append(ALPHA_NUMERIC_STRING.charAt(character));
         }
         return builder.toString();

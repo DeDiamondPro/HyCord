@@ -1,12 +1,12 @@
 package io.github.dediamondpro.hycord.features.discord;
 
-import club.sk1er.mods.core.ModCore;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.*;
 import de.jcm.discordgamesdk.user.DiscordUser;
+import io.github.dediamondpro.hycord.core.GuiUtils;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
-import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
+import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -22,12 +22,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -80,7 +76,7 @@ public class LobbyManager {
                     users.put(id, discordUser);
                     talkingData.put(id, false);
                     if (!pictures.containsKey(id)) {
-                        bufferedPictures.put(id, Objects.requireNonNull(NetworkUtils.getImg("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64")));
+                        bufferedPictures.put(id, Objects.requireNonNull(NetworkUtils.getImage("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64")));
                     }
                 }
             });
@@ -96,7 +92,7 @@ public class LobbyManager {
                 users.put(userId, discordUser);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                         + EnumChatFormatting.GREEN + discordUser.getUsername() + "#" + discordUser.getDiscriminator() + " joined the voice chat"));
-                bufferedPictures.put(discordUser.getUserId(), Objects.requireNonNull(NetworkUtils.getImg("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64")));
+                bufferedPictures.put(discordUser.getUserId(), Objects.requireNonNull(NetworkUtils.getImage("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64")));
             }
         });
     }
@@ -260,7 +256,7 @@ public class LobbyManager {
                 Minecraft.getMinecraft().displayGuiScreen(null);
             } else {
                 startVoice(result, lobby);
-                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+                GuiUtils.open(new GuiVoiceMenu());
             }
         });
     }

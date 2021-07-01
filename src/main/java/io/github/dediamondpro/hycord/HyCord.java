@@ -1,7 +1,5 @@
 package io.github.dediamondpro.hycord;
 
-import club.sk1er.mods.core.ModCore;
-import club.sk1er.mods.core.ModCoreInstaller;
 import de.jcm.discordgamesdk.activity.ActivityActionType;
 import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
 import io.github.dediamondpro.hycord.core.*;
@@ -9,8 +7,8 @@ import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
 import io.github.dediamondpro.hycord.features.discord.*;
-import io.github.dediamondpro.hycord.features.discord.gui.VoiceBrowser;
-import io.github.dediamondpro.hycord.features.discord.gui.VoiceMenu;
+import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceBrowser;
+import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
 import io.github.dediamondpro.hycord.options.SettingsHandler;
 import io.github.dediamondpro.hycord.options.gui.GuiMove;
@@ -23,6 +21,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -67,9 +66,9 @@ public class HyCord {
             } else if (args.length > 0 && args[0].equalsIgnoreCase("invite")) {
                 RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
             } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
-                ModCore.getInstance().getGuiHandler().open(new GuiMove());
+                GuiUtils.open(new GuiMove());
             } else
-                ModCore.getInstance().getGuiHandler().open(config.gui());
+                GuiUtils.open(config.gui());
         }
     });
     SimpleCommand partySize = new SimpleCommand("psize", new SimpleCommand.ProcessCommandRunnable() {
@@ -183,11 +182,11 @@ public class HyCord {
     SimpleCommand voice = new SimpleCommand("voice", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (LobbyManager.lobbyId != null) {
-                ModCore.getInstance().getGuiHandler().open(new VoiceMenu());
+                GuiUtils.open(new GuiVoiceMenu());
             } else if(args.length > 0){
                 LobbyManager.joinSecret(args[0]);
             } else {
-                ModCore.getInstance().getGuiHandler().open(new VoiceBrowser());
+                GuiUtils.open(new GuiVoiceBrowser());
             }
         }
     });
@@ -196,9 +195,10 @@ public class HyCord {
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
                 LobbyManager.createPartyLobby("0b4d470f-f2fb-4874-9334-1eaef8ba4804");
                 System.out.println(RichPresence.discordRPC.lobbyManager().getLobby(LobbyManager.partyLobbyId).toString());
-            } else {
-                //If you leak this you're a horrible human being
+            } else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                //If you leak this you're a horrible human being.
                 try {
+                    // TODO: 2021/06/30 : Ask Diamond if this code can be uncommented           Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(EnumChatFormatting.RED + "You've made a grave mistake..."));
                     Desktop.getDesktop().browse(URI.create("https://www.youtube.com/watch?v=dQw4w9WgXcQ"));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -210,7 +210,6 @@ public class HyCord {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         config.preload();
-        ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
         if(Settings.updateChannel != 0) {
             Thread updateCheck = new Thread(() -> {
                 requireUpdate = UpdateChecker.checkUpdate();
@@ -245,6 +244,8 @@ public class HyCord {
         }
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new NickNameController());
+
+        MinecraftForge.EVENT_BUS.register(new GuiUtils());
 
         ClientCommandHandler.instance.registerCommand(mainCommand);
         ClientCommandHandler.instance.registerCommand(setNick);
@@ -283,6 +284,11 @@ public class HyCord {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Mod.EventHandler
+    private void onPostInit(FMLPostInitializationEvent event) {
+
     }
 
     private static class MacWarning {

@@ -23,4 +23,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'HyCord'
+rootProject.name = mod_name

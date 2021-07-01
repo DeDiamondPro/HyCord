@@ -13,6 +13,8 @@ import java.io.IOException;
 import static io.github.dediamondpro.hycord.options.SettingsHandler.locations;
 
 public class GuiMove extends GuiScreen {
+
+    private boolean wereRepeatEventsEnabled;
     private boolean editing = false;
     private static int attachmentPointX;
     private static int attachmentPointY;
@@ -21,6 +23,7 @@ public class GuiMove extends GuiScreen {
     @Override
     public void initGui() {
         editObject = null;
+        wereRepeatEventsEnabled = Keyboard.areRepeatEventsEnabled();
         Keyboard.enableRepeatEvents(true);
     }
 
@@ -105,6 +108,7 @@ public class GuiMove extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        Keyboard.enableRepeatEvents(false);
+        Keyboard.enableRepeatEvents(wereRepeatEventsEnabled);
     }
+
 }

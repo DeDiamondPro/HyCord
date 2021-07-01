@@ -27,8 +27,6 @@ public class Utils {
     private static final Pattern getNamePattern = Pattern.compile("(.*)(?<rank>\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7))( )?(?<username>[a-zA-Z0-9_]{3,16})(§[a-z0-9])(.*)");
 
     public static boolean isHypixel() {
-        Minecraft mc = Minecraft.getMinecraft();
-
         if (mc != null && mc.theWorld != null && mc.thePlayer != null && mc.thePlayer.getClientBrand() != null) {
             return mc.thePlayer.getClientBrand().toLowerCase().contains("hypixel");
         }
@@ -117,9 +115,9 @@ public class Utils {
      */
     public static List<String> getSidebarLines() {
         List<String> lines = new ArrayList<>();
-        if (Minecraft.getMinecraft().theWorld == null)
+        if (mc.theWorld == null)
             return lines;
-        Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+        Scoreboard scoreboard = mc.theWorld.getScoreboard();
         if (scoreboard == null)
             return lines;
 

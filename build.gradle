@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     shade('com.github.jncrmx:discord-game-sdk4j:0.5.3')
-    shade('gg.essential:Vigilance:123-10809-SNAPSHOT')
+    shade('gg.essential:Vigilance:125-10809-SNAPSHOT')
 }
 
 jar {
@@ -44,7 +44,6 @@ jar {
     manifest.attributes(
             "ModSide": "CLIENT"
     )
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
 }
 
 shadowJar {
@@ -52,6 +51,29 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     archiveClassifier.set('')
+    exclude 'META-INF', 'META-INF/**'
+    exclude 'org/jetbrains/annotations', 'org/jetbrains/annotations/**'
+    relocate("gg.essential", "hycord.essentialgg")
+
+    exclude "LICENSE.md"
+    exclude "pack.mcmeta"
+    exclude "dummyThing"
+    exclude "**/module-info.class"
+    exclude "*.so"
+    exclude "*.dylib"
+    exclude "*.dll"
+    exclude "*.jnilib"
+    exclude "ibxm/**"
+    exclude "com/jcraft/**"
+    exclude "org/lwjgl/**"
+    exclude "net/java/**"
+
+    exclude "META-INF/proguard/**"
+    exclude "META-INF/maven/**"
+    exclude "META-INF/versions/**"
+    exclude "META-INF/com.android.tools/**"
+
+    exclude "fabric.mod.json"
 }
 
 processResources {

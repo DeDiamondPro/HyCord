@@ -43,6 +43,7 @@ public class LobbyManager {
     public static Long currentUser;
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
+    public static boolean proximity = false;
 
     //Filters for VoiceBrowser.java
     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
@@ -290,5 +291,9 @@ public class LobbyManager {
         }
         System.out.println("created party lobby");
         partyLobbyId = lobby.getId();
+    }
+
+    public static void joinProximity(){
+
     }
 }

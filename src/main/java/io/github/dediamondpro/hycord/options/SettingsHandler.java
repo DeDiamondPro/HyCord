@@ -51,7 +51,7 @@ public class SettingsHandler {
 
     public static void save() {
         try {
-            FileWriter writer = new FileWriter("config/HyCordConfig.txt");
+            FileWriter writer = new FileWriter("config/HyCord/HyCordConfig.txt");
             for (String str : locations.keySet()) {
                 writer.write(str + ":" + locations.get(str).toString() + System.lineSeparator());
             }

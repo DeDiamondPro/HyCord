@@ -117,6 +117,7 @@ public class GuiVoiceMenu extends GuiScreen {
         if (mouseX >= this.width - 20 && mouseX <= this.width - 4 && mouseY <= 20 && mouseY >= 4) {
             LobbyManager.leave();
             GuiUtils.open(new GuiVoiceBrowser());
+            LobbyManager.proximity = false;
         } else if (mouseX >= this.width - 40 && mouseX <= this.width - 24 && mouseY <= 20 && mouseY >= 4
                 && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
             GuiUtils.open(new GuiVoiceCreator());

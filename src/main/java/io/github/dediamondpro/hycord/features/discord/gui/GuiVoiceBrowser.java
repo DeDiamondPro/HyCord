@@ -19,6 +19,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
+import javax.xml.soap.Text;
 import java.awt.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -122,17 +123,17 @@ public class GuiVoiceBrowser extends GuiScreen {
             GL11.glPushMatrix();
             GL11.glTranslatef(0, scroll, 0);
 
-            Gui.drawRect(gameBegin - 3, scroll + 44, gameBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(topicBegin - 3, scroll + 44, topicBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(capacityBegin - 3, scroll + 44, capacityBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
-            Gui.drawRect(joinButtonBegin - 3, scroll + 44, joinButtonBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(gameBegin - 3, scroll + 70, gameBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(topicBegin - 3, scroll + 70, topicBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(capacityBegin - 3, scroll + 70, capacityBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
+            Gui.drawRect(joinButtonBegin - 3, scroll + 70, joinButtonBegin - 2, this.height + scroll, new Color(0, 0, 0, 75).getRGB());
 
-            Gui.drawRect(0, 0, this.width, 44, new Color(0, 0, 0, 75).getRGB());
-            TextUtils.drawTextMaxLengthCentered("Owner name", 32, 29, new Color(255, 255, 255).getRGB(), false, gameBegin);
-            TextUtils.drawTextMaxLengthCentered("Game", gameBegin, 29, new Color(255, 255, 255).getRGB(), false, topicBegin);
-            TextUtils.drawTextMaxLengthCentered("Topic", topicBegin, 29, new Color(255, 255, 255).getRGB(), false, capacityBegin);
-            TextUtils.drawTextMaxLengthCentered("Capacity", capacityBegin, 29, new Color(255, 255, 255).getRGB(), false, joinButtonBegin);
-            TextUtils.drawTextMaxLengthCentered("Join", joinButtonBegin, 29, new Color(255, 255, 255).getRGB(), false, this.width);
+            Gui.drawRect(0, 0, this.width, 70, new Color(0, 0, 0, 75).getRGB());
+            TextUtils.drawTextMaxLengthCentered("Owner name", 32, 55, new Color(255, 255, 255).getRGB(), false, gameBegin);
+            TextUtils.drawTextMaxLengthCentered("Game", gameBegin, 55, new Color(255, 255, 255).getRGB(), false, topicBegin);
+            TextUtils.drawTextMaxLengthCentered("Topic", topicBegin, 55, new Color(255, 255, 255).getRGB(), false, capacityBegin);
+            TextUtils.drawTextMaxLengthCentered("Capacity", capacityBegin, 55, new Color(255, 255, 255).getRGB(), false, joinButtonBegin);
+            TextUtils.drawTextMaxLengthCentered("Join", joinButtonBegin, 55, new Color(255, 255, 255).getRGB(), false, this.width);
 
             if (!typing && enteredText.equals("")) {
                 mc.fontRendererObj.drawStringWithShadow("Enter Voice Chat Id...", 15, 7, new Color(255, 255, 255).getRGB());
@@ -165,7 +166,19 @@ public class GuiVoiceBrowser extends GuiScreen {
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             Gui.drawModalRectWithCustomSizedTexture(this.width - 33, 1, 0, 0, 16, 16, 16, 16);
 
-            int amount = 3;
+            TextUtils.drawTextMaxLength("Proximity voice chat", 15, 32, new Color(255, 255, 255).getRGB(), true, this.width);
+            Gui.drawRect(this.width - 62,
+                    29,
+                    this.width - 58 + mc.fontRendererObj.getStringWidth("Join"),
+                    40, new Color(255, 255, 255).getRGB());
+            Gui.drawRect(this.width - 61,
+                    30,
+                    this.width - 59 + mc.fontRendererObj.getStringWidth("Join"),
+                    39, new Color(0, 0, 0).getRGB());
+            TextUtils.drawTextCentered("Join", this.width - 60 + mc.fontRendererObj.getStringWidth("Join") / 2f, 31, 0xFFFFFF, true);
+            Gui.drawRect(10, 20, this.width - 65, 21, new Color(0, 0, 0).getRGB());
+
+            int amount = 4;
             for (Lobby lobby : matches) {
                 if (LobbyManager.pictures.containsKey(lobby.getOwnerId())) {
                     mc.getTextureManager().bindTexture(LobbyManager.pictures.get(lobby.getOwnerId()));
@@ -219,7 +232,7 @@ public class GuiVoiceBrowser extends GuiScreen {
                 mouseX <= joinButtonBegin + (this.width - joinButtonBegin) / 2 + mc.fontRendererObj.getStringWidth("Join") / 2 + 2) {
             typing = false;
             Keyboard.enableRepeatEvents(false);
-            int amount = 3;
+            int amount = 4;
             for (Lobby lobby : matches) {
                 if (mouseY >= 26 * amount - 26 + scroll && mouseY <= 26 * amount - 12 + scroll) {
                     LobbyManager.join(lobby);
@@ -235,9 +248,12 @@ public class GuiVoiceBrowser extends GuiScreen {
             typing = false;
             Keyboard.enableRepeatEvents(false);
         }
-        if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseX >= 4 && mouseY <= 15) {
+        if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 4 && mouseY <= 15) {
             LobbyManager.joinSecret(enteredText);
-        }
+        }/* else if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 29 && mouseY <= 40) {
+           LobbyManager.proximity = true;
+           LobbyManager.joinProximity();
+        }*/
     }
 
     @Override

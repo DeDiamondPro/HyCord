@@ -192,13 +192,12 @@ public class HyCord {
     });
     SimpleCommand dev = new SimpleCommand("hycorddevtest", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText( EnumChatFormatting.YELLOW + "Executing malicious code..."));
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
-                LobbyManager.createPartyLobby("0b4d470f-f2fb-4874-9334-1eaef8ba4804");
-                System.out.println(RichPresence.discordRPC.lobbyManager().getLobby(LobbyManager.partyLobbyId).toString());
+                GuiUtils.open(new GuiVoiceBrowser());
             } else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 //If you leak this you're a horrible human being.
                 try {
-                    // TODO: 2021/06/30 : Ask Diamond if this code can be uncommented           Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(EnumChatFormatting.RED + "You've made a grave mistake..."));
                     Desktop.getDesktop().browse(URI.create("https://www.youtube.com/watch?v=dQw4w9WgXcQ"));
                 } catch (IOException e) {
                     e.printStackTrace();

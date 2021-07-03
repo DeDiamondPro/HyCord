@@ -1,5 +1,6 @@
 package io.github.dediamondpro.hycord.options.gui;
 
+import gg.essential.vigilance.VigilanceConfig;
 import io.github.dediamondpro.hycord.core.Location;
 import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.options.SettingsHandler;
@@ -82,9 +83,6 @@ public class GuiMove extends GuiScreen {
             editObj(locations.get(editObject).getXScaled(this.width) - 1, locations.get(editObject).getYScaled(this.height));
         } else if (editObject != null && keyCode == Keyboard.KEY_RIGHT) {
             editObj(locations.get(editObject).getXScaled(this.width) + 1, locations.get(editObject).getYScaled(this.height));
-        } else if (keyCode == Keyboard.KEY_ESCAPE) {
-            Keyboard.enableRepeatEvents(false);
-            SettingsHandler.save();
         }
 
         super.keyTyped(typedChar, keyCode);
@@ -109,6 +107,7 @@ public class GuiMove extends GuiScreen {
     @Override
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(wereRepeatEventsEnabled);
+        SettingsHandler.save();
     }
 
 }

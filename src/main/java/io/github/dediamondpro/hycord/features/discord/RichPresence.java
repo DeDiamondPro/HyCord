@@ -170,6 +170,7 @@ public class RichPresence {
 
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+        initializedRpc = false;
         if (enabled) {
             if (LobbyManager.lobbyId != null) {
                 discordRPC.lobbyManager().disconnectVoice(LobbyManager.lobbyId, System.out::println);

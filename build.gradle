@@ -16,6 +16,8 @@ minecraft {
     runDir = 'run'
     replace('@VER@', mod_ver)
     mappings = 'stable_22'
+    makeObfSourceJar = false
+    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
 }
 
 configurations {
@@ -40,9 +42,12 @@ dependencies {
 }
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    enabled = false
     manifest.attributes(
-            "ModSide": "CLIENT"
+            "ModSide": "CLIENT",
+            "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+            "FMLCorePluginContainsFMLMod": "no yes",
+            "ForceLoadAsMod": true
     )
 }
 

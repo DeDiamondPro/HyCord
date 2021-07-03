@@ -15,10 +15,10 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
                     "In order to resolve this conflict you must make HyCord be\n" +
                     "above this mod alphabetically in your mods folder.\n" +
                     "This tricks Forge into loading HyCord first.\n" +
-                    "You can do this by renaming your Wyvtilities jar to !Wyvtilities.jar,\n" +
+                    "You can do this by renaming your HyCord jar to !HyCord.jar,\n" +
                     "or by renaming the other mod's jar to start with a Z.\n" +
                     "If you have already done this and are still getting this error,\n" +
-                    "ask for support in the Discord (https://discord.gg/EZJwuR832S).");
+                    "ask for support in the Discord (https://discord.gg/2NPfmfA67R).");
         }
     }
 

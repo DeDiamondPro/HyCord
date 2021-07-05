@@ -35,7 +35,7 @@ import java.net.URI;
 import java.util.Scanner;
 import java.util.UUID;
 
-@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION, clientSideOnly = true)
+@Mod(name = HyCord.NAME, modid = HyCord.MODID, version = HyCord.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";

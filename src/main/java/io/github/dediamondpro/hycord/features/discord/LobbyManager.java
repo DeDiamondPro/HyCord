@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vector3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -24,6 +25,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +46,8 @@ public class LobbyManager {
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
     public static boolean proximity = false;
+    private static ConcurrentHashMap<Long, Vector3d> playerLocations = new ConcurrentHashMap<>();
+    private static long ticks = 0;
 
     //Filters for VoiceBrowser.java
     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
@@ -66,7 +70,8 @@ public class LobbyManager {
         lobbyId = lobby.getId();
         System.out.println("Starting voice chat in Lobby " + lobby.getId());
         if (result != Result.OK) {
-            System.out.println("An unknown error occurred.");
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
+            Minecraft.getMinecraft().displayGuiScreen(null);
             return;
         }
         discordRPC.lobbyManager().connectVoice(lobby, System.out::println);
@@ -136,6 +141,18 @@ public class LobbyManager {
         } else {
             pressed = false;
         }
+        if (LobbyManager.proximity && ticks % 20 == 0) {
+            LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
+            memberTransaction.setMetadata("x", String.valueOf(Minecraft.getMinecraft().thePlayer.posX));
+            memberTransaction.setMetadata("y", String.valueOf(Minecraft.getMinecraft().thePlayer.posY));
+            memberTransaction.setMetadata("z", String.valueOf(Minecraft.getMinecraft().thePlayer.posZ));
+            try {
+                discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction, System.out::println);
+            } catch (Error e) {
+                e.printStackTrace();
+            }
+        }
+        ticks++;
     }
 
     @SubscribeEvent
@@ -235,7 +252,6 @@ public class LobbyManager {
 
     public static void join(Lobby lobby) {
         discordRPC.lobbyManager().connectLobby(lobby, LobbyManager::startVoice);
-        lobbyId = lobby.getId();
     }
 
     public static void editVoice(int capacity, LobbyType privacy, String game, String topic, boolean locked) {
@@ -293,7 +309,43 @@ public class LobbyManager {
         partyLobbyId = lobby.getId();
     }
 
-    public static void joinProximity(){
+    public static void joinProximity() {
+        LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
+        query.distance(LobbySearchQuery.Distance.GLOBAL);
+        query.filter("metadata.type", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, "proximity");
+        query.filter("metadata.server", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, "SERVER");
+        System.out.println("Searching for proximity lobbies");
+        discordRPC.lobbyManager().search(query, result -> {
+            if (result == Result.OK) {
+                java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
+                if (lobbies.size() > 0) {
+                    discordRPC.lobbyManager().connectLobby(lobbies.get(0), LobbyManager::startVoice);
+                } else {
+                    LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
+                    transaction.setCapacity(200);
+                    transaction.setLocked(false);
+                    transaction.setType(LobbyType.PUBLIC);
+                    transaction.setMetadata("type", "proximity");
+                    transaction.setMetadata("server", "SERVER");
+                    discordRPC.lobbyManager().createLobby(transaction, LobbyManager::startVoice);
+                }
+            } else {
+                System.out.println("an error occurred while searching for proximity lobbies");
+                GuiUtils.open(null);
+                proximity = false;
+            }
+        });
+    }
 
+    public static void memberUpdateHandler(long id, long userId) {
+        if (!proximity || userId == currentUser || id != lobbyId) return;
+        Map<String, String> update = discordRPC.lobbyManager().getMemberMetadata(id, userId);
+        if (update.containsKey("x") && update.containsKey("y") && update.containsKey("z")) {
+            Vector3d temp = new Vector3d();
+            temp.x = Double.parseDouble(update.get("x"));
+            temp.y = Double.parseDouble(update.get("y"));
+            temp.z = Double.parseDouble(update.get("z"));
+            playerLocations.put(id, temp);
+        }
     }
 }

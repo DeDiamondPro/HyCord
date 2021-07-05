@@ -133,6 +133,11 @@ public class RichPresence {
             public void onLobbyMessage(long lobbyId, long userId, byte[] data) {
                 handleMsg(lobbyId, data);
             }
+
+            @Override
+            public void onMemberUpdate(long lobbyId, long userId) {
+                LobbyManager.memberUpdateHandler(lobbyId, userId);
+            }
         });
         try {
             discordRPC = new Core(params);
@@ -150,11 +155,11 @@ public class RichPresence {
                 Thread.currentThread().interrupt();
             });
             callBacks.start();
+            LobbyManager.createPartyLobby(partyId);
         } catch (GameSDKException e) {
             System.out.println("An error occurred while trying to start the core, is Discord running?");
             sent = false;
         }
-        LobbyManager.createPartyLobby(partyId);
     }
 
     @SubscribeEvent
@@ -189,7 +194,7 @@ public class RichPresence {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     void onMsg(ClientChatReceivedEvent event) {
-        if (event.type != 0) return;
+        if (event.type != 0 || !enabled) return;
         String msg = event.message.getFormattedText();
         Matcher pListMatcher = partyListRegex.matcher(msg);
         Matcher promoteMatcher = promoteRegex.matcher(msg);

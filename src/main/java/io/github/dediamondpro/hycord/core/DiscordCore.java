@@ -20,11 +20,16 @@ public class DiscordCore {
         String fileName;
         if (SystemUtils.IS_OS_WINDOWS)
             fileName = "discord_game_sdk.dll";
-        else
+        else if (SystemUtils.IS_OS_MAC)
+            fileName = "discord_game_sdk.dylib";
+        else if (SystemUtils.IS_OS_LINUX)
             fileName = "discord_game_sdk.so";
+        else
+            throw new RuntimeException("cannot determine OS type: " + System.getProperty("os.name"));
 
         File sdk = new File("config/HyCord/game-sdk/" + fileName);
-        File jni = new File("config/HyCord/game-sdk/" + (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni.so"));
+        File jni = new File("config/HyCord/game-sdk/" + ((SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
+                (SystemUtils.IS_OS_MAC ? ".dylib" : ".so"))));
         if (sdk.exists() && jni.exists()) {
             System.out.println("Found sdk.");
             loadNative(sdk, jni);
@@ -33,13 +38,16 @@ public class DiscordCore {
             File dir = new File("config/HyCord/game-sdk");
             dir.mkdir();
 
+            String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+            if (arch.equals("amd64")) arch = "x86_64";
+
             URL downloadUrl = new URL("https://dl-game-sdk.discordapp.net/3.1.0/discord_game_sdk.zip");
             URLConnection con = downloadUrl.openConnection();
             con.setRequestProperty("User-Agent", "HyCord");
             ZipInputStream zin = new ZipInputStream(con.getInputStream());
             ZipEntry entry;
             while ((entry = zin.getNextEntry()) != null) {
-                if (entry.getName().equals("lib/x86_64/" + fileName)) {
+                if (entry.getName().equals("lib/" + arch + "/" + fileName)) {
                     System.out.println("Found file");
                     Files.copy(zin, sdk.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     extractNative(sdk);
@@ -52,9 +60,14 @@ public class DiscordCore {
     }
 
     public static void extractNative(File sdk) throws IOException {
-        String path = "/native/" + (SystemUtils.IS_OS_WINDOWS ? "windows" : "linux") + "/" + System.getProperty("os.arch").toLowerCase(Locale.ROOT) + "/" + (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni.so");
+        String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+        if (arch.equals("x86_64")) arch = "amd64";
+        String path = "/native/" + (SystemUtils.IS_OS_WINDOWS ? "windows" : (SystemUtils.IS_OS_MAC ? "macos" : "linux"))
+                + "/" + arch + "/" + (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
+                (SystemUtils.IS_OS_MAC ? ".dylib" : ".so"));
         InputStream in = RichPresence.class.getResourceAsStream(path);
-        File jni = new File("config/HyCord/game-sdk", (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni.so"));
+        File jni = new File("config/HyCord/game-sdk", (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
+                (SystemUtils.IS_OS_MAC ? ".dylib" : ".so")));
         Files.copy(in, jni.toPath(), StandardCopyOption.REPLACE_EXISTING);
         loadNative(sdk, jni);
     }

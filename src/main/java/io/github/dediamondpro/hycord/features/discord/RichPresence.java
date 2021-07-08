@@ -41,6 +41,7 @@ public class RichPresence {
     String secondLine = "In a party";
     String imageText = "";
     String gameMode = "";
+    public static String server = "";
     public static boolean enabled = false;
     private static String joinSecret = Utils.randomAlphaNumeric(64);
     public static String partyId = UUID.randomUUID().toString();
@@ -58,6 +59,7 @@ public class RichPresence {
     public static Pattern partyWith = Pattern.compile("§eYou'll be partying with: ((§r)(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ?(?<user>[a-zA-Z0-9_]{3,16})§r(§e, )?)+");
     public static Pattern voiceRegex = Pattern.compile("(.*)(?<id>([0-9]{18})(:)([a-z0-9]{16}))(.*)");
     public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
+    public static Pattern serverRegex = Pattern.compile("(?<date>[0-7]+/?){3}+ +(?<server>[a-zA-Z][0-9]+[a-zA-Z])");
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -81,6 +83,12 @@ public class RichPresence {
                 secondLine = sCleaned.replaceAll(" ⏣ ", "");
             if (sCleaned.contains("Map: "))
                 imageText = sCleaned.replaceAll("Map: ", "");
+            Matcher serverMatcher = serverRegex.matcher(sCleaned);
+            if (serverMatcher.matches()) {
+                if (LobbyManager.proximity && !serverMatcher.group("server").equals(server))
+                    LobbyManager.joinProximity(serverMatcher.group("server"));
+                server = serverMatcher.group("server");
+            }
         }
         if (secondLine.equals("Your Island"))
             secondLine = "Private Island";
@@ -171,6 +179,9 @@ public class RichPresence {
         else
             secondLine = "On Hypixel";
         gameMode = "";
+        server = "";
+        if (LobbyManager.proximity)
+            LobbyManager.leave();
     }
 
     @SubscribeEvent

@@ -3,13 +3,17 @@ package io.github.dediamondpro.hycord.features;
 import com.google.gson.JsonElement;
 import io.github.dediamondpro.hycord.HyCord;
 import io.github.dediamondpro.hycord.core.NetworkUtils;
+import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import tv.twitch.chat.Chat;
 
 public class UpdateChecker {
 
@@ -34,8 +38,13 @@ public class UpdateChecker {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || sent) return;
-        Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText("HyCord version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available. Click here to open GitHub").setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, latest.getAsJsonObject().get("html_url").getAsString()))));
+        if (event.phase != TickEvent.Phase.START || sent || !Utils.isHypixel()) return;
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                + EnumChatFormatting.YELLOW + "Version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available. Click")
+                .appendSibling(new ChatComponentText(EnumChatFormatting.GOLD + "" + EnumChatFormatting.BOLD + "HERE")
+                        .setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, latest.getAsJsonObject().get("html_url").getAsString()))
+                                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.YELLOW + "Click to open GitHub")))))
+                .appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + " to open GitHub.")));
         sent = true;
     }
 

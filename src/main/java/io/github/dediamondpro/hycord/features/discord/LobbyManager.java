@@ -33,7 +33,7 @@ import static io.github.dediamondpro.hycord.features.discord.RichPresence.discor
 import static io.github.dediamondpro.hycord.options.SettingsHandler.locations;
 
 public class LobbyManager {
-
+    static Minecraft mc = Minecraft.getMinecraft();
     private static final ResourceLocation micTexture = new ResourceLocation("hycord", "microphone.png");
     private static final ResourceLocation muteTexture = new ResourceLocation("hycord", "microphone_mute.png");
     private static final ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
@@ -46,7 +46,6 @@ public class LobbyManager {
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
     public static boolean proximity = false;
-    private static ConcurrentHashMap<Long, Vector3d> playerLocations = new ConcurrentHashMap<>();
     private static long ticks = 0;
 
     //Filters for VoiceBrowser.java
@@ -309,11 +308,17 @@ public class LobbyManager {
         partyLobbyId = lobby.getId();
     }
 
-    public static void joinProximity() {
+    public static void joinProximity(String server) {
+        if(server.equals("")){
+            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Unknown server"));
+            GuiUtils.open(null);
+            proximity = false;
+            return;
+        }
         LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
         query.distance(LobbySearchQuery.Distance.GLOBAL);
         query.filter("metadata.type", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, "proximity");
-        query.filter("metadata.server", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, "SERVER");
+        query.filter("metadata.server", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, server);
         System.out.println("Searching for proximity lobbies");
         discordRPC.lobbyManager().search(query, result -> {
             if (result == Result.OK) {
@@ -326,7 +331,7 @@ public class LobbyManager {
                     transaction.setLocked(false);
                     transaction.setType(LobbyType.PUBLIC);
                     transaction.setMetadata("type", "proximity");
-                    transaction.setMetadata("server", "SERVER");
+                    transaction.setMetadata("server", server);
                     discordRPC.lobbyManager().createLobby(transaction, LobbyManager::startVoice);
                 }
             } else {
@@ -341,11 +346,16 @@ public class LobbyManager {
         if (!proximity || userId == currentUser || id != lobbyId) return;
         Map<String, String> update = discordRPC.lobbyManager().getMemberMetadata(id, userId);
         if (update.containsKey("x") && update.containsKey("y") && update.containsKey("z")) {
-            Vector3d temp = new Vector3d();
-            temp.x = Double.parseDouble(update.get("x"));
-            temp.y = Double.parseDouble(update.get("y"));
-            temp.z = Double.parseDouble(update.get("z"));
-            playerLocations.put(id, temp);
+            double distance = Utils.calculateDistance(Double.parseDouble(update.get("x")), mc.thePlayer.posX,
+                    Double.parseDouble(update.get("y")), mc.thePlayer.posY, Double.parseDouble(update.get("z")), mc.thePlayer.posZ);
+            System.out.println("distance to " + userId + " is " + distance);
+            if (distance < 5)
+                discordRPC.voiceManager().setLocalVolume(userId, 200);
+            else if (distance > 15)
+                discordRPC.voiceManager().setLocalVolume(userId, 0);
+            else{
+                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance,5, 15, 200, 0));
+            }
         }
     }
 }

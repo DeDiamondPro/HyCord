@@ -183,7 +183,7 @@ public class HyCord {
         public void processCommand(ICommandSender sender, String[] args) {
             if (LobbyManager.lobbyId != null) {
                 GuiUtils.open(new GuiVoiceMenu());
-            } else if(args.length > 0){
+            } else if (args.length > 0) {
                 LobbyManager.joinSecret(args[0]);
             } else {
                 GuiUtils.open(new GuiVoiceBrowser());
@@ -192,7 +192,7 @@ public class HyCord {
     });
     SimpleCommand dev = new SimpleCommand("hycorddevtest", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText( EnumChatFormatting.YELLOW + "Executing malicious code..."));
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Executing malicious code..."));
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
                 GuiUtils.open(new GuiVoiceBrowser());
             } else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -209,7 +209,7 @@ public class HyCord {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         config.preload();
-        if(Settings.updateChannel != 0) {
+        if (Settings.updateChannel != 0) {
             Thread updateCheck = new Thread(() -> {
                 requireUpdate = UpdateChecker.checkUpdate();
                 Thread.currentThread().interrupt();
@@ -222,25 +222,22 @@ public class HyCord {
     public void init(FMLInitializationEvent event) {
         SettingsHandler.init();
 
-        if (!SystemUtils.IS_OS_MAC) {
-            ClientCommandHandler.instance.registerCommand(partySize);
-            ClientCommandHandler.instance.registerCommand(replyYesCommand);
-            ClientCommandHandler.instance.registerCommand(replyNoCommand);
-            ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
-            ClientCommandHandler.instance.registerCommand(getStatus);
-            ClientCommandHandler.instance.registerCommand(voice);
+        ClientCommandHandler.instance.registerCommand(partySize);
+        ClientCommandHandler.instance.registerCommand(replyYesCommand);
+        ClientCommandHandler.instance.registerCommand(replyNoCommand);
+        ClientCommandHandler.instance.registerCommand(replyIgnoreCommand);
+        ClientCommandHandler.instance.registerCommand(getStatus);
+        ClientCommandHandler.instance.registerCommand(voice);
 
-            MinecraftForge.EVENT_BUS.register(new RichPresence());
-            MinecraftForge.EVENT_BUS.register(new LobbyManager());
+        MinecraftForge.EVENT_BUS.register(new RichPresence());
+        MinecraftForge.EVENT_BUS.register(new LobbyManager());
 
-            try {
-                DiscordCore.init();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            MinecraftForge.EVENT_BUS.register(new MacWarning());
+        try {
+            DiscordCore.init();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
         MinecraftForge.EVENT_BUS.register(new AutoFl());
         MinecraftForge.EVENT_BUS.register(new NickNameController());
 
@@ -282,27 +279,6 @@ public class HyCord {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    @Mod.EventHandler
-    private void onPostInit(FMLPostInitializationEvent event) {
-
-    }
-
-    private static class MacWarning {
-
-        private boolean sent = false;
-
-        @SubscribeEvent
-        public void onTick(TickEvent.ClientTickEvent event) {
-            if (!sent) {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED +
-                        "It has been detected that you use MacOS,\nunfortunately HyCord's discord related features" +
-                        "currently don't work on MacOS,\nthese features have been automatically disabled."));
-                sent = true;
-            }
-
         }
     }
 }

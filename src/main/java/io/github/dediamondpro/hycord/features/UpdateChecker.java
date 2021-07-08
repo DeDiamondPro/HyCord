@@ -41,7 +41,7 @@ public class UpdateChecker {
         if (event.phase != TickEvent.Phase.START || sent || !Utils.isHypixel()) return;
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                 + EnumChatFormatting.YELLOW + "Version " + latest.getAsJsonObject().get("tag_name").getAsString() + " is available. Click")
-                .appendSibling(new ChatComponentText(EnumChatFormatting.GOLD + "" + EnumChatFormatting.BOLD + "HERE")
+                .appendSibling(new ChatComponentText(EnumChatFormatting.GOLD + "" + EnumChatFormatting.BOLD + " HERE")
                         .setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, latest.getAsJsonObject().get("html_url").getAsString()))
                                 .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(EnumChatFormatting.YELLOW + "Click to open GitHub")))))
                 .appendSibling(new ChatComponentText(EnumChatFormatting.YELLOW + " to open GitHub.")));

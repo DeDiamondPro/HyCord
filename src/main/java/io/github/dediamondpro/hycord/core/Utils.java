@@ -2,6 +2,7 @@ package io.github.dediamondpro.hycord.core;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -47,7 +48,7 @@ public class Utils {
             return "duels";
         else if (game.contains("turbo_kart_racers"))
             return "turbokartracers";
-        else if (game.contains("arcade"))
+        else if (game.equals("arcade_games"))
             return "arcade";
         else if (game.contains("arena_brawl"))
             return "arena";
@@ -69,7 +70,7 @@ public class Utils {
             return "warlords";
         else if (game.contains("murder_mystery"))
             return "murdermystery";
-        else if (game.contains("tnt") || game.equals("bow_spleef") || game.equals("pvp_run"))
+        else if (isTntGame())
             return "tnt";
         else if (game.contains("vampirez"))
             return "vampirez";
@@ -235,5 +236,25 @@ public class Utils {
 
     public static double calculateDistance(double x1, double x2, double y1, double y2, double z1, double z2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
+    }
+
+    public static boolean isArcadeGame(){
+        String game = RichPresence.game;
+        return game.equals("Creeper attack") || game.equals("Farm hunt") || game.equals("Party games") || game.equals("Zombies")
+                || game.equals("Hide and seek") || game.equals("Hypixel says") || game.equals("Mini walls") || game.equals("Blocking dead")
+                || game.equals("Hole in the wall") || game.equals("Football") || game.equals("Bounty hunters") || game.equals("Pixel painters")
+                || game.equals("Capture the wool") || game.equals("Dragon wars") || game.equals("Ender spleef") || game.equals("Galaxy wars")
+                || game.equals("Throw out");
+    }
+
+    public static boolean isClassicGame(){
+        String game = RichPresence.game;
+        return game.equals("Arena brawl") || game.equals("Vampirez") || game.equals("Turbo kart racers") || game.equals("Quakecraft")
+                || game.equals("The walls") || game.equals("Paintball warfare");
+    }
+
+    public static boolean isTntGame(){
+        String game = RichPresence.game;
+        return game.equals("Bow spleef") || game.equals("Pvp run") || game.contains("Tnt");
     }
 }

@@ -6,7 +6,7 @@ plugins {
 
 version = mod_ver
 group = mod_group
-archivesBaseName = mod_name
+archivesBaseName = "[" + mod_mc_version + "] " + mod_name
 
 sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'

@@ -7,9 +7,11 @@ import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
+import io.github.dediamondpro.hycord.HyCord;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -38,9 +40,6 @@ public class RichPresence {
     Instant time = Instant.now();
     int partyMembers = 1;
     boolean canInvite = true;
-    String secondLine = "In a party";
-    String imageText = "";
-    String gameMode = "";
     public static String server = "";
     public static boolean enabled = false;
     private static String joinSecret = Utils.randomAlphaNumeric(64);
@@ -60,6 +59,17 @@ public class RichPresence {
     public static Pattern voiceRegex = Pattern.compile("(.*)(?<id>([0-9]{18})(:)([a-z0-9]{16}))(.*)");
     public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
     public static Pattern serverRegex = Pattern.compile("(?<date>[0-7]+/?){3}+ +(?<server>[a-zA-Z][0-9]+[a-zA-Z])");
+    public static Pattern timeRegex = Pattern.compile(" (?<time>[0-9]{1,2}:[0-9]{1,2}(am|pm)) ");
+    public static Pattern dateRegex = Pattern.compile(" (?<date>[a-zA-Z ]+[0-9]+.{2})");
+
+    static String mode = "";
+    static String map = "";
+    public static String game = "";
+    static String itemHeld = "";
+    static String coins = "";
+    static String bits = "";
+    static String sbTime = "";
+    static String sbDate = "";
 
     @SubscribeEvent
     void onTick(TickEvent.ClientTickEvent event) {
@@ -77,26 +87,47 @@ public class RichPresence {
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
-            if (sCleaned.contains("Mode: "))
-                secondLine = sCleaned.replaceAll("Mode: ", "");
-            else if (sCleaned.contains(" ⏣ "))
-                secondLine = sCleaned.replaceAll(" ⏣ ", "");
-            if (sCleaned.contains("Map: "))
-                imageText = sCleaned.replaceAll("Map: ", "");
             Matcher serverMatcher = serverRegex.matcher(sCleaned);
-            if (serverMatcher.matches()) {
+            Matcher dateMatcher = dateRegex.matcher(sCleaned);
+            Matcher timeMatcher = timeRegex.matcher(sCleaned);
+            if (sCleaned.contains("Mode: "))
+                mode = sCleaned.replace("Mode: ", "");
+            else if (sCleaned.contains(" ⏣ "))
+                map = sCleaned.replace(" ⏣ ", "");
+            else if (sCleaned.contains("Map: "))
+                map = sCleaned.replace("Map: ", "");
+            else if (sCleaned.contains("Purse: ") || sCleaned.contains("Piggy: "))
+                coins = sCleaned.replaceAll("Purse: |Piggy: ", "");
+            else if (sCleaned.contains("Bits: "))
+                bits = sCleaned.replace("Bits: ", "");
+            else if (serverMatcher.matches()) {
                 if (LobbyManager.proximity && !serverMatcher.group("server").equals(server))
                     LobbyManager.joinProximity(serverMatcher.group("server"));
                 server = serverMatcher.group("server");
+            } else if (dateMatcher.matches()) {
+                sbDate = dateMatcher.group("date");
+            } else if (timeMatcher.matches()) {
+                sbTime = timeMatcher.group("time");
             }
         }
-        if (secondLine.equals("Your Island"))
-            secondLine = "Private Island";
+        if (map.equals("Your Island"))
+            map = "Private Island";
         Scoreboard title = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective sidebarObjective = title.getObjectiveInDisplaySlot(1);
         if (sidebarObjective != null) {
             String objectiveName = sidebarObjective.getDisplayName().replaceAll("(?i)\\u00A7.", "");
-            gameMode = objectiveName.substring(0, 1).toUpperCase() + objectiveName.substring(1).toLowerCase(Locale.ROOT);
+            game = objectiveName.substring(0, 1).toUpperCase() + objectiveName.substring(1).toLowerCase(Locale.ROOT);
+        }
+        if (Minecraft.getMinecraft().thePlayer.getCurrentEquippedItem() != null)
+            itemHeld = Minecraft.getMinecraft().thePlayer.getCurrentEquippedItem().getDisplayName().replaceAll("§[a-z0-9]", "");
+        else
+            itemHeld = "";
+        if (Utils.isTntGame()) {
+            mode = game;
+            game = "Tnt games";
+        } else if (Utils.isArcadeGame()) {
+            mode = game;
+            game = "Arcade games";
         }
         updateRPC();
     }
@@ -173,13 +204,10 @@ public class RichPresence {
     @SubscribeEvent
     void worldLoad(WorldEvent.Load event) {
         time = Instant.now();
-        imageText = "";
-        if (partyMembers > 1)
-            secondLine = "In a party";
-        else
-            secondLine = "On Hypixel";
-        gameMode = "";
+        map = "";
+        game = "";
         server = "";
+        mode = "Lobby";
         if (LobbyManager.proximity)
             LobbyManager.leave();
     }
@@ -213,18 +241,15 @@ public class RichPresence {
         Matcher joinMatcher = joinRegex.matcher(msg);
         if (pListMatcher.matches()) {
             partyMembers = Integer.parseInt(pListMatcher.group("users"));
-            secondLine = "In a party";
             System.out.println("list");
         } else if (disbandRegex.matcher(msg).matches()) {
             partyMembers = 1;
             canInvite = true;
             partyId = UUID.randomUUID().toString();
             LobbyManager.createPartyLobby(partyId);
-            secondLine = "On Hypixel";
             System.out.println("disband");
         } else if (joinMatcher.matches()) {
             partyMembers++;
-            secondLine = "In a party";
             if (joinMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
                 canInvite = false;
                 partyId = UUID.randomUUID().toString();
@@ -233,33 +258,27 @@ public class RichPresence {
             System.out.println("join");
         } else if (leaveRegex.matcher(msg).matches()) {
             partyMembers--;
-            secondLine = "In a party";
             System.out.println("leave");
         } else if (joinedRegex.matcher(msg).matches()) {
             partyMembers = 2;
             canInvite = false;
             partyId = UUID.randomUUID().toString();
             LobbyManager.createPartyLobby(partyId);
-            secondLine = "In a party";
             System.out.println("joined");
         } else if (promoteMatcher.matches() && promoteMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = true;
-            secondLine = "In a party";
             System.out.println("promote");
         } else if (demoteMatcher.matches() && demoteMatcher.group("user").equals(Minecraft.getMinecraft().thePlayer.getName())) {
             canInvite = false;
-            secondLine = "In a party";
             System.out.println("demote");
         } else if (partyWith.matcher(msg).matches()) {
             partyMembers = 3;
             for (int i = 0; i < msg.length(); i++)
                 if (msg.charAt(i) == ',')
                     partyMembers++;
-            secondLine = "In a party";
         } else if (aloneRegex.matcher(msg).matches()) {
             partyMembers = 1;
             canInvite = true;
-            secondLine = "On Hypixel";
         } else {
             Matcher voiceMatcher = voiceRegex.matcher(msg);
             if (voiceMatcher.matches()) {
@@ -282,16 +301,33 @@ public class RichPresence {
 
     private void updateRPC() {
         try (Activity activity = new Activity()) {
-            activity.setDetails(gameMode);
-            activity.setState(secondLine);
             activity.party().size().setMaxSize(Settings.maxPartySize);
             activity.party().size().setCurrentSize(partyMembers);
-            activity.assets().setLargeImage(Utils.getDiscordPicture(gameMode));
-            activity.assets().setLargeText(imageText);
+            activity.assets().setLargeImage(Utils.getDiscordPicture(game));
+            activity.assets().setSmallImage("hycord_logo");
+            activity.assets().setSmallText("Powered by HyCord " + HyCord.VERSION + " by DeDiamondPro");
             activity.party().setID(partyId);
-            activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
+            if (Settings.timeElapsed)
+                activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
             if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null)
                 activity.secrets().setJoinSecret("%%%%" + joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
+            if (game.contains("Skyblock")) {
+                activity.setDetails(replace(Settings.detailSb));
+                activity.setState(replace(Settings.stateSb));
+                activity.assets().setLargeText(replace(Settings.imageTextSb));
+            } else if (mode.equals("Lobby")) {
+                activity.setDetails(replace(Settings.detailLobby));
+                activity.setState(replace(Settings.stateLobby));
+                activity.assets().setLargeText(replace(Settings.imageTextLobby));
+            } else {
+                if (Utils.isClassicGame()) {
+                    mode = game;
+                    game = "Classic games";
+                }
+                activity.setDetails(replace(Settings.detail));
+                activity.setState(replace(Settings.state));
+                activity.assets().setLargeText(replace(Settings.imageText));
+            }
             discordRPC.activityManager().updateActivity(activity);
         }
     }
@@ -304,6 +340,23 @@ public class RichPresence {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + split[1]);
             joinSecret = Utils.randomAlphaNumeric(64);
         }
+    }
+
+    public static String replace(String input) {
+        String out = input;
+        out = out.replace("{server}", server);
+        out = out.replace("{game}", game);
+        out = out.replace("{mode}", mode);
+        out = out.replace("{map}", map);
+        out = out.replace("{user}", Minecraft.getMinecraft().thePlayer.getName());
+        out = out.replace("{item}", itemHeld);
+        out = out.replace("{coins}", coins);
+        out = out.replace("{bits}", bits);
+        out = out.replace("{time}", sbTime);
+        out = out.replace("{date}", sbDate);
+        out = out.replace("{players}", String.valueOf(Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap().size()));
+        if (out.length() < 2 || out.length() >= 128) return "";
+        return out;
     }
 }
 

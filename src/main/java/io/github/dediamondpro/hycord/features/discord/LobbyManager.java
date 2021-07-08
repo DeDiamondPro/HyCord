@@ -42,6 +42,7 @@ public class LobbyManager {
     public static ConcurrentHashMap<Long, DiscordUser> users = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, ResourceLocation> pictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, Boolean> muteData = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
@@ -199,7 +200,7 @@ public class LobbyManager {
                         int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
                         if (talkingData.get(id)) {
                             if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
-                                    || discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).containsValue("mute") && Boolean.parseBoolean(discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).get("mute"))) {
+                                    || muteData.containsKey(id) && muteData.get(id)) {
                                 Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
@@ -216,7 +217,7 @@ public class LobbyManager {
                             amount++;
                         } else if (Settings.showNonTalking) {
                             if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
-                                    || discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).containsValue("mute") && Boolean.parseBoolean(discordRPC.lobbyManager().getMemberMetadata(lobbyId, id).get("mute"))) {
+                                    || muteData.containsKey(id) && muteData.get(id)) {
                                 Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
@@ -309,7 +310,7 @@ public class LobbyManager {
     }
 
     public static void joinProximity(String server) {
-        if(server.equals("")){
+        if (server.equals("")) {
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Unknown server"));
             GuiUtils.open(null);
             proximity = false;
@@ -343,8 +344,11 @@ public class LobbyManager {
     }
 
     public static void memberUpdateHandler(long id, long userId) {
-        if (!proximity || userId == currentUser || id != lobbyId) return;
+        if (lobbyId == null || id != lobbyId || userId == currentUser) return;
         Map<String, String> update = discordRPC.lobbyManager().getMemberMetadata(id, userId);
+        if (update.containsKey("mute"))
+            muteData.put(userId, Boolean.valueOf(update.get("mute")));
+        if (!proximity) return;
         if (update.containsKey("x") && update.containsKey("y") && update.containsKey("z")) {
             double distance = Utils.calculateDistance(Double.parseDouble(update.get("x")), mc.thePlayer.posX,
                     Double.parseDouble(update.get("y")), mc.thePlayer.posY, Double.parseDouble(update.get("z")), mc.thePlayer.posZ);
@@ -353,8 +357,8 @@ public class LobbyManager {
                 discordRPC.voiceManager().setLocalVolume(userId, 200);
             else if (distance > 15)
                 discordRPC.voiceManager().setLocalVolume(userId, 0);
-            else{
-                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance,5, 15, 200, 0));
+            else {
+                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance, 5, 15, 200, 0));
             }
         }
     }

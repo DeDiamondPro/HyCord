@@ -37,6 +37,168 @@ public class Settings extends Vigilant {
     public static boolean enableRP = true;
 
     @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence detail",
+            description = "The detail (first line) of the Rich presence.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String detail = "{game} - {mode}";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence state",
+            description = "The state (second line) of the Rich presence.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String state = "{players} players left";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence image text",
+            description = "The image text (text that shows when you hover over the image) of the Rich presence.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String imageText = "{map}";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence detail in a lobby",
+            description = "The detail (first line) of the Rich presence while in a lobby.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String detailLobby = "{game} - {mode}";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence state in a lobby",
+            description = "The state (second line) of the Rich presence while in a lobby.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String stateLobby = "In a party";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence image text in a lobby",
+            description = "The image text (text that shows when you hover over the image) of the Rich presence while in a lobby.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String imageTextLobby = "";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence detail on skyblock",
+            description = "The detail (first line) of the Rich presence while on skyblock.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby\n" +
+                    "{coins}: display the coins in your purse\n" +
+                    "{bits}: display the amount of bits you have\n" +
+                    "{time}: display the skyblock time\n" +
+                    "{date}: display the skyblock date",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String detailSb = "Skyblock - {map}";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence state on skyblock",
+            description = "The state (second line) of the Rich presence while on skyblock.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby\n" +
+                    "{coins}: display the coins in your purse\n" +
+                    "{bits}: display the amount of bits you have\n" +
+                    "{time}: display the skyblock time\n" +
+                    "{date}: display the skyblock date",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String stateSb = "{date} {time}";
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "Discord Rich Presence image text on skyblock",
+            description = "The image text (text that shows when you hover over the image) of the Rich presence while on skyblock.\n" +
+                    "Available variables:\n" +
+                    "{game}: display the game you're currently playing\n" +
+                    "{mode}: display the mode of the game\n" +
+                    "{map}: display the map\n" +
+                    "{user}: display your username\n" +
+                    "{item}: display the item held \n" +
+                    "{players}: display the players in the lobby\n" +
+                    "{coins}: display the coins in your purse\n" +
+                    "{bits}: display the amount of bits you have\n" +
+                    "{time}: display the skyblock time\n" +
+                    "{date}: display the skyblock date",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static String imageTextSb = "{map}";
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Discord Rich Presence time elapsed",
+            description = "Display the time you have been playing a game on Discord.",
+            category = "Discord",
+            subcategory = "Rich presence"
+    )
+    public static boolean timeElapsed = true;
+
+    @Property(
             type = PropertyType.SLIDER,
             name = "Maximum discord party size",
             description = "Sets the maximum Discord party size.",

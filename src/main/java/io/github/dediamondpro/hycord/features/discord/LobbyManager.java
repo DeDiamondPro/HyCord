@@ -1,3 +1,18 @@
+/*
+ * HyCord is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * HyCord is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package io.github.dediamondpro.hycord.features.discord;
 
 import de.jcm.discordgamesdk.Result;
@@ -142,11 +157,11 @@ public class LobbyManager {
             pressed = false;
         }
         if (LobbyManager.proximity && ticks % 20 == 0) {
+            try {
             LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
             memberTransaction.setMetadata("x", String.valueOf(Minecraft.getMinecraft().thePlayer.posX));
             memberTransaction.setMetadata("y", String.valueOf(Minecraft.getMinecraft().thePlayer.posY));
             memberTransaction.setMetadata("z", String.valueOf(Minecraft.getMinecraft().thePlayer.posZ));
-            try {
                 discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction, System.out::println);
             } catch (Error e) {
                 e.printStackTrace();
@@ -355,10 +370,10 @@ public class LobbyManager {
             System.out.println("distance to " + userId + " is " + distance);
             if (distance < 5)
                 discordRPC.voiceManager().setLocalVolume(userId, 200);
-            else if (distance > 15)
+            else if (distance > 20)
                 discordRPC.voiceManager().setLocalVolume(userId, 0);
             else {
-                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance, 5, 15, 200, 0));
+                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance, 5, 20, 200, 0));
             }
         }
     }

@@ -1,4 +1,7 @@
 /*
+ * HyCord - Discord integration mod
+ * Copyright (C) 2021 DeDiamondPro
+ *
  * HyCord is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -230,11 +233,10 @@ public class RichPresence {
     @SubscribeEvent
     void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         initializedRpc = false;
+        LobbyManager.proximity = false;
         if (enabled) {
-            if (LobbyManager.lobbyId != null) {
-                discordRPC.lobbyManager().disconnectVoice(LobbyManager.lobbyId, System.out::println);
-                discordRPC.lobbyManager().disconnectLobby(LobbyManager.lobbyId, System.out::println);
-            }
+            if (LobbyManager.lobbyId != null)
+                LobbyManager.leave();
             if (LobbyManager.partyLobbyId != null)
                 discordRPC.lobbyManager().disconnectLobby(LobbyManager.partyLobbyId, System.out::println);
             try {

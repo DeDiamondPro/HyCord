@@ -1,4 +1,7 @@
 /*
+ * HyCord - Discord integration mod
+ * Copyright (C) 2021 DeDiamondPro
+ *
  * HyCord is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -38,7 +41,8 @@ public class Settings extends Vigilant {
             name = "Hypixel API Key",
             description = "Your Hypixel API key, which can be obtained from /api new. Required for some features. Easily set by doing /hycord setkey <apikey>.",
             category = "General",
-            subcategory = "API"
+            subcategory = "API",
+            protectedText = true
     )
     public static String apiKey = "";
 

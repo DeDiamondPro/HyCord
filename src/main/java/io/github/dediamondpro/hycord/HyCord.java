@@ -1,4 +1,7 @@
 /*
+ * HyCord - Discord integration mod
+ * Copyright (C) 2021 DeDiamondPro
+ *
  * HyCord is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +24,10 @@ import io.github.dediamondpro.hycord.core.*;
 import io.github.dediamondpro.hycord.features.AutoFl;
 import io.github.dediamondpro.hycord.features.NickNameController;
 import io.github.dediamondpro.hycord.features.UpdateChecker;
-import io.github.dediamondpro.hycord.features.discord.*;
+import io.github.dediamondpro.hycord.features.discord.GetDiscord;
+import io.github.dediamondpro.hycord.features.discord.LobbyManager;
+import io.github.dediamondpro.hycord.features.discord.RelationshipHandler;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceBrowser;
 import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
@@ -36,11 +42,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.commons.lang3.SystemUtils;
 
 import java.awt.*;
 import java.io.File;

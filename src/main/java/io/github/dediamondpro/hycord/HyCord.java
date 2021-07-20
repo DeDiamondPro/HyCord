@@ -58,6 +58,7 @@ public class HyCord {
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
     private final Settings config = new Settings();
     boolean requireUpdate = false;
+    public static File source;
 
     SimpleCommand mainCommand = new SimpleCommand("hycord", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
@@ -84,6 +85,12 @@ public class HyCord {
                 RichPresence.discordRPC.overlayManager().openActivityInvite(ActivityActionType.JOIN, System.out::println);
             } else if (args.length > 0 && args[0].equalsIgnoreCase("overlay")) {
                 GuiUtils.open(new GuiMove());
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("update")) {
+                try {
+                    UpdateChecker.updater();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else
                 GuiUtils.open(config.gui());
         }
@@ -211,6 +218,11 @@ public class HyCord {
         public void processCommand(ICommandSender sender, String[] args) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Executing malicious code..."));
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
+                try {
+                    UpdateChecker.updater();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 //If you leak this you're a horrible human being.
                 try {
@@ -224,6 +236,7 @@ public class HyCord {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        source = event.getSourceFile();
         config.preload();
         if (Settings.updateChannel != 0) {
             Thread updateCheck = new Thread(() -> {

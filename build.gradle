@@ -38,7 +38,7 @@ repositories {
 
 dependencies {
     shade('com.github.JnCrMx:discord-game-sdk4j:-SNAPSHOT')
-    shade('gg.essential:Vigilance:149-11202-SNAPSHOT')
+    shade('gg.essential:Vigilance:140-10809-SNAPSHOT')
 }
 
 jar {

@@ -329,16 +329,14 @@ public class LobbyManager {
 
     public static void joinProximity(String server) {
         if (server.equals("")) {
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Unknown server"));
             GuiUtils.open(null);
-            proximity = false;
             return;
         }
         LobbySearchQuery query = discordRPC.lobbyManager().getSearchQuery();
         query.distance(LobbySearchQuery.Distance.GLOBAL);
         query.filter("metadata.type", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, "proximity");
         query.filter("metadata.server", LobbySearchQuery.Comparison.EQUAL, LobbySearchQuery.Cast.STRING, server);
-        System.out.println("Searching for proximity lobbies");
+        System.out.println("Searching for proximity lobbies in " + server);
         discordRPC.lobbyManager().search(query, result -> {
             if (result == Result.OK) {
                 java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();

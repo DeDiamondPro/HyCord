@@ -29,7 +29,6 @@ import io.github.dediamondpro.hycord.HyCord;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -64,6 +63,8 @@ public class RichPresence {
     public static String partyId = UUID.randomUUID().toString();
     static boolean initializedRpc;
     static boolean sent = true;
+    static boolean triedLocraw = false;
+    static boolean triggeredByHyCord = false;
 
     public static Pattern partyListRegex = Pattern.compile("(§6Party Members \\(|§e(Looting|Visiting|Adventuring|Exploring) §r§cThe Catacombs( Entrance)? §r§ewith §r§9)(?<users>[0-9]+)(\\)§r|/5 players( §r§eon §r§6Floor [IV]+)?§r§e!§r)");
     public static Pattern disbandRegex = Pattern.compile("§cThe party was disbanded because all invites expired and the party was empty§r|(§eYou have been kicked from the party by (§r)?)?§[a-z0-9](\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ([a-zA-Z0-9_]{3,16}) (§r§ehas disbanded the party!|§r§e)§r|§eYou left the party\\.§r|§cThe party was disbanded because the party leader disconnected\\.§r");
@@ -79,6 +80,7 @@ public class RichPresence {
     public static Pattern serverRegex = Pattern.compile("(?<date>[0-7]+/?){3}+ +(?<server>[a-zA-Z][0-9]+[a-zA-Z])");
     public static Pattern timeRegex = Pattern.compile(" (?<time>[0-9]{1,2}:[0-9]{1,2}(am|pm)) ");
     public static Pattern dateRegex = Pattern.compile(" (?<date>[a-zA-Z ]+[0-9]+.{2})");
+    public static Pattern lobbyLocrawRegex = Pattern.compile("\\{\\\"server\\\":\\\"(?<server>dynamiclobby[0-9]+[a-z-A-Z])\\\".+}");
 
     static String mode = "";
     static String map = "";
@@ -100,7 +102,7 @@ public class RichPresence {
             sent = true;
         }
         tickCounter++;
-        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null || !Settings.enableRP || !enabled)
+        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -135,6 +137,8 @@ public class RichPresence {
         if (sidebarObjective != null) {
             String objectiveName = sidebarObjective.getDisplayName().replaceAll("(?i)\\u00A7.", "");
             game = objectiveName.substring(0, 1).toUpperCase() + objectiveName.substring(1).toLowerCase(Locale.ROOT);
+        } else {
+            game = "Limbo";
         }
         if (Minecraft.getMinecraft().thePlayer.getCurrentEquippedItem() != null)
             itemHeld = Minecraft.getMinecraft().thePlayer.getCurrentEquippedItem().getDisplayName().replaceAll("§[a-z0-9]", "");
@@ -147,7 +151,14 @@ public class RichPresence {
             mode = game;
             game = "Arcade games";
         }
-        updateRPC();
+        if(LobbyManager.proximity && server.equals("") && scoreboard.size() > 0 && !triedLocraw) {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
+            triedLocraw = true;
+            triggeredByHyCord = true;
+            System.out.println("Using locraw");
+        }
+        if (Settings.enableRP)
+            updateRPC();
     }
 
     private void initializeRpc() {
@@ -226,6 +237,7 @@ public class RichPresence {
         game = "";
         server = "";
         mode = "Lobby";
+        triedLocraw = false;
         if (LobbyManager.proximity)
             LobbyManager.leave();
     }
@@ -248,7 +260,7 @@ public class RichPresence {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     void onMsg(ClientChatReceivedEvent event) {
         if (event.type != 0 || !enabled) return;
         String msg = event.message.getFormattedText();
@@ -256,7 +268,16 @@ public class RichPresence {
         Matcher promoteMatcher = promoteRegex.matcher(msg);
         Matcher demoteMatcher = demoteRegex.matcher(msg);
         Matcher joinMatcher = joinRegex.matcher(msg);
-        if (pListMatcher.matches()) {
+        Matcher locrawMatcher = lobbyLocrawRegex.matcher(event.message.getUnformattedText());
+        if(locrawMatcher.matches()){
+            if (LobbyManager.proximity && !locrawMatcher.group("server").equals(server))
+                LobbyManager.joinProximity(locrawMatcher.group("server"));
+            server = locrawMatcher.group("server");
+            if(triggeredByHyCord) {
+                event.setCanceled(true);
+                triggeredByHyCord = false;
+            }
+        } else if (pListMatcher.matches()) {
             partyMembers = Integer.parseInt(pListMatcher.group("users"));
             System.out.println("list");
         } else if (disbandRegex.matcher(msg).matches()) {

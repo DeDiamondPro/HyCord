@@ -268,11 +268,11 @@ public class GuiVoiceBrowser extends GuiScreen {
         }
         if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 4 && mouseY <= 15) {
             LobbyManager.joinSecret(enteredText);
-        } else if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 29 && mouseY <= 40) {
+        } /*else if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 29 && mouseY <= 40) {
            LobbyManager.proximity = true;
            LobbyManager.joinProximity(RichPresence.server);
            GuiUtils.open(null);
-        }
+        }*/
     }
 
     @Override

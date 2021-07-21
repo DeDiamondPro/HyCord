@@ -382,8 +382,8 @@ public class LobbyManager {
         }
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     void onPlayerRender(RenderPlayerEvent.Post event) {
         locationData.put(event.entityPlayer.getUniqueID(), new BlockPos(event.x, event.y, event.z));
-    }
+    }*/
 }

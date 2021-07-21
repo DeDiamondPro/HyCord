@@ -75,46 +75,57 @@ public class UpdateChecker {
         sent = true;
     }
 
-    public static void updater() throws IOException {
+    public static void updater() {
         if (latest == null) return;
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
                 EnumChatFormatting.YELLOW + "Downloading update please wait..."));
-        String updateUrl = latest.getAsJsonObject().get("assets").getAsJsonArray().get(0).getAsJsonObject().get("browser_download_url").getAsString();
-        String name = updateUrl.substring(updateUrl.lastIndexOf("/") + 1);
-        URLConnection con = new URL(updateUrl).openConnection();
-        con.setRequestProperty("User-Agent", "HyCord");
-        InputStream in = con.getInputStream();
-        File updateDir = new File("config/HyCord/updates");
-        if (!updateDir.exists() && !updateDir.mkdir()) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
-                    EnumChatFormatting.RED + "Failed to download update"));
-            return;
-        }
-        File tempFile = new File("config/HyCord/updates/" + name);
-        Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("applying update");
+        Thread hycordUpdateThread = new Thread(()->{
             try {
-                if (HyCord.source == null || !HyCord.source.exists() || HyCord.source.isDirectory()) {
-                    System.out.println("source file doesn't exist?");
+                String updateUrl = latest.getAsJsonObject().get("assets").getAsJsonArray().get(0).getAsJsonObject().get("browser_download_url").getAsString();
+                String name = updateUrl.substring(updateUrl.lastIndexOf("/") + 1);
+                URLConnection con = new URL(updateUrl).openConnection();
+                con.setRequestProperty("User-Agent", "HyCord");
+                InputStream in = con.getInputStream();
+                File updateDir = new File("config/HyCord/updates");
+                if (!updateDir.exists() && !updateDir.mkdir()) {
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
+                            EnumChatFormatting.RED + "Failed to download update"));
                     return;
                 }
-                copyFile(tempFile, HyCord.source);
-                System.out.println("Successfully downloaded update");
-                tempFile.delete();
-                updateDir.delete();
-            } catch (Throwable e) {
+                File tempFile = new File("config/HyCord/updates/" + name);
+                Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    System.out.println("applying update");
+                    try {
+                        if (HyCord.source == null || !HyCord.source.exists() || HyCord.source.isDirectory()) {
+                            System.out.println("source file doesn't exist?");
+                            return;
+                        }
+                        copyFile(tempFile, HyCord.source);
+                        System.out.println("Successfully downloaded update");
+                        tempFile.delete();
+                        updateDir.delete();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }));
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
+                        EnumChatFormatting.YELLOW + "Update downloaded successfully, restart your game to use the new version!"));
+            }catch (IOException e){
                 e.printStackTrace();
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
+                        EnumChatFormatting.RED + "Failed to download update"));
             }
-        }));
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
-                EnumChatFormatting.YELLOW + "Update downloaded successfully, restart your game to use the new version!"));
+            Thread.currentThread().interrupt();
+        });
+        hycordUpdateThread.start();
     }
 
     /**
      * Taken from SkytilsMod and Wynntils under GNU Affero General Public License v3.0
      * Modified to be more compact
      * https://github.com/Skytils/SkytilsMod/blob/0.x/LICENSE
+     * https://github.com/Wynntils/Wynntils/blob/development/LICENSE
      *
      * @param sourceFile The source file
      * @param destFile   Where it will be

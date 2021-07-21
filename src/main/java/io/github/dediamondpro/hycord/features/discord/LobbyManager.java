@@ -32,11 +32,12 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vector3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
@@ -45,6 +46,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
@@ -61,6 +63,7 @@ public class LobbyManager {
     public static ConcurrentHashMap<Long, ResourceLocation> pictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, Boolean> muteData = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<UUID, BlockPos> locationData = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
@@ -377,5 +380,10 @@ public class LobbyManager {
                 discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance, 5, 20, 200, 0));
             }
         }
+    }
+
+    @SubscribeEvent
+    void onPlayerRender(RenderPlayerEvent.Post event) {
+        locationData.put(event.entityPlayer.getUniqueID(), new BlockPos(event.x, event.y, event.z));
     }
 }

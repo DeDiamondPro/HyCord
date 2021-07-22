@@ -108,6 +108,7 @@ public class UpdateChecker {
                     } catch (Throwable e) {
                         e.printStackTrace();
                     }
+                    Thread.currentThread().interrupt();
                 }));
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " +
                         EnumChatFormatting.YELLOW + "Update downloaded successfully, restart your game to use the new version!"));

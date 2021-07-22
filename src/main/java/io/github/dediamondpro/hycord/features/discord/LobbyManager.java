@@ -18,6 +18,7 @@
 
 package io.github.dediamondpro.hycord.features.discord;
 
+import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.*;
 import de.jcm.discordgamesdk.user.DiscordUser;
@@ -44,6 +45,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -63,12 +65,12 @@ public class LobbyManager {
     public static ConcurrentHashMap<Long, ResourceLocation> pictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, Boolean> muteData = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<UUID, BlockPos> locationData = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, BlockPos> locationData = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, String> proximityPlayers = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
     public static boolean proximity = false;
-    private static long ticks = 0;
 
     //Filters for VoiceBrowser.java
     public static LobbySearchQuery.Distance distance = LobbySearchQuery.Distance.GLOBAL;
@@ -91,9 +93,18 @@ public class LobbyManager {
         lobbyId = lobby.getId();
         System.out.println("Starting voice chat in Lobby " + lobby.getId());
         if (result != Result.OK) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
-            Minecraft.getMinecraft().displayGuiScreen(null);
+            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
+            mc.displayGuiScreen(null);
             return;
+        }
+        if (proximity) {
+            try {
+                LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
+                memberTransaction.setMetadata("uuid", mc.thePlayer.getUniqueID().toString());
+                discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction);
+            } catch (Error e) {
+                e.printStackTrace();
+            }
         }
         discordRPC.lobbyManager().connectVoice(lobby, System.out::println);
         currentUser = discordRPC.userManager().getCurrentUser().getUserId();
@@ -104,6 +115,12 @@ public class LobbyManager {
                     talkingData.put(id, false);
                     if (!pictures.containsKey(id)) {
                         bufferedPictures.put(id, Objects.requireNonNull(NetworkUtils.getImage("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64")));
+                    }
+                }
+                if (proximity) {
+                    Map<String, String> data = discordRPC.lobbyManager().getMemberMetadata(lobbyId, id);
+                    if (data.containsKey("uuid")) {
+                        proximityPlayers.put(id, data.get("uuid"));
                     }
                 }
             });
@@ -117,7 +134,7 @@ public class LobbyManager {
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
             if (result == Result.OK) {
                 users.put(userId, discordUser);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                         + EnumChatFormatting.GREEN + discordUser.getUsername() + "#" + discordUser.getDiscriminator() + " joined the voice chat"));
                 bufferedPictures.put(discordUser.getUserId(), Objects.requireNonNull(NetworkUtils.getImage("https://cdn.discordapp.com/avatars/" + discordUser.getUserId() + "/" + discordUser.getAvatar() + ".png?size=64")));
             }
@@ -134,11 +151,17 @@ public class LobbyManager {
         if (userId.equals(currentUser)) {
             talkingData.clear();
             users.clear();
+            proximityPlayers.clear();
+            locationData.clear();
         } else {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                     + EnumChatFormatting.RED + users.get(userId).getUsername() + "#" + users.get(userId).getDiscriminator() + " left the voice chat"));
             talkingData.remove(userId);
             users.remove(userId);
+            if (proximityPlayers.containsKey(id)) {
+                locationData.remove(UUID.fromString(proximityPlayers.get(id)));
+                proximityPlayers.remove(id);
+            }
         }
     }
 
@@ -162,18 +185,24 @@ public class LobbyManager {
         } else {
             pressed = false;
         }
-        if (LobbyManager.proximity && ticks % 20 == 0) {
-            try {
-            LobbyMemberTransaction memberTransaction = discordRPC.lobbyManager().getMemberUpdateTransaction(lobbyId, currentUser);
-            memberTransaction.setMetadata("x", String.valueOf(Minecraft.getMinecraft().thePlayer.posX));
-            memberTransaction.setMetadata("y", String.valueOf(Minecraft.getMinecraft().thePlayer.posY));
-            memberTransaction.setMetadata("z", String.valueOf(Minecraft.getMinecraft().thePlayer.posZ));
-                discordRPC.lobbyManager().updateMember(lobbyId, currentUser, memberTransaction, System.out::println);
-            } catch (Error e) {
-                e.printStackTrace();
+        if (proximity) {
+            for (Long element : proximityPlayers.keySet()) {
+                BlockPos loc = locationData.get(proximityPlayers.get(element));
+                double dist = Utils.calculateDistance(loc.getX(), mc.thePlayer.posX, loc.getY(), mc.thePlayer.posY, loc.getZ(), mc.thePlayer.posZ);
+                System.out.println("distance to " + element + " is " + dist);
+                try {
+                    if (dist < 5)
+                        discordRPC.voiceManager().setLocalVolume(element, 200);
+                    else if (dist > 40)
+                        discordRPC.voiceManager().setLocalVolume(element, 0);
+                    else {
+                        discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 40, 200, 0));
+                    }
+                }catch (GameSDKException e){
+                    e.printStackTrace();
+                }
             }
         }
-        ticks++;
     }
 
     @SubscribeEvent
@@ -181,28 +210,28 @@ public class LobbyManager {
         if (!RichPresence.enabled || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         try {
             for (Long id : bufferedPictures.keySet()) {
-                pictures.put(id, Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
+                pictures.put(id, mc.getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
                 bufferedPictures.remove(id);
             }
             if (lobbyId == null) return;
-            if (Minecraft.getMinecraft().currentScreen != null && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat))
+            if (mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat))
                 return;
-            ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+            ScaledResolution sr = new ScaledResolution(mc);
             if (Settings.showIndicator) {
                 if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
-                    Minecraft.getMinecraft().getTextureManager().bindTexture(micTexture);
+                    mc.getTextureManager().bindTexture(micTexture);
                     GlStateManager.color(1.0F, 1.0F, 1.0F);
                     Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
                             locations.get("mic").getYScaled(sr.getScaledHeight()),
                             0, 0, 20, 20, 20, 20);
                 } else if (discordRPC.voiceManager().isSelfDeaf()) {
-                    Minecraft.getMinecraft().getTextureManager().bindTexture(deafenTexture);
+                    mc.getTextureManager().bindTexture(deafenTexture);
                     GlStateManager.color(1.0F, 1.0F, 1.0F);
                     Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
                             locations.get("mic").getYScaled(sr.getScaledHeight()),
                             0, 0, 20, 20, 20, 20);
                 } else if (discordRPC.voiceManager().isSelfMute()) {
-                    Minecraft.getMinecraft().getTextureManager().bindTexture(muteTexture);
+                    mc.getTextureManager().bindTexture(muteTexture);
                     GlStateManager.color(1.0F, 1.0F, 1.0F);
                     Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
                             locations.get("mic").getYScaled(sr.getScaledHeight()),
@@ -222,16 +251,16 @@ public class LobbyManager {
                         if (talkingData.get(id)) {
                             if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
                                     || muteData.containsKey(id) && muteData.get(id)) {
-                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
                             } else {
-                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xFFFFFF);
+                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xFFFFFF);
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(0, 255, 0).getRGB());
                             }
                             if (pictures.containsKey(id)) {
-                                Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                                mc.getTextureManager().bindTexture(pictures.get(id));
                                 GlStateManager.color(1.0F, 1.0F, 1.0F);
                                 Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
                             }
@@ -239,16 +268,16 @@ public class LobbyManager {
                         } else if (Settings.showNonTalking) {
                             if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
                                     || muteData.containsKey(id) && muteData.get(id)) {
-                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
                             } else {
-                                Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xaaaaaa);
+                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xaaaaaa);
                                 if (Settings.showIndicatorOther)
                                     Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(170, 170, 170).getRGB());
                             }
                             if (pictures.containsKey(id)) {
-                                Minecraft.getMinecraft().getTextureManager().bindTexture(pictures.get(id));
+                                mc.getTextureManager().bindTexture(pictures.get(id));
                                 GlStateManager.color(0.6F, 0.6F, 0.6F);
                                 Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
                             }
@@ -290,8 +319,8 @@ public class LobbyManager {
     public static void joinSecret(String secret) {
         discordRPC.lobbyManager().connectLobbyWithActivitySecret(secret, (result, lobby) -> {
             if (result != Result.OK) {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
-                Minecraft.getMinecraft().displayGuiScreen(null);
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
+                mc.displayGuiScreen(null);
             } else {
                 startVoice(result, lobby);
                 GuiUtils.open(new GuiVoiceMenu());
@@ -368,22 +397,14 @@ public class LobbyManager {
         if (update.containsKey("mute"))
             muteData.put(userId, Boolean.valueOf(update.get("mute")));
         if (!proximity) return;
-        if (update.containsKey("x") && update.containsKey("y") && update.containsKey("z")) {
-            double distance = Utils.calculateDistance(Double.parseDouble(update.get("x")), mc.thePlayer.posX,
-                    Double.parseDouble(update.get("y")), mc.thePlayer.posY, Double.parseDouble(update.get("z")), mc.thePlayer.posZ);
-            System.out.println("distance to " + userId + " is " + distance);
-            if (distance < 5)
-                discordRPC.voiceManager().setLocalVolume(userId, 200);
-            else if (distance > 20)
-                discordRPC.voiceManager().setLocalVolume(userId, 0);
-            else {
-                discordRPC.voiceManager().setLocalVolume(userId, (int) Utils.map((float) distance, 5, 20, 200, 0));
-            }
+        if (update.containsKey("uuid")) {
+            proximityPlayers.put(id, update.get("uuid"));
         }
     }
 
-    /*@SubscribeEvent
+    @SubscribeEvent
     void onPlayerRender(RenderPlayerEvent.Post event) {
-        locationData.put(event.entityPlayer.getUniqueID(), new BlockPos(event.x, event.y, event.z));
-    }*/
+        if (proximity && proximityPlayers.containsValue(event.entityPlayer.getUniqueID().toString()))
+            locationData.put(event.entityPlayer.getUniqueID().toString(), new BlockPos(event.x, event.y, event.z));
+    }
 }

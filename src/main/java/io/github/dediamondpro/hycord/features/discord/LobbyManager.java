@@ -107,7 +107,6 @@ public class LobbyManager {
             }
         }
         discordRPC.lobbyManager().connectVoice(lobby, System.out::println);
-        currentUser = discordRPC.userManager().getCurrentUser().getUserId();
         for (Long id : discordRPC.lobbyManager().getMemberUserIds(lobby.getId())) {
             discordRPC.userManager().getUser(id, (r, discordUser) -> {
                 if (r == Result.OK) {
@@ -119,7 +118,7 @@ public class LobbyManager {
                 }
                 if (proximity) {
                     Map<String, String> data = discordRPC.lobbyManager().getMemberMetadata(lobbyId, id);
-                    if (data.containsKey("uuid")) {
+                    if (data.containsKey("uuid") && !id.equals(currentUser)) {
                         proximityPlayers.put(id, data.get("uuid"));
                     }
                 }
@@ -186,20 +185,23 @@ public class LobbyManager {
             pressed = false;
         }
         if (proximity) {
+            if (mc.thePlayer == null) return;
             for (Long element : proximityPlayers.keySet()) {
                 BlockPos loc = locationData.get(proximityPlayers.get(element));
-                double dist = Utils.calculateDistance(loc.getX(), mc.thePlayer.posX, loc.getY(), mc.thePlayer.posY, loc.getZ(), mc.thePlayer.posZ);
-                System.out.println("distance to " + element + " is " + dist);
-                try {
-                    if (dist < 5)
-                        discordRPC.voiceManager().setLocalVolume(element, 200);
-                    else if (dist > 40)
-                        discordRPC.voiceManager().setLocalVolume(element, 0);
-                    else {
-                        discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 40, 200, 0));
+                if (loc != null) {
+                    double dist = Utils.calculateDistance(loc.getX(), mc.thePlayer.posX, loc.getY(), mc.thePlayer.posY, loc.getZ(), mc.thePlayer.posZ);
+                    System.out.println("distance to " + element + " is " + dist);
+                    try {
+                        if (dist < 5)
+                            discordRPC.voiceManager().setLocalVolume(element, 200);
+                        else if (dist > 40)
+                            discordRPC.voiceManager().setLocalVolume(element, 0);
+                        else {
+                            discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 40, 200, 0));
+                        }
+                    } catch (GameSDKException e) {
+                        e.printStackTrace();
                     }
-                }catch (GameSDKException e){
-                    e.printStackTrace();
                 }
             }
         }
@@ -208,86 +210,82 @@ public class LobbyManager {
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Post event) {
         if (!RichPresence.enabled || event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        try {
-            for (Long id : bufferedPictures.keySet()) {
-                pictures.put(id, mc.getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
-                bufferedPictures.remove(id);
+        for (Long id : bufferedPictures.keySet()) {
+            pictures.put(id, mc.getTextureManager().getDynamicTextureLocation("pic" + id, new DynamicTexture(bufferedPictures.get(id))));
+            bufferedPictures.remove(id);
+        }
+        if (lobbyId == null) return;
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat))
+            return;
+        ScaledResolution sr = new ScaledResolution(mc);
+        if (Settings.showIndicator) {
+            if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
+                mc.getTextureManager().bindTexture(micTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                        locations.get("mic").getYScaled(sr.getScaledHeight()),
+                        0, 0, 20, 20, 20, 20);
+            } else if (discordRPC.voiceManager().isSelfDeaf()) {
+                mc.getTextureManager().bindTexture(deafenTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                        locations.get("mic").getYScaled(sr.getScaledHeight()),
+                        0, 0, 20, 20, 20, 20);
+            } else if (discordRPC.voiceManager().isSelfMute()) {
+                mc.getTextureManager().bindTexture(muteTexture);
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
+                        locations.get("mic").getYScaled(sr.getScaledHeight()),
+                        0, 0, 20, 20, 20, 20);
             }
-            if (lobbyId == null) return;
-            if (mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat))
-                return;
-            ScaledResolution sr = new ScaledResolution(mc);
-            if (Settings.showIndicator) {
-                if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
-                    mc.getTextureManager().bindTexture(micTexture);
-                    GlStateManager.color(1.0F, 1.0F, 1.0F);
-                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                            locations.get("mic").getYScaled(sr.getScaledHeight()),
-                            0, 0, 20, 20, 20, 20);
-                } else if (discordRPC.voiceManager().isSelfDeaf()) {
-                    mc.getTextureManager().bindTexture(deafenTexture);
-                    GlStateManager.color(1.0F, 1.0F, 1.0F);
-                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                            locations.get("mic").getYScaled(sr.getScaledHeight()),
-                            0, 0, 20, 20, 20, 20);
-                } else if (discordRPC.voiceManager().isSelfMute()) {
-                    mc.getTextureManager().bindTexture(muteTexture);
-                    GlStateManager.color(1.0F, 1.0F, 1.0F);
-                    Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                            locations.get("mic").getYScaled(sr.getScaledHeight()),
-                            0, 0, 20, 20, 20, 20);
-                }
+        }
+        if (Settings.showUserList) {
+            int amount = 0;
+            int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
+            if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * talkingData.size() > sr.getScaledHeight()) {
+                originalYCoord = sr.getScaledHeight() - 19 * talkingData.size();
             }
-            if (Settings.showUserList) {
-                int amount = 0;
-                int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
-                if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * talkingData.size() > sr.getScaledHeight()) {
-                    originalYCoord = sr.getScaledHeight() - 19 * talkingData.size();
-                }
-                for (Long id : talkingData.keySet()) {
-                    if (users.containsKey(id)) {
-                        int yCoord = originalYCoord + 19 * amount;
-                        int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
-                        if (talkingData.get(id)) {
-                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
-                                    || muteData.containsKey(id) && muteData.get(id)) {
-                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
-                                if (Settings.showIndicatorOther)
-                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
-                            } else {
-                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xFFFFFF);
-                                if (Settings.showIndicatorOther)
-                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(0, 255, 0).getRGB());
-                            }
-                            if (pictures.containsKey(id)) {
-                                mc.getTextureManager().bindTexture(pictures.get(id));
-                                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                                Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
-                            }
-                            amount++;
-                        } else if (Settings.showNonTalking) {
-                            if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
-                                    || muteData.containsKey(id) && muteData.get(id)) {
-                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
-                                if (Settings.showIndicatorOther)
-                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
-                            } else {
-                                mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xaaaaaa);
-                                if (Settings.showIndicatorOther)
-                                    Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(170, 170, 170).getRGB());
-                            }
-                            if (pictures.containsKey(id)) {
-                                mc.getTextureManager().bindTexture(pictures.get(id));
-                                GlStateManager.color(0.6F, 0.6F, 0.6F);
-                                Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
-                            }
-                            amount++;
+            for (Long id : talkingData.keySet()) {
+                if (users.containsKey(id)) {
+                    int yCoord = originalYCoord + 19 * amount;
+                    int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
+                    if (talkingData.get(id)) {
+                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
+                                || muteData.containsKey(id) && muteData.get(id)) {
+                            mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                            if (Settings.showIndicatorOther)
+                                Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
+                        } else {
+                            mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xFFFFFF);
+                            if (Settings.showIndicatorOther)
+                                Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(0, 255, 0).getRGB());
                         }
+                        if (pictures.containsKey(id)) {
+                            mc.getTextureManager().bindTexture(pictures.get(id));
+                            GlStateManager.color(1.0F, 1.0F, 1.0F);
+                            Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
+                        }
+                        amount++;
+                    } else if (Settings.showNonTalking) {
+                        if (discordRPC.voiceManager().isLocalMute(id) || (id.equals(currentUser) && (discordRPC.voiceManager().isSelfMute() || discordRPC.voiceManager().isSelfDeaf()))
+                                || muteData.containsKey(id) && muteData.get(id)) {
+                            mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, new Color(255, 0, 0).getRGB());
+                            if (Settings.showIndicatorOther)
+                                Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(255, 0, 0).getRGB());
+                        } else {
+                            mc.fontRendererObj.drawStringWithShadow(users.get(id).getUsername(), xCoord + 22, yCoord + 6, 0xaaaaaa);
+                            if (Settings.showIndicatorOther)
+                                Gui.drawRect(xCoord, yCoord, xCoord + 18, yCoord + 18, new Color(170, 170, 170).getRGB());
+                        }
+                        if (pictures.containsKey(id)) {
+                            mc.getTextureManager().bindTexture(pictures.get(id));
+                            GlStateManager.color(0.6F, 0.6F, 0.6F);
+                            Gui.drawModalRectWithCustomSizedTexture(xCoord + 1, yCoord + 1, 0, 0, 16, 16, 16, 16);
+                        }
+                        amount++;
                     }
                 }
             }
-        } catch (IllegalStateException | NullPointerException e) {
-            e.printStackTrace();
         }
     }
 
@@ -397,7 +395,7 @@ public class LobbyManager {
         if (update.containsKey("mute"))
             muteData.put(userId, Boolean.valueOf(update.get("mute")));
         if (!proximity) return;
-        if (update.containsKey("uuid")) {
+        if (update.containsKey("uuid") && id != currentUser) {
             proximityPlayers.put(id, update.get("uuid"));
         }
     }

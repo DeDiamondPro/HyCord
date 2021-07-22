@@ -206,6 +206,11 @@ public class RichPresence {
             public void onMemberUpdate(long lobbyId, long userId) {
                 LobbyManager.memberUpdateHandler(lobbyId, userId);
             }
+
+            @Override
+            public void onCurrentUserUpdate() {
+                LobbyManager.currentUser = discordRPC.userManager().getCurrentUser().getUserId();
+            }
         });
         try {
             discordRPC = new Core(params);

@@ -18,10 +18,7 @@
 
 package io.github.dediamondpro.hycord.features.discord;
 
-import de.jcm.discordgamesdk.Core;
-import de.jcm.discordgamesdk.CreateParams;
-import de.jcm.discordgamesdk.DiscordEventAdapter;
-import de.jcm.discordgamesdk.GameSDKException;
+import de.jcm.discordgamesdk.*;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.user.DiscordUser;
 import de.jcm.discordgamesdk.user.Relationship;
@@ -243,8 +240,11 @@ public class RichPresence {
         server = "";
         mode = "Lobby";
         triedLocraw = false;
-        if (LobbyManager.proximity)
+        if (LobbyManager.proximity) {
             LobbyManager.leave();
+            LobbyManager.proximityPlayers.clear();
+            LobbyManager.locationData.clear();
+        }
     }
 
     @SubscribeEvent

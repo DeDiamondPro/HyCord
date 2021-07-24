@@ -45,10 +45,8 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.dediamondpro.hycord.features.discord.RichPresence.discordRPC;
@@ -116,9 +114,10 @@ public class LobbyManager {
                         bufferedPictures.put(id, Objects.requireNonNull(NetworkUtils.getImage("https://cdn.discordapp.com/avatars/" + id + "/" + discordUser.getAvatar() + ".png?size=64")));
                     }
                 }
-                if (proximity) {
+                if (proximity && !id.equals(currentUser)) {
                     Map<String, String> data = discordRPC.lobbyManager().getMemberMetadata(lobbyId, id);
-                    if (data.containsKey("uuid") && !id.equals(currentUser)) {
+                    System.out.println(data);
+                    if (data.containsKey("uuid")) {
                         proximityPlayers.put(id, data.get("uuid"));
                     }
                 }
@@ -142,7 +141,6 @@ public class LobbyManager {
 
     public static void talkHandler(Long userId, Boolean speaking) {
         talkingData.put(userId, speaking);
-        System.out.println(userId + " speaking: " + speaking);
     }
 
     public static void leaveHandler(Long userId, long id) {
@@ -158,13 +156,14 @@ public class LobbyManager {
             talkingData.remove(userId);
             users.remove(userId);
             if (proximityPlayers.containsKey(id)) {
-                locationData.remove(UUID.fromString(proximityPlayers.get(id)));
+                locationData.remove(proximityPlayers.get(id));
                 proximityPlayers.remove(id);
             }
         }
     }
 
     private boolean pressed = false;
+    int ticks = 0;
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -184,13 +183,12 @@ public class LobbyManager {
         } else {
             pressed = false;
         }
-        if (proximity) {
+        if (proximity && ticks % Settings.ticks == 0) {
             if (mc.thePlayer == null) return;
             for (Long element : proximityPlayers.keySet()) {
                 BlockPos loc = locationData.get(proximityPlayers.get(element));
                 if (loc != null) {
-                    double dist = Utils.calculateDistance(loc.getX(), mc.thePlayer.posX, loc.getY(), mc.thePlayer.posY, loc.getZ(), mc.thePlayer.posZ);
-                    System.out.println("distance to " + element + " is " + dist);
+                    double dist = Math.sqrt(Math.pow(loc.getX(), 2) + Math.pow(loc.getY(), 2) + Math.pow(loc.getZ(), 2));
                     try {
                         if (dist < 5)
                             discordRPC.voiceManager().setLocalVolume(element, 200);
@@ -205,6 +203,7 @@ public class LobbyManager {
                 }
             }
         }
+        ticks++;
     }
 
     @SubscribeEvent
@@ -371,8 +370,10 @@ public class LobbyManager {
             if (result == Result.OK) {
                 java.util.List<Lobby> lobbies = discordRPC.lobbyManager().getLobbies();
                 if (lobbies.size() > 0) {
+                    System.out.println("Proximity lobby found!");
                     discordRPC.lobbyManager().connectLobby(lobbies.get(0), LobbyManager::startVoice);
                 } else {
+                    System.out.println("No proximity lobby found, creating one...");
                     LobbyTransaction transaction = discordRPC.lobbyManager().getLobbyCreateTransaction();
                     transaction.setCapacity(200);
                     transaction.setLocked(false);
@@ -395,8 +396,9 @@ public class LobbyManager {
         if (update.containsKey("mute"))
             muteData.put(userId, Boolean.valueOf(update.get("mute")));
         if (!proximity) return;
-        if (update.containsKey("uuid") && id != currentUser) {
-            proximityPlayers.put(id, update.get("uuid"));
+        System.out.println(update);
+        if (update.containsKey("uuid")) {
+            proximityPlayers.put(userId, update.get("uuid"));
         }
     }
 

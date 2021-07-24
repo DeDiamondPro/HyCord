@@ -142,7 +142,10 @@ public class HyCord {
                     newNick = newNick.replace("&r" + replacePart, Utils.rainbowText(replacePart));
                 }
                 NickNameController.nicknames.put(args[0], newNick);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));
+                if (args[1].contains("&r") && Minecraft.getMinecraft().thePlayer.getUniqueID().toString().equals("53924f1a-87e6-4709-8e53-f1c7d13dc239"))
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(Utils.rainbowText(args[0] + " has successfully been clowned!")));
+                else
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));
             } else
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a player and a nickname"));
         }

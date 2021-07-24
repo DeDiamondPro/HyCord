@@ -151,7 +151,7 @@ public class RichPresence {
             mode = game;
             game = "Arcade games";
         }
-        if(LobbyManager.proximity && server.equals("") && scoreboard.size() > 0 && !triedLocraw) {
+        if (LobbyManager.proximity && server.equals("") && scoreboard.size() > 0 && !triedLocraw) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");
             triedLocraw = true;
             triggeredByHyCord = true;
@@ -274,11 +274,11 @@ public class RichPresence {
         Matcher demoteMatcher = demoteRegex.matcher(msg);
         Matcher joinMatcher = joinRegex.matcher(msg);
         Matcher locrawMatcher = lobbyLocrawRegex.matcher(event.message.getUnformattedText());
-        if(locrawMatcher.matches()){
+        if (locrawMatcher.matches()) {
             if (LobbyManager.proximity && !locrawMatcher.group("server").equals(server))
                 LobbyManager.joinProximity(locrawMatcher.group("server"));
             server = locrawMatcher.group("server");
-            if(triggeredByHyCord) {
+            if (triggeredByHyCord) {
                 event.setCanceled(true);
                 triggeredByHyCord = false;
             }
@@ -371,7 +371,11 @@ public class RichPresence {
                 activity.setState(replace(Settings.state));
                 activity.assets().setLargeText(replace(Settings.imageText));
             }
-            discordRPC.activityManager().updateActivity(activity);
+            try {
+                discordRPC.activityManager().updateActivity(activity);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
     }
 

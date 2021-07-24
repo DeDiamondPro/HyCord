@@ -192,10 +192,10 @@ public class LobbyManager {
                     try {
                         if (dist < 5)
                             discordRPC.voiceManager().setLocalVolume(element, 200);
-                        else if (dist > 40)
+                        else if (dist > 30)
                             discordRPC.voiceManager().setLocalVolume(element, 0);
                         else {
-                            discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 40, 200, 0));
+                            discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 30, 200, 0));
                         }
                     } catch (GameSDKException e) {
                         e.printStackTrace();

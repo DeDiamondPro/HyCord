@@ -256,7 +256,7 @@ public class LobbyManager {
                         0, 0, 20, 20, 20, 20);
             }
         }
-        if (Settings.showUserList) {
+        if (Settings.showUserList && !proximity) {
             int amount = 0;
             int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
             if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * talkingData.size() > sr.getScaledHeight()) {

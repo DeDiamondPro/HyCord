@@ -56,17 +56,6 @@ public class Settings extends Vigilant {
     public static boolean enableRP = true;
 
     @Property(
-            type = PropertyType.SLIDER,
-            name = "Proximity voicechat ticks",
-            description = "Changes after how many ticks the volume of other users updater",
-            category = "Discord",
-            subcategory = "Advanced",
-            min = 5,
-            max = 20
-    )
-    public static int ticks = 5;
-
-    @Property(
             type = PropertyType.TEXT,
             name = "Discord Rich Presence detail",
             description = "The detail (first line) of the Rich presence.\n" +

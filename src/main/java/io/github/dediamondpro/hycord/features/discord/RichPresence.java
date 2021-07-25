@@ -102,7 +102,7 @@ public class RichPresence {
             sent = true;
         }
         tickCounter++;
-        if (tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null)
+        if (enabled && tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -372,11 +372,7 @@ public class RichPresence {
                 activity.setState(replace(Settings.state));
                 activity.assets().setLargeText(replace(Settings.imageText));
             }
-            try {
-                discordRPC.activityManager().updateActivity(activity);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
+            discordRPC.activityManager().updateActivity(activity);
         }
     }
 

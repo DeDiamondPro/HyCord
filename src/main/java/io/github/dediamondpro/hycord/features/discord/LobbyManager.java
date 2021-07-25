@@ -26,6 +26,7 @@ import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
+import io.github.dediamondpro.hycord.options.SettingsHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
@@ -184,7 +185,7 @@ public class LobbyManager {
         } else {
             pressed = false;
         }
-        if (proximity && ticks % Settings.ticks == 0) {
+        if (proximity && ticks % 5 == 0) {
             int volume = 0;
             int change = 0;
             Long user = null;
@@ -236,23 +237,11 @@ public class LobbyManager {
         ScaledResolution sr = new ScaledResolution(mc);
         if (Settings.showIndicator) {
             if (talkingData.containsKey(currentUser) && talkingData.get(currentUser)) {
-                mc.getTextureManager().bindTexture(micTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                        locations.get("mic").getYScaled(sr.getScaledHeight()),
-                        0, 0, 20, 20, 20, 20);
+                renderMicrophone(sr, micTexture);
             } else if (discordRPC.voiceManager().isSelfDeaf()) {
-                mc.getTextureManager().bindTexture(deafenTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                        locations.get("mic").getYScaled(sr.getScaledHeight()),
-                        0, 0, 20, 20, 20, 20);
+                renderMicrophone(sr, deafenTexture);
             } else if (discordRPC.voiceManager().isSelfMute()) {
-                mc.getTextureManager().bindTexture(muteTexture);
-                GlStateManager.color(1.0F, 1.0F, 1.0F);
-                Gui.drawModalRectWithCustomSizedTexture(locations.get("mic").getXScaled(sr.getScaledWidth()),
-                        locations.get("mic").getYScaled(sr.getScaledHeight()),
-                        0, 0, 20, 20, 20, 20);
+                renderMicrophone(sr, muteTexture);
             }
         }
         if (Settings.showUserList) {
@@ -303,6 +292,15 @@ public class LobbyManager {
                 }
             }
         }
+    }
+
+    private void renderMicrophone(ScaledResolution sr, ResourceLocation texture) {
+        mc.getTextureManager().bindTexture(texture);
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        Gui.drawModalRectWithCustomSizedTexture(locations.get("microphone").getXScaled(sr.getScaledWidth()),
+                locations.get("microphone").getYScaled(sr.getScaledHeight()), 0, 0,
+                locations.get("microphone").width, locations.get("microphone").height,
+                locations.get("microphone").width, locations.get("microphone").height);
     }
 
     public static void leave() {

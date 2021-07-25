@@ -35,7 +35,7 @@ public class SettingsHandler {
         File dir = new File("config/HyCord");
         System.out.print("Making dir: " + dir.mkdir());
 
-        locations.put("mic", new Location(1892, 1052, 20, 20, 1920, 1080));
+        locations.put("microphone", new Location(1888, 1038, 32, 32, 1920, 1080));
         locations.put("voice users", new Location(6,6,75,50,1920,1080));
 
         File configFile = new File("config/HyCord/HyCordConfig.txt");
@@ -65,6 +65,7 @@ public class SettingsHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        locations.remove("mic");
     }
 
     public static void save() {

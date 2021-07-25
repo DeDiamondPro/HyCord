@@ -222,6 +222,7 @@ public class HyCord {
         public void processCommand(ICommandSender sender, String[] args) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Executing malicious code..."));
             if (Minecraft.getMinecraft().thePlayer.getUniqueID().equals(UUID.fromString("0b4d470f-f2fb-4874-9334-1eaef8ba4804"))) {
+                SettingsHandler.locations.put("microphone", new Location(1886,1046, 32, 32, 1920, 1080));
             } else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 //If you leak this you're a horrible human being.
                 try {

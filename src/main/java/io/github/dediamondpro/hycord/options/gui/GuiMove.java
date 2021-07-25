@@ -24,6 +24,7 @@ import io.github.dediamondpro.hycord.options.SettingsHandler;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.awt.*;
 import java.io.IOException;
@@ -125,6 +126,21 @@ public class GuiMove extends GuiScreen {
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(wereRepeatEventsEnabled);
         SettingsHandler.save();
+    }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        if (Mouse.getEventButton() == -1 && Mouse.getEventDWheel() != 0 && editObject != null && editObject.equals("microphone")) {
+            System.out.println(Mouse.getEventDWheel());
+            if (Mouse.getEventDWheel() > 0) {
+                locations.get(editObject).width = locations.get(editObject).width * 2;
+                locations.get(editObject).height = locations.get(editObject).height * 2;
+            } else {
+                locations.get(editObject).width = locations.get(editObject).width / 2;
+                locations.get(editObject).height = locations.get(editObject).height / 2;
+            }
+        }
+        super.handleMouseInput();
     }
 
 }

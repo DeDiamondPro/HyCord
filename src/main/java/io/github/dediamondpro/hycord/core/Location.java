@@ -30,14 +30,14 @@ public class Location {
 
     public Location(int x, int y, int width, int height, int displayWidth, int displayHeight) {
         if (x > displayWidth / 2) {
-            this.x = displayWidth - (x - this.width);
+            this.x = displayWidth - (x + width);
             alignRight = true;
         } else {
             this.x = x;
             alignRight = false;
         }
         if (y > displayHeight / 2) {
-            this.y = displayHeight - (y + this.height);
+            this.y = displayHeight - (y + height);
             alignBottom = true;
         } else {
             this.y = y;

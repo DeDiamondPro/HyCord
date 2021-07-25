@@ -88,7 +88,7 @@ public class Utils {
             return "warlords";
         else if (game.contains("murder_mystery"))
             return "murdermystery";
-        else if (isTntGame())
+        else if (game.contains("tnt_games"))
             return "tnt";
         else if (game.contains("vampirez"))
             return "vampirez";
@@ -273,6 +273,6 @@ public class Utils {
 
     public static boolean isTntGame(){
         String game = RichPresence.game;
-        return game.equals("Bow spleef") || game.equals("Pvp run") || game.contains("Tnt")  || game.equals("The tnt games");
+        return game.equals("Bow spleef") || game.equals("Pvp run") || game.contains("Tnt");
     }
 }

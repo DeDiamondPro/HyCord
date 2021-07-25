@@ -18,7 +18,6 @@
 
 package io.github.dediamondpro.hycord.options.gui;
 
-import gg.essential.vigilance.VigilanceConfig;
 import io.github.dediamondpro.hycord.core.Location;
 import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.options.SettingsHandler;

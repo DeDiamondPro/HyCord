@@ -110,9 +110,12 @@ public class GuiVoiceMenu extends GuiScreen {
                     }
                 } else {
                     Gui.drawRect(153, 36 * amount - 8, 323, 36 * amount - 3, new Color(50, 50, 50).getRGB());
-                    if (!editing || editUser != user.getUserId()) {
+                    if (!editing || editUser != user.getUserId() && (!LobbyManager.proximity || !LobbyManager.defaultVolume.containsKey(editUser))) {
                         mc.fontRendererObj.drawStringWithShadow("Volume: " + discordRPC.voiceManager().getLocalVolume(user.getUserId()) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                         Gui.drawRect((int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 153, 320), 36 * amount - 11, (int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 156, 323), 36 * amount, new Color(200, 200, 200).getRGB());
+                    } else if (!editing || editUser != user.getUserId()) {
+                        mc.fontRendererObj.drawStringWithShadow("Volume: " + LobbyManager.defaultVolume.get(editUser) + "%", 85, 36 * amount - 10, 0xFFFFFF);
+                        Gui.drawRect((int) Utils.map(LobbyManager.defaultVolume.get(editUser), 0, 200, 153, 320), 36 * amount - 11, (int) Utils.map(LobbyManager.defaultVolume.get(editUser), 0, 200, 156, 323), 36 * amount, new Color(200, 200, 200).getRGB());
                     } else if (editUser == user.getUserId()) {
                         mc.fontRendererObj.drawStringWithShadow("Volume: " + (int) Utils.map(x, 153, 323, 0, 200) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                         Gui.drawRect(x, 36 * amount - 11, x + 3, 36 * amount, new Color(200, 200, 200).getRGB());
@@ -136,8 +139,6 @@ public class GuiVoiceMenu extends GuiScreen {
             LobbyManager.leave();
             GuiUtils.open(new GuiVoiceBrowser());
             LobbyManager.proximity = false;
-            LobbyManager.proximityPlayers.clear();
-            LobbyManager.locationData.clear();
         } else if (mouseX >= this.width - 40 && mouseX <= this.width - 24 && mouseY <= 20 && mouseY >= 4
                 && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
             GuiUtils.open(new GuiVoiceCreator());
@@ -229,7 +230,10 @@ public class GuiVoiceMenu extends GuiScreen {
         } else {
             x = Math.max(mouseX, 153);
         }
-        discordRPC.voiceManager().setLocalVolume(editUser, (int) Utils.map(x, 153, 323, 0, 200));
+        if (!LobbyManager.proximity)
+            discordRPC.voiceManager().setLocalVolume(editUser, (int) Utils.map(x, 153, 323, 0, 200));
+        else
+            LobbyManager.defaultVolume.put(editUser, (int) Utils.map(x, 153, 323, 0, 200));
     }
 
     @Override

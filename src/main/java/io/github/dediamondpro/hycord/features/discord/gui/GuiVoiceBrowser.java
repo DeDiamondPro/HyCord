@@ -37,7 +37,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
-import javax.xml.soap.Text;
 import java.awt.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;

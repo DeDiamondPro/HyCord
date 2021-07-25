@@ -18,7 +18,6 @@
 
 package io.github.dediamondpro.hycord.features.discord;
 
-import de.jcm.discordgamesdk.GameSDKException;
 import de.jcm.discordgamesdk.Result;
 import de.jcm.discordgamesdk.lobby.*;
 import de.jcm.discordgamesdk.user.DiscordUser;
@@ -33,15 +32,15 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.BlockPos;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
+import scala.Int;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -63,8 +62,9 @@ public class LobbyManager {
     public static ConcurrentHashMap<Long, ResourceLocation> pictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, BufferedImage> bufferedPictures = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, Boolean> muteData = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, BlockPos> locationData = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, String> proximityPlayers = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, Integer> volumeData = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, Integer> defaultVolume = new ConcurrentHashMap<>();
     public static Long currentUser;
     public static Long lobbyId = null;
     public static Long partyLobbyId = null;
@@ -129,6 +129,7 @@ public class LobbyManager {
         System.out.println(userId);
         if (lobbyId == null || lobbyId != id) return;
         talkingData.put(userId, false);
+        volumeData.put(userId, discordRPC.voiceManager().getLocalVolume(userId));
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
             if (result == Result.OK) {
                 users.put(userId, discordUser);
@@ -148,15 +149,16 @@ public class LobbyManager {
         if (userId.equals(currentUser)) {
             talkingData.clear();
             users.clear();
-            proximityPlayers.clear();
-            locationData.clear();
         } else {
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                     + EnumChatFormatting.RED + users.get(userId).getUsername() + "#" + users.get(userId).getDiscriminator() + " left the voice chat"));
             talkingData.remove(userId);
             users.remove(userId);
-            if (proximityPlayers.containsKey(id)) {
-                locationData.remove(proximityPlayers.get(id));
+            if (proximity) {
+                if (defaultVolume.containsKey(id))
+                    discordRPC.voiceManager().setLocalVolume(id, defaultVolume.get(id));
+                defaultVolume.remove(id);
+                volumeData.remove(id);
                 proximityPlayers.remove(id);
             }
         }
@@ -184,23 +186,39 @@ public class LobbyManager {
             pressed = false;
         }
         if (proximity && ticks % Settings.ticks == 0) {
-            if (mc.thePlayer == null) return;
-            for (Long element : proximityPlayers.keySet()) {
-                BlockPos loc = locationData.get(proximityPlayers.get(element));
-                if (loc != null) {
-                    double dist = Math.sqrt(Math.pow(loc.getX(), 2) + Math.pow(loc.getY(), 2) + Math.pow(loc.getZ(), 2));
-                    try {
-                        if (dist < 5)
-                            discordRPC.voiceManager().setLocalVolume(element, 200);
-                        else if (dist > 30)
-                            discordRPC.voiceManager().setLocalVolume(element, 0);
-                        else {
-                            discordRPC.voiceManager().setLocalVolume(element, (int) Utils.map((float) dist, 5, 30, 200, 0));
+            int volume = 0;
+            int change = 0;
+            Long user = null;
+            for (EntityPlayer player : mc.theWorld.playerEntities) {
+                if (proximityPlayers.containsValue(player.getUniqueID().toString())) {
+                    float dist = (float) Utils.calculateDistance(player.posX, mc.thePlayer.posX, player.posY, mc.thePlayer.posY, player.posZ, mc.thePlayer.posZ);
+                    for (long element : proximityPlayers.keySet()) {
+                        if (!defaultVolume.containsKey(element))
+                            defaultVolume.put(element, 100);
+                        int userVolume = 0;
+                        if (dist <= 30)
+                            userVolume = (int) Utils.map(dist, 0, 30, defaultVolume.get(element), 0);
+                        if (proximityPlayers.get(element).equals(player.getUniqueID().toString())) {
+                            if (!volumeData.containsKey(element)) {
+                                change = 1000;
+                                volume = userVolume;
+                                user = element;
+                            } else {
+                                int dif = volumeData.get(element) - userVolume;
+                                if (dif > change) {
+                                    change = dif;
+                                    volume = userVolume;
+                                    user = element;
+                                }
+                            }
+                            break;
                         }
-                    } catch (GameSDKException e) {
-                        e.printStackTrace();
                     }
                 }
+            }
+            if (user != null) {
+                discordRPC.voiceManager().setLocalVolume(user, volume);
+                volumeData.put(user, volume);
             }
         }
         ticks++;
@@ -295,6 +313,13 @@ public class LobbyManager {
         users.clear();
         talkingData.clear();
         lobbyId = null;
+        if (proximity) {
+            for (Long element : proximityPlayers.keySet())
+                if (defaultVolume.containsKey(element))
+                    discordRPC.voiceManager().setLocalVolume(element, defaultVolume.get(element));
+            proximityPlayers.clear();
+            volumeData.clear();
+        }
     }
 
     public static void join(Lobby lobby) {
@@ -400,11 +425,5 @@ public class LobbyManager {
         if (update.containsKey("uuid")) {
             proximityPlayers.put(userId, update.get("uuid"));
         }
-    }
-
-    @SubscribeEvent
-    void onPlayerRender(RenderPlayerEvent.Post event) {
-        if (proximity && proximityPlayers.containsValue(event.entityPlayer.getUniqueID().toString()))
-            locationData.put(event.entityPlayer.getUniqueID().toString(), new BlockPos(event.x, event.y, event.z));
     }
 }

@@ -61,10 +61,10 @@ public class Settings extends Vigilant {
             description = "Changes after how many ticks the volume of other users updater",
             category = "Discord",
             subcategory = "Advanced",
-            min = 10,
+            min = 5,
             max = 20
     )
-    public static int ticks = 20;
+    public static int ticks = 5;
 
     @Property(
             type = PropertyType.TEXT,

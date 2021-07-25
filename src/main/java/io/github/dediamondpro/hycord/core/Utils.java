@@ -262,7 +262,7 @@ public class Utils {
                 || game.equals("Hide and seek") || game.equals("Hypixel says") || game.equals("Mini walls") || game.equals("Blocking dead")
                 || game.equals("Hole in the wall") || game.equals("Football") || game.equals("Bounty hunters") || game.equals("Pixel painters")
                 || game.equals("Capture the wool") || game.equals("Dragon wars") || game.equals("Ender spleef") || game.equals("Galaxy wars")
-                || game.equals("Throw out");
+                || game.equals("Throw out") || game.equals("The tnt games");
     }
 
     public static boolean isClassicGame(){

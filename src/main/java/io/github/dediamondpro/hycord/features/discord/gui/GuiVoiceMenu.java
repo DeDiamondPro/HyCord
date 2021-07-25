@@ -24,6 +24,7 @@ import io.github.dediamondpro.hycord.core.GuiUtils;
 import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -68,7 +69,10 @@ public class GuiVoiceMenu extends GuiScreen {
         GL11.glPushMatrix();
         GL11.glTranslatef(0, scroll, 0);
 
-        TextUtils.drawTextMaxLengthCentered("Click to copy voice chat id.", 0, 18, new Color(255, 255, 255).getRGB(), true, this.width);
+        if (!LobbyManager.proximity)
+            TextUtils.drawTextMaxLengthCentered("Click to copy voice chat id.", 0, 18, new Color(255, 255, 255).getRGB(), true, this.width);
+        else
+            TextUtils.drawTextMaxLengthCentered("Proximity voice chat in server " + RichPresence.server, 0, 18, new Color(255, 255, 255).getRGB(), true, this.width);
 
         int amount = 2;
         try {
@@ -145,7 +149,7 @@ public class GuiVoiceMenu extends GuiScreen {
         } else {
             int amount = 2;
             if (mouseY >= 10 && mouseY <= 26) {
-                if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId) != null) {
+                if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId) != null && !LobbyManager.proximity) {
                     Utils.copyToClipboard(discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.lobbyId));
                 }
             } else if (mouseX >= 72 && mouseX <= 82) {

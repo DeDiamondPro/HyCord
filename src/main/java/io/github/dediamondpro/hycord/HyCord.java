@@ -132,17 +132,22 @@ public class HyCord {
     SimpleCommand setNick = new SimpleCommand("setnick", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 1) {
-                String newNick = args[1].replace("&", "§").replace("§r", "&r");
-                while (newNick.contains("&r")) {
+                StringBuilder totalNick = new StringBuilder();
+                for (int i = 1; i < args.length; i++)
+                    totalNick.append(args[i]).append(" ");
+                String newNick = totalNick.substring(0, totalNick.length() - 1);
+                System.out.println(newNick);
+                newNick = newNick.replace("&", "§").replace("§rr", "&&r");
+                while (newNick.contains("&rr")) {
                     String replacePart;
-                    if (newNick.split("&r")[1].contains("§"))
-                        replacePart = newNick.split("&r")[1].split("§")[0];
+                    if (newNick.split("&rr")[1].contains("§"))
+                        replacePart = newNick.split("&rr")[1].split("§")[0];
                     else
-                        replacePart = newNick.split("&r")[1];
-                    newNick = newNick.replace("&r" + replacePart, Utils.rainbowText(replacePart));
+                        replacePart = newNick.split("&rr")[1];
+                    newNick = newNick.replace("&rr" + replacePart, Utils.rainbowText(replacePart));
                 }
                 NickNameController.nicknames.put(args[0], newNick);
-                if (args[1].contains("&r") && Minecraft.getMinecraft().thePlayer.getUniqueID().toString().equals("53924f1a-87e6-4709-8e53-f1c7d13dc239"))
+                if (args[1].contains("&rr") && Minecraft.getMinecraft().thePlayer.getUniqueID().toString().equals("53924f1a-87e6-4709-8e53-f1c7d13dc239"))
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(Utils.rainbowText(args[0] + " has successfully been clowned!")));
                 else
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));

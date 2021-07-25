@@ -317,7 +317,7 @@ public class Settings extends Vigilant {
             category = "Discord",
             subcategory = "Voice"
     )
-    public static boolean showIndicatorOther = true;
+    public static boolean showIndicatorOther = false;
 
     @Property(
             type = PropertyType.SWITCH,

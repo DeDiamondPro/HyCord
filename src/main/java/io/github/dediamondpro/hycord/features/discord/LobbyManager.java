@@ -55,7 +55,7 @@ public class LobbyManager {
     static Minecraft mc = Minecraft.getMinecraft();
     private static final ResourceLocation micTexture = new ResourceLocation("hycord", "microphone.png");
     private static final ResourceLocation muteTexture = new ResourceLocation("hycord", "microphone_mute.png");
-    private static final ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
+    public static final ResourceLocation deafenTexture = new ResourceLocation("hycord", "deafen.png");
 
     public static ConcurrentHashMap<Long, Boolean> talkingData = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, DiscordUser> users = new ConcurrentHashMap<>();

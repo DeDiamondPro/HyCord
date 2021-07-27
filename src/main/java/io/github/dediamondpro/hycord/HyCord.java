@@ -209,7 +209,7 @@ public class HyCord {
     });
     SimpleCommand voice = new SimpleCommand("voice", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
-            if (LobbyManager.lobbyId != null) {
+            if (LobbyManager.lobbyId != null || LobbyManager.proximity) {
                 GuiUtils.open(new GuiVoiceMenu());
             } else if (args.length > 0) {
                 LobbyManager.joinSecret(args[0]);

@@ -274,7 +274,7 @@ public class GuiVoiceBrowser extends GuiScreen {
            LobbyManager.proximity = true;
            LobbyManager.joinProximity(RichPresence.server, true);
            GuiUtils.open(null);
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Hycord > " + EnumChatFormatting.YELLOW
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " + EnumChatFormatting.YELLOW
                     + "Attempting to join proximity voicechat..."));
         }
     }

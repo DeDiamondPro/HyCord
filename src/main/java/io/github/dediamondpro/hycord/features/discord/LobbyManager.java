@@ -378,7 +378,7 @@ public class LobbyManager {
         partyLobbyId = lobby.getId();
     }
 
-    public static void joinProximity(String server) {
+    public static void joinProximity(String server, boolean showMessage) {
         if (server.equals("")) {
             GuiUtils.open(null);
             return;
@@ -404,8 +404,12 @@ public class LobbyManager {
                     transaction.setMetadata("server", server);
                     discordRPC.lobbyManager().createLobby(transaction, LobbyManager::startVoice);
                 }
+                if (showMessage)
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA +"Hycord > "
+                            + EnumChatFormatting.YELLOW + "Successfully joined proximity voice chat for server " + server));
             } else {
-                System.out.println("an error occurred while searching for proximity lobbies");
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA +"Hycord > "
+                        + EnumChatFormatting.RED + "Failed to join proximity voice chat for " + server));
                 GuiUtils.open(null);
                 proximity = false;
             }

@@ -27,10 +27,13 @@ import io.github.dediamondpro.hycord.core.TextUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.LobbyManager;
 import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -269,8 +272,10 @@ public class GuiVoiceBrowser extends GuiScreen {
             LobbyManager.joinSecret(enteredText);
         } else if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 29 && mouseY <= 40) {
            LobbyManager.proximity = true;
-           LobbyManager.joinProximity(RichPresence.server);
+           LobbyManager.joinProximity(RichPresence.server, true);
            GuiUtils.open(null);
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Hycord > " + EnumChatFormatting.YELLOW
+                    + "Attempting to join proximity voicechat..."));
         }
     }
 

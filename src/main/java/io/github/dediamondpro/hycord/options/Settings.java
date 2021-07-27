@@ -310,6 +310,16 @@ public class Settings extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Show proximity voice chat join message",
+            description = "Show a message in chat every time HyCord joins a new proximity voice chat when switching servers.",
+            category = "Discord",
+            subcategory = "Voice"
+    )
+
+    public static boolean showVoiceJoin = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Auto Friend List",
             description = "Automatically do /friend list when you join Hypixel.",
             category = "Miscellaneous",

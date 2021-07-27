@@ -122,7 +122,7 @@ public class RichPresence {
                 bits = sCleaned.replace("Bits: ", "");
             else if (serverMatcher.matches()) {
                 if (LobbyManager.proximity && !serverMatcher.group("server").equals(server))
-                    LobbyManager.joinProximity(serverMatcher.group("server"));
+                    LobbyManager.joinProximity(serverMatcher.group("server"), Settings.showVoiceJoin);
                 server = serverMatcher.group("server");
             } else if (dateMatcher.matches()) {
                 sbDate = dateMatcher.group("date");
@@ -277,7 +277,7 @@ public class RichPresence {
         Matcher locrawMatcher = lobbyLocrawRegex.matcher(event.message.getUnformattedText());
         if (locrawMatcher.matches()) {
             if (LobbyManager.proximity && !locrawMatcher.group("server").equals(server))
-                LobbyManager.joinProximity(locrawMatcher.group("server"));
+                LobbyManager.joinProximity(locrawMatcher.group("server"), Settings.showVoiceJoin);
             server = locrawMatcher.group("server");
             if (triggeredByHyCord) {
                 event.setCanceled(true);

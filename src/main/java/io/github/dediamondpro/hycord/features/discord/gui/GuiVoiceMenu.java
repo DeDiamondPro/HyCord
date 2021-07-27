@@ -60,7 +60,8 @@ public class GuiVoiceMenu extends GuiScreen {
         mc.getTextureManager().bindTexture(leave_icon);
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         Gui.drawModalRectWithCustomSizedTexture(this.width - 20, 4, 0, 0, 16, 16, 16, 16);
-        if (LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null && LobbyManager.currentUser != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+        if (!LobbyManager.proximity && LobbyManager.lobbyId != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId) != null
+                && LobbyManager.currentUser != null && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
             mc.getTextureManager().bindTexture(settingsIcon);
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             Gui.drawModalRectWithCustomSizedTexture(this.width - 40, 4, 0, 0, 16, 16, 16, 16);
@@ -144,7 +145,7 @@ public class GuiVoiceMenu extends GuiScreen {
             GuiUtils.open(new GuiVoiceBrowser());
             LobbyManager.proximity = false;
         } else if (mouseX >= this.width - 40 && mouseX <= this.width - 24 && mouseY <= 20 && mouseY >= 4
-                && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser) {
+                && discordRPC.lobbyManager().getLobby(LobbyManager.lobbyId).getOwnerId() == LobbyManager.currentUser && !LobbyManager.proximity) {
             GuiUtils.open(new GuiVoiceCreator());
         } else {
             int amount = 2;

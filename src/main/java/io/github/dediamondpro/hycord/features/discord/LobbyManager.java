@@ -244,14 +244,14 @@ public class LobbyManager {
                 renderMicrophone(sr, muteTexture);
             }
         }
-        if (Settings.showUserList) {
+        if (Settings.showUserList && !proximity) {
             int amount = 0;
             int originalYCoord = locations.get("voice users").getYScaled(sr.getScaledHeight());
             if (locations.get("voice users").getYScaled(sr.getScaledHeight()) + 19 * talkingData.size() > sr.getScaledHeight()) {
                 originalYCoord = sr.getScaledHeight() - 19 * talkingData.size();
             }
             for (Long id : talkingData.keySet()) {
-                if (users.containsKey(id) && (!proximity || !volumeData.containsKey(id) || volumeData.get(id) != 0)) {
+                if (users.containsKey(id)) {
                     int yCoord = originalYCoord + 19 * amount;
                     int xCoord = locations.get("voice users").getXScaled(sr.getScaledWidth());
                     if (talkingData.get(id)) {

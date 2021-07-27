@@ -137,17 +137,17 @@ public class HyCord {
                     totalNick.append(args[i]).append(" ");
                 String newNick = totalNick.substring(0, totalNick.length() - 1);
                 System.out.println(newNick);
-                newNick = newNick.replace("&", "§").replace("§rr", "&&r");
-                while (newNick.contains("&rr")) {
+                newNick = newNick.replace("&", "§").replace("§§z", "&&z");
+                while (newNick.contains("&&z")) {
                     String replacePart;
-                    if (newNick.split("&rr")[1].contains("§"))
-                        replacePart = newNick.split("&rr")[1].split("§")[0];
+                    if (newNick.split("&&z")[1].contains("§"))
+                        replacePart = newNick.split("&&z")[1].split("§")[0];
                     else
-                        replacePart = newNick.split("&rr")[1];
-                    newNick = newNick.replace("&rr" + replacePart, Utils.rainbowText(replacePart));
+                        replacePart = newNick.split("&&z")[1];
+                    newNick = newNick.replace("&&z" + replacePart, Utils.rainbowText(replacePart));
                 }
                 NickNameController.nicknames.put(args[0], newNick);
-                if (args[1].contains("&rr") && Minecraft.getMinecraft().thePlayer.getUniqueID().toString().equals("53924f1a-87e6-4709-8e53-f1c7d13dc239"))
+                if (args[1].contains("&&z") && Minecraft.getMinecraft().thePlayer.getUniqueID().toString().equals("53924f1a-87e6-4709-8e53-f1c7d13dc239"))
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(Utils.rainbowText(args[0] + " has successfully been clowned!")));
                 else
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the nick of " + args[0] + " to " + newNick));

@@ -37,7 +37,7 @@ public class RenderHook {
     public static ConcurrentHashMap<String, Long> userIdMap = new ConcurrentHashMap<>();
 
     public static void renderIcon(Entity entity, double x, double y, double z, int maxDistance) {
-        if (renderable(entity)) {
+        if (LobbyManager.proximity && renderable(entity)) {
             EntityPlayer player = (EntityPlayer) entity;
             if (LobbyManager.proximityPlayers.containsValue(player.getUniqueID().toString())) {
                 if (userIdMap.containsKey(player.getUniqueID().toString())) {

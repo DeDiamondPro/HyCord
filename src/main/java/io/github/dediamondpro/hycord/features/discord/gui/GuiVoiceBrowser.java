@@ -271,11 +271,11 @@ public class GuiVoiceBrowser extends GuiScreen {
         if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 4 && mouseY <= 15) {
             LobbyManager.joinSecret(enteredText);
         } else if (mouseX >= this.width - 62 && mouseX <= this.width - 58 + mc.fontRendererObj.getStringWidth("Join") && mouseY >= 29 && mouseY <= 40) {
-           LobbyManager.proximity = true;
-           LobbyManager.joinProximity(RichPresence.server, true);
-           GuiUtils.open(null);
+            LobbyManager.proximity = true;
+            LobbyManager.joinProximity(RichPresence.server, true);
+            GuiUtils.open(null);
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > " + EnumChatFormatting.YELLOW
-                    + "Attempting to join proximity voicechat..."));
+                    + "Joining proximity voice chat."));
         }
     }
 

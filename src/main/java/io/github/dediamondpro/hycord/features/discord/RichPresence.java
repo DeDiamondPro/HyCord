@@ -77,10 +77,9 @@ public class RichPresence {
     public static Pattern partyWith = Pattern.compile("§eYou'll be partying with: ((§r)(§[a-z0-9])(\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ?(?<user>[a-zA-Z0-9_]{3,16})§r(§e, )?)+");
     public static Pattern voiceRegex = Pattern.compile("(.*)(?<id>([0-9]{18})(:)([a-z0-9]{16}))(.*)");
     public static Pattern invitedRegex = Pattern.compile("-----------------------------\\n(\\[(MVP(\\+){0,2}|VIP\\+?|ADMIN|HELPER|MOD|YOUTUBE)])?( )?(?<user>[a-zA-Z0-9_]{3,16}) has invited you to join their party!\\nYou have 60 seconds to accept\\. Click here to join!\\n-----------------------------");
-    public static Pattern serverRegex = Pattern.compile("(?<date>[0-7]+/?){3}+ +(?<server>[a-zA-Z][0-9]+[a-zA-Z])");
     public static Pattern timeRegex = Pattern.compile(" (?<time>[0-9]{1,2}:[0-9]{1,2}(am|pm)) ");
     public static Pattern dateRegex = Pattern.compile(" (?<date>[a-zA-Z ]+[0-9]+.{2})");
-    public static Pattern lobbyLocrawRegex = Pattern.compile("\\{\\\"server\\\":\\\"(?<server>dynamiclobby[0-9]+[a-z-A-Z])\\\".+}");
+    public static Pattern lobbyLocrawRegex = Pattern.compile("\\{\\\"server\\\":\\\"(?<server>[a-z]+[0-9]+[a-z-A-Z])\\\".+}");
 
     static String mode = "";
     static String map = "";
@@ -107,7 +106,6 @@ public class RichPresence {
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
             String sCleaned = Utils.cleanSB(s);
-            Matcher serverMatcher = serverRegex.matcher(sCleaned);
             Matcher dateMatcher = dateRegex.matcher(sCleaned);
             Matcher timeMatcher = timeRegex.matcher(sCleaned);
             if (sCleaned.contains("Mode: "))
@@ -120,15 +118,10 @@ public class RichPresence {
                 coins = sCleaned.replaceAll("Purse: |Piggy: ", "");
             else if (sCleaned.contains("Bits: "))
                 bits = sCleaned.replace("Bits: ", "");
-            else if (serverMatcher.matches()) {
-                if (LobbyManager.proximity && !serverMatcher.group("server").equals(server))
-                    LobbyManager.joinProximity(serverMatcher.group("server"), Settings.showVoiceJoin);
-                server = serverMatcher.group("server");
-            } else if (dateMatcher.matches()) {
+            else if (dateMatcher.matches())
                 sbDate = dateMatcher.group("date");
-            } else if (timeMatcher.matches()) {
+            else if (timeMatcher.matches())
                 sbTime = timeMatcher.group("time");
-            }
         }
         if (map.equals("Your Island"))
             map = "Private Island";

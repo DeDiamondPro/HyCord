@@ -92,6 +92,7 @@ public class LobbyManager {
         if (result != Result.OK) {
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Failed to connect to Voice Chat: " + result));
             mc.displayGuiScreen(null);
+            proximity = false;
             return;
         }
         if (proximity) {

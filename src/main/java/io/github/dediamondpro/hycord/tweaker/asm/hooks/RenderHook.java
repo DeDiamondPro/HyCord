@@ -37,9 +37,10 @@ public class RenderHook {
     private static final ResourceLocation silentSpeakerTexture = new ResourceLocation("hycord", "speaker_silent.png");
     public static ConcurrentHashMap<String, Long> userIdMap = new ConcurrentHashMap<>();
 
-    public static void renderIcon(Entity entity, double x, double y, double z, int maxDistance) {
-        if (LobbyManager.proximity && renderable(entity)) {
+    public static void renderIcon(Entity entity, String str, double x, double y, double z, int maxDistance) {
+        if (LobbyManager.proximity && renderable(entity) && str.equals(entity.getDisplayName().getFormattedText())) {
             EntityPlayer player = (EntityPlayer) entity;
+            render(player, silentSpeakerTexture, x, y, z, maxDistance);
             if (LobbyManager.proximityPlayers.containsValue(player.getUniqueID().toString())) {
                 if (userIdMap.containsKey(player.getUniqueID().toString())) {
                     if (LobbyManager.muteData.containsKey(userIdMap.get(player.getUniqueID().toString()))

@@ -39,11 +39,12 @@ public class RenderTransformer implements ITransformer {
     private InsnList insertRenderIcon() {
         InsnList list = new InsnList();
         list.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        list.add(new VarInsnNode(Opcodes.ALOAD, 2));
         list.add(new VarInsnNode(Opcodes.DLOAD, 3));
         list.add(new VarInsnNode(Opcodes.DLOAD, 5));
         list.add(new VarInsnNode(Opcodes.DLOAD, 7));
         list.add(new VarInsnNode(Opcodes.ILOAD, 9));
-        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hooks() + "RenderHook", "renderIcon", "(Lnet/minecraft/entity/Entity;DDDI)V", false));
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hooks() + "RenderHook", "renderIcon", "(Lnet/minecraft/entity/Entity;Ljava/lang/String;DDDI)V", false));
         return list;
     }
     

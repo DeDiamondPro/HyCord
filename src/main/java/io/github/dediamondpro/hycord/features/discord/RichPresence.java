@@ -370,6 +370,7 @@ public class RichPresence {
                 activity.assets().setLargeText(replace(Settings.imageText));
             }
             discordRPC.activityManager().updateActivity(activity);
+            triedReconnect = false;
         } catch (Throwable e) {
             e.printStackTrace();
             if (!triedReconnect)
@@ -387,6 +388,7 @@ public class RichPresence {
     }
 
     public static void reconnect() {
+        triedReconnect = true;
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                 + EnumChatFormatting.RED + "Disconnected from Discord attempting to reconnect..."));
         try {

@@ -101,7 +101,7 @@ public class RichPresence {
             sent = true;
         }
         tickCounter++;
-        if (enabled && tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null)
+        if (!enabled || tickCounter % 100 != 0 || !Utils.isHypixel() || Minecraft.getMinecraft().theWorld == null && Minecraft.getMinecraft().thePlayer == null)
             return;
         List<String> scoreboard = Utils.getSidebarLines();
         for (String s : scoreboard) {
@@ -224,6 +224,7 @@ public class RichPresence {
             LobbyManager.createPartyLobby(partyId);
         } catch (GameSDKException e) {
             System.out.println("An error occurred while trying to start the core, is Discord running?");
+            enabled = false;
             sent = false;
         }
     }

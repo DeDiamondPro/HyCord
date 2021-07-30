@@ -366,6 +366,8 @@ public class RichPresence {
                 activity.assets().setLargeText(replace(Settings.imageText));
             }
             discordRPC.activityManager().updateActivity(activity);
+        } catch (Throwable e){
+            e.printStackTrace();
         }
     }
 

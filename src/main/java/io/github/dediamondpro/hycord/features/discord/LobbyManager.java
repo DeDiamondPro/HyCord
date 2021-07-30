@@ -120,6 +120,8 @@ public class LobbyManager {
                     if (data.containsKey("uuid")) {
                         proximityPlayers.put(id, data.get("uuid"));
                     }
+                    volumeData.put(id, discordRPC.voiceManager().getLocalVolume(id));
+                    discordRPC.voiceManager().setLocalVolume(id, 0);
                 }
             });
         }
@@ -129,7 +131,10 @@ public class LobbyManager {
         System.out.println(userId);
         if (lobbyId == null || lobbyId != id) return;
         talkingData.put(userId, false);
-        volumeData.put(userId, discordRPC.voiceManager().getLocalVolume(userId));
+        if(proximity) {
+            volumeData.put(userId, discordRPC.voiceManager().getLocalVolume(userId));
+            discordRPC.voiceManager().setLocalVolume(userId, 0);
+        }
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
             if (result == Result.OK) {
                 users.put(userId, discordUser);

@@ -154,7 +154,7 @@ public class RichPresence {
             updateRPC();
     }
 
-    private void initializeRpc() {
+    private static void initializeRpc() {
         partyId = UUID.randomUUID().toString();
         CreateParams params = new CreateParams();
         params.setClientID(819625966627192864L);
@@ -367,9 +367,23 @@ public class RichPresence {
                 activity.assets().setLargeText(replace(Settings.imageText));
             }
             discordRPC.activityManager().updateActivity(activity);
-        } catch (Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
+            reconnect();
         }
+    }
+
+    public static void reconnect() {
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                + EnumChatFormatting.RED + "Disconnected from Discord attempting to reconnect..."));
+        try {
+            enabled = false;
+            discordRPC.close();
+        } catch (Throwable ignored) {
+        }
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                + EnumChatFormatting.YELLOW + "Started sdk"));
+        initializeRpc();
     }
 
     public static void handleMsg(long lobbId, byte[] data) {

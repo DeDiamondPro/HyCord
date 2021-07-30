@@ -115,7 +115,7 @@ public class GuiVoiceMenu extends GuiScreen {
                     }
                 } else {
                     Gui.drawRect(153, 36 * amount - 8, 323, 36 * amount - 3, new Color(50, 50, 50).getRGB());
-                    if (!editing || editUser != user.getUserId() && (!LobbyManager.proximity || !LobbyManager.defaultVolume.containsKey(editUser))) {
+                    if ((!editing || editUser != user.getUserId()) && (!LobbyManager.proximity || !LobbyManager.defaultVolume.containsKey(editUser))) {
                         mc.fontRendererObj.drawStringWithShadow("Volume: " + discordRPC.voiceManager().getLocalVolume(user.getUserId()) + "%", 85, 36 * amount - 10, 0xFFFFFF);
                         Gui.drawRect((int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 153, 320), 36 * amount - 11, (int) Utils.map(discordRPC.voiceManager().getLocalVolume(user.getUserId()), 0, 200, 156, 323), 36 * amount, new Color(200, 200, 200).getRGB());
                     } else if (!editing || editUser != user.getUserId()) {

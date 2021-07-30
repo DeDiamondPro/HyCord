@@ -87,6 +87,8 @@ public class HyCord {
                 GuiUtils.open(new GuiMove());
             } else if (args.length > 0 && args[0].equalsIgnoreCase("update")) {
                 UpdateChecker.updater();
+            } else if (args.length > 0 && args[0].equalsIgnoreCase("reconnect")) {
+                RichPresence.reconnect();
             } else
                 GuiUtils.open(config.gui());
         }

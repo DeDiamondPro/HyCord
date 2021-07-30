@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RenderHook {
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final ResourceLocation speakerTexture = new ResourceLocation("hycord", "speaker.png");
+    private static final ResourceLocation silentSpeakerTexture = new ResourceLocation("hycord", "speaker_silent.png");
     public static ConcurrentHashMap<String, Long> userIdMap = new ConcurrentHashMap<>();
 
     public static void renderIcon(Entity entity, double x, double y, double z, int maxDistance) {
@@ -41,19 +42,26 @@ public class RenderHook {
             EntityPlayer player = (EntityPlayer) entity;
             if (LobbyManager.proximityPlayers.containsValue(player.getUniqueID().toString())) {
                 if (userIdMap.containsKey(player.getUniqueID().toString())) {
-                    if (!LobbyManager.muteData.containsKey(userIdMap.get(player.getUniqueID().toString()))
-                            || !LobbyManager.muteData.get(userIdMap.get(player.getUniqueID().toString())))
+                    if (LobbyManager.muteData.containsKey(userIdMap.get(player.getUniqueID().toString()))
+                            && LobbyManager.muteData.get(userIdMap.get(player.getUniqueID().toString())))
+                        render(player, LobbyManager.deafenTexture, x, y, z, maxDistance);
+                    else if (LobbyManager.talkingData.containsKey(userIdMap.get(player.getUniqueID().toString())) &&
+                            LobbyManager.talkingData.get(userIdMap.get(player.getUniqueID().toString())))
                         render(player, speakerTexture, x, y, z, maxDistance);
                     else
-                        render(player, LobbyManager.deafenTexture, x, y, z, maxDistance);
+                        render(player, silentSpeakerTexture, x, y, z, maxDistance);
                 } else {
                     for (long id : LobbyManager.proximityPlayers.keySet()) {
                         if (LobbyManager.proximityPlayers.get(id).equals(player.getUniqueID().toString())) {
                             userIdMap.put(player.getUniqueID().toString(), id);
-                            if (!LobbyManager.muteData.containsKey(id) || !LobbyManager.muteData.get(id))
+                            if (LobbyManager.muteData.containsKey(id)
+                                    && LobbyManager.muteData.get(id))
+                                render(player, LobbyManager.deafenTexture, x, y, z, maxDistance);
+                            else if (LobbyManager.talkingData.containsKey(id) &&
+                                    LobbyManager.talkingData.get(id))
                                 render(player, speakerTexture, x, y, z, maxDistance);
                             else
-                                render(player, LobbyManager.deafenTexture, x, y, z, maxDistance);
+                                render(player, silentSpeakerTexture, x, y, z, maxDistance);
                             break;
                         }
                     }

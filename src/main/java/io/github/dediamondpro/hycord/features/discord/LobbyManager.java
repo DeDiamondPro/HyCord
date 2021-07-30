@@ -26,7 +26,6 @@ import io.github.dediamondpro.hycord.core.NetworkUtils;
 import io.github.dediamondpro.hycord.core.Utils;
 import io.github.dediamondpro.hycord.features.discord.gui.GuiVoiceMenu;
 import io.github.dediamondpro.hycord.options.Settings;
-import io.github.dediamondpro.hycord.options.SettingsHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiChat;
@@ -120,7 +119,7 @@ public class LobbyManager {
                     if (data.containsKey("uuid")) {
                         proximityPlayers.put(id, data.get("uuid"));
                     }
-                    volumeData.put(id, discordRPC.voiceManager().getLocalVolume(id));
+                    defaultVolume.put(id, discordRPC.voiceManager().getLocalVolume(id));
                     discordRPC.voiceManager().setLocalVolume(id, 0);
                 }
             });
@@ -131,8 +130,8 @@ public class LobbyManager {
         System.out.println(userId);
         if (lobbyId == null || lobbyId != id) return;
         talkingData.put(userId, false);
-        if(proximity) {
-            volumeData.put(userId, discordRPC.voiceManager().getLocalVolume(userId));
+        if (proximity) {
+            defaultVolume.put(userId, discordRPC.voiceManager().getLocalVolume(userId));
             discordRPC.voiceManager().setLocalVolume(userId, 0);
         }
         discordRPC.userManager().getUser(userId, (result, discordUser) -> {
@@ -209,7 +208,7 @@ public class LobbyManager {
                                 volume = userVolume;
                                 user = element;
                             } else {
-                                int dif = volumeData.get(element) - userVolume;
+                                int dif = Math.abs(volumeData.get(element) - userVolume);
                                 if (dif > change) {
                                     change = dif;
                                     volume = userVolume;
@@ -410,10 +409,10 @@ public class LobbyManager {
                     discordRPC.lobbyManager().createLobby(transaction, LobbyManager::startVoice);
                 }
                 if (showMessage)
-                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA +"Hycord > "
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                             + EnumChatFormatting.YELLOW + "Successfully joined proximity voice chat for server " + server));
             } else {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA +"Hycord > "
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                         + EnumChatFormatting.RED + "Failed to join proximity voice chat for " + server));
                 GuiUtils.open(null);
                 proximity = false;

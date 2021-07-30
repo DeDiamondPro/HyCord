@@ -200,8 +200,8 @@ public class LobbyManager {
                         if (!defaultVolume.containsKey(element))
                             defaultVolume.put(element, 100);
                         int userVolume = 0;
-                        if (dist <= 30)
-                            userVolume = (int) Utils.map(dist, 0, 30, defaultVolume.get(element), 0);
+                        if (dist <= 40)
+                            userVolume = (int) Utils.map(dist, 0, 40, defaultVolume.get(element), 0);
                         if (proximityPlayers.get(element).equals(player.getUniqueID().toString())) {
                             if (!volumeData.containsKey(element)) {
                                 change = 1000;

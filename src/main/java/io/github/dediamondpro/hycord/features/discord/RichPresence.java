@@ -65,6 +65,7 @@ public class RichPresence {
     static boolean sent = true;
     static boolean triedLocraw = false;
     static boolean triggeredByHyCord = false;
+    static boolean triedReconnect = false;
 
     public static Pattern partyListRegex = Pattern.compile("(§6Party Members \\(|§e(Looting|Visiting|Adventuring|Exploring) §r§cThe Catacombs( Entrance)? §r§ewith §r§9)(?<users>[0-9]+)(\\)§r|/5 players( §r§eon §r§6Floor [IV]+)?§r§e!§r)");
     public static Pattern disbandRegex = Pattern.compile("§cThe party was disbanded because all invites expired and the party was empty§r|(§eYou have been kicked from the party by (§r)?)?§[a-z0-9](\\[(MVP((§r)?(§[a-z0-9])?(\\+)){0,2}(§r)?(§[a-z0-9])?|VIP(§r)?(§[a-z0-9])?\\+?(§r)?(§[a-z0-9])?|ADMIN|HELPER|MOD|(§r)?(§[a-z0-9])YOUTUBE(§r)?(§[a-z0-9]))]|(§r)?(§7)) ([a-zA-Z0-9_]{3,16}) (§r§ehas disbanded the party!|§r§e)§r|§eYou left the party\\.§r|§cThe party was disbanded because the party leader disconnected\\.§r");
@@ -97,7 +98,9 @@ public class RichPresence {
             initializedRpc = true;
         }
         if (!sent && Minecraft.getMinecraft().theWorld != null) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Could not initialize HyCord core, is Discord running?"));
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                    + EnumChatFormatting.RED + "A problem has occurred while initializing HyCord, a cause of this can be that Discord isn't running." +
+                    " HyCord has automatically been disabled, to attempt to enable HyCord please do /hycord reconnect."));
             sent = true;
         }
         tickCounter++;
@@ -369,7 +372,17 @@ public class RichPresence {
             discordRPC.activityManager().updateActivity(activity);
         } catch (Throwable e) {
             e.printStackTrace();
-            reconnect();
+            if (!triedReconnect)
+                reconnect();
+            else
+                try {
+                    enabled = false;
+                    discordRPC.close();
+                } catch (Throwable ignored) {
+                }
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
+                    + EnumChatFormatting.RED + "A problem has repeatedly occurred and HyCord has automatically been disabled," +
+                    " to attempt to enable HyCord please do /hycord reconnect."));
         }
     }
 

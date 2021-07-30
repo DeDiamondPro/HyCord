@@ -40,7 +40,6 @@ public class RenderHook {
     public static void renderIcon(Entity entity, String str, double x, double y, double z, int maxDistance) {
         if (LobbyManager.proximity && renderable(entity) && str.equals(entity.getDisplayName().getFormattedText())) {
             EntityPlayer player = (EntityPlayer) entity;
-            render(player, silentSpeakerTexture, x, y, z, maxDistance);
             if (LobbyManager.proximityPlayers.containsValue(player.getUniqueID().toString())) {
                 if (userIdMap.containsKey(player.getUniqueID().toString())) {
                     if (LobbyManager.muteData.containsKey(userIdMap.get(player.getUniqueID().toString()))

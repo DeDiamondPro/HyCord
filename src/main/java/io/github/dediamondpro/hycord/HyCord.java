@@ -59,6 +59,9 @@ public class HyCord {
     private final Settings config = new Settings();
     boolean requireUpdate = false;
     public static File source;
+    
+    @Mod.Instance
+    public static HyCord instance = new HyCord();
 
     SimpleCommand mainCommand = new SimpleCommand("hycord", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {

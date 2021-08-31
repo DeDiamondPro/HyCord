@@ -56,7 +56,7 @@ import java.util.UUID;
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
-    private final Settings config = new Settings();
+    public final Settings config = new Settings();
     boolean requireUpdate = false;
     public static File source;
     

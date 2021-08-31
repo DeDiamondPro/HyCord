@@ -16,35 +16,30 @@
  * along with HyCord.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.dediamondpro.hycord.features;
+package io.github.dediamondpro.hycord.core;
 
-import io.github.dediamondpro.hycord.core.Utils;
-import io.github.dediamondpro.hycord.options.Settings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
-public class AutoFl {
+public class GuiUtils {
 
-    public boolean send = false;
-    private int tickCounter = 0;
+    private static GuiScreen display;
 
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        tickCounter++;
-        if (!Utils.isHypixel() || send || tickCounter % 20 != 0)
-            return;
-        if (Settings.autoFLEnabled)
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/fl");
-        if (Settings.autoGLEnabled)
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/g online");
-        send = true;
+    public static void open(GuiScreen display) {
+        GuiUtils.display = display;
     }
 
-    @SubscribeEvent
-    public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        send = false;
+    @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (!(display instanceof GuiTemplate)) {
+            Minecraft.getMinecraft().displayGuiScreen(display);
+            display = new GuiTemplate();
+        }
     }
+
+    private static class GuiTemplate extends GuiScreen {}
 
 }

@@ -132,7 +132,10 @@ public class RichPresence {
         ScoreObjective sidebarObjective = title.getObjectiveInDisplaySlot(1);
         if (sidebarObjective != null) {
             String objectiveName = sidebarObjective.getDisplayName().replaceAll("(?i)\\u00A7.", "");
-            game = objectiveName.substring(0, 1).toUpperCase() + objectiveName.substring(1).toLowerCase(Locale.ROOT);
+            if (objectiveName.length() > 0)
+                game = objectiveName.substring(0, 1).toUpperCase() + objectiveName.substring(1).toLowerCase(Locale.ROOT);
+            else
+                game = "Limbo";
         } else {
             game = "Limbo";
         }
@@ -225,7 +228,7 @@ public class RichPresence {
             });
             callBacks.start();
             LobbyManager.createPartyLobby(partyId);
-        } catch (GameSDKException e) {
+        } catch (Exception e) {
             System.out.println("An error occurred while trying to start the core, is Discord running?");
             enabled = false;
             sent = false;
@@ -371,7 +374,7 @@ public class RichPresence {
             }
             discordRPC.activityManager().updateActivity(activity);
             triedReconnect = false;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             if (!triedReconnect)
                 reconnect();

@@ -150,7 +150,7 @@ public class LobbyManager {
     }
 
     public static void leaveHandler(Long userId, long id) {
-        if (lobbyId != id) return;
+        if (lobbyId == null || lobbyId != id) return;
         if (userId.equals(currentUser)) {
             talkingData.clear();
             users.clear();

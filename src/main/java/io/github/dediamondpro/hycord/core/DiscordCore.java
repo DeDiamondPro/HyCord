@@ -35,6 +35,11 @@ import java.util.zip.ZipInputStream;
 
 public class DiscordCore {
     public static void init() throws IOException {
+        File dir = new File("config/HyCord/game-sdk");
+        if (!dir.exists() && !dir.mkdir()) {
+            throw new IllegalStateException("Could not create HyCord game-sdk folder");
+        }
+
         String fileName;
         if (SystemUtils.IS_OS_WINDOWS)
             fileName = "discord_game_sdk.dll";
@@ -48,49 +53,47 @@ public class DiscordCore {
         File sdk = new File("config/HyCord/game-sdk/" + fileName);
         File jni = new File("config/HyCord/game-sdk/" + ((SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
                 (SystemUtils.IS_OS_MAC ? ".dylib" : ".so"))));
-        if (sdk.exists() && jni.exists()) {
-            System.out.println("Found sdk.");
+        if (!sdk.exists())
+            downloadSdk(sdk, fileName);
+        if(!jni.exists())
+            extractJni(jni);
+        if(sdk.exists() && jni.exists())
             loadNative(sdk, jni);
-        } else {
-            System.out.println("sdk not found, downloading sdk.");
-            File dir = new File("config/HyCord/game-sdk");
-            dir.mkdir();
-
-            String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
-            if (arch.equals("amd64")) arch = "x86_64";
-
-            URL downloadUrl = new URL("https://dl-game-sdk.discordapp.net/3.1.0/discord_game_sdk.zip");
-            URLConnection con = downloadUrl.openConnection();
-            con.setRequestProperty("User-Agent", "HyCord");
-            ZipInputStream zin = new ZipInputStream(con.getInputStream());
-            ZipEntry entry;
-            while ((entry = zin.getNextEntry()) != null) {
-                if (entry.getName().equals("lib/" + arch + "/" + fileName)) {
-                    System.out.println("Found file");
-                    Files.copy(zin, sdk.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    extractNative(sdk);
-                    break;
-                }
-                zin.closeEntry();
-            }
-            zin.close();
-        }
+        else
+            throw new IllegalStateException("Could not download GameSDK");
     }
 
-    public static void extractNative(File sdk) throws IOException {
+    private static void downloadSdk(File sdk, String fileName) throws IOException {
+        String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+        if (arch.equals("amd64")) arch = "x86_64";
+
+        URL downloadUrl = new URL("https://dl-game-sdk.discordapp.net/3.1.0/discord_game_sdk.zip");
+        URLConnection con = downloadUrl.openConnection();
+        con.setRequestProperty("User-Agent", "HyCord");
+        ZipInputStream zin = new ZipInputStream(con.getInputStream());
+        ZipEntry entry;
+        while ((entry = zin.getNextEntry()) != null) {
+            if (entry.getName().equals("lib/" + arch + "/" + fileName)) {
+                System.out.println("Found file");
+                Files.copy(zin, sdk.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                break;
+            }
+            zin.closeEntry();
+        }
+        zin.close();
+    }
+
+    private static void extractJni(File jni) throws IOException {
         String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
         if (arch.equals("x86_64")) arch = "amd64";
         String path = "/native/" + (SystemUtils.IS_OS_WINDOWS ? "windows" : (SystemUtils.IS_OS_MAC ? "macos" : "linux"))
                 + "/" + arch + "/" + (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
                 (SystemUtils.IS_OS_MAC ? ".dylib" : ".so"));
         InputStream in = RichPresence.class.getResourceAsStream(path);
-        File jni = new File("config/HyCord/game-sdk", (SystemUtils.IS_OS_WINDOWS ? "discord_game_sdk_jni.dll" : "libdiscord_game_sdk_jni" +
-                (SystemUtils.IS_OS_MAC ? ".dylib" : ".so")));
         Files.copy(in, jni.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        loadNative(sdk, jni);
     }
 
-    public static void loadNative(File sdk, File jni) {
+    private static void loadNative(File sdk, File jni) {
         if (SystemUtils.IS_OS_WINDOWS)
             System.load(sdk.getAbsolutePath());
         System.load(jni.getAbsolutePath());

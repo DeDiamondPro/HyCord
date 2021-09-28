@@ -59,9 +59,8 @@ public class RichPresence {
     boolean canInvite = true;
     public static String server = "";
     public static boolean enabled = false;
-    private static String joinSecret = Utils.randomAlphaNumeric(64);
     public static String partyId = UUID.randomUUID().toString();
-    static boolean initializedRpc;
+    static boolean initializedRpc = false;
     static boolean sent = true;
     static boolean triedLocraw = false;
     static boolean triggeredByHyCord = false;
@@ -354,7 +353,7 @@ public class RichPresence {
             if (Settings.timeElapsed)
                 activity.timestamps().setStart(Instant.ofEpochSecond(time.toEpochMilli()));
             if (canInvite && Settings.enableInvites && LobbyManager.partyLobbyId != null)
-                activity.secrets().setJoinSecret("%%%%" + joinSecret + "&" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
+                activity.secrets().setJoinSecret("%%%%" + discordRPC.lobbyManager().getLobbyActivitySecret(LobbyManager.partyLobbyId) + "&" + Minecraft.getMinecraft().thePlayer.getName());
             if (game.contains("Skyblock")) {
                 activity.setDetails(replace(Settings.detailSb));
                 activity.setState(replace(Settings.stateSb));
@@ -397,8 +396,7 @@ public class RichPresence {
         try {
             enabled = false;
             discordRPC.close();
-        } catch (Throwable ignored) {
-        }
+        } catch (Throwable ignored) {}
         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_AQUA + "Hycord > "
                 + EnumChatFormatting.YELLOW + "Started sdk"));
         initializeRpc();
@@ -407,11 +405,9 @@ public class RichPresence {
     public static void handleMsg(long lobbId, byte[] data) {
         if (lobbId != LobbyManager.partyLobbyId) return;
         String msg = new String(data).replaceAll("%", "");
-        if (msg.startsWith(joinSecret)) {
-            String[] split = msg.split("&", 2);
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + split[1]);
-            joinSecret = Utils.randomAlphaNumeric(64);
-        }
+        System.out.println(msg);
+        if (msg.startsWith(Minecraft.getMinecraft().thePlayer.getName()))
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/p invite " + msg.split("&")[1]);
     }
 
     public static String replace(String input) {

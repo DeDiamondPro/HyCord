@@ -42,6 +42,8 @@ jar {
     manifest.attributes(
             "ModSide": "CLIENT",
             "FMLCorePlugin": "io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin",
+            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
+            "TweakOrder": "0",
             "FMLCorePluginContainsFMLMod": "no yes",
             "ForceLoadAsMod": true
     )

@@ -17,7 +17,6 @@ minecraft {
     replace('@VER@', mod_ver)
     mappings = 'stable_22'
     makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=io.github.dediamondpro.hycord.tweaker.FMLLoadingPlugin"
 }
 
 configurations {
@@ -26,19 +25,16 @@ configurations {
 }
 
 repositories {
-    maven {
-        name = 'JitPack'
-        url = 'https://jitpack.io'
-    }
-    maven {
-        name = 'Sk1er'
-        url = 'https://repo.sk1er.club/repository/maven-public'
-    }
+    mavenCentral()
+    maven { url "https://repo.sk1er.club/repository/maven-public" }
+    maven { url 'https://repo.spongepowered.org/maven' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    shade('com.github.JnCrMx:discord-game-sdk4j:v0.5.4')
-    shade('gg.essential:vigilance-1.8.9-forge:180')
+    shade ('com.github.JnCrMx:discord-game-sdk4j:v0.5.4')
+    shade ("gg.essential:loader-launchwrapper:1.1.2")
+    implementation ("gg.essential:essential-1.8.9-forge:1457")
 }
 
 jar {
@@ -58,7 +54,6 @@ shadowJar {
     archiveClassifier.set('')
     exclude 'META-INF', 'META-INF/**'
     exclude 'org/jetbrains/annotations', 'org/jetbrains/annotations/**'
-    relocate("gg.essential", "hycord.essentialgg")
 
     exclude "LICENSE.md"
     exclude "pack.mcmeta"

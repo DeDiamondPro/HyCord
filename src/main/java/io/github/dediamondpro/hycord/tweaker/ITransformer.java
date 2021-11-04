@@ -18,33 +18,23 @@
 
 package io.github.dediamondpro.hycord.tweaker;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
-import java.util.Map;
-
-@IFMLLoadingPlugin.MCVersion("1.8.9")
-public class FMLLoadingPlugin implements IFMLLoadingPlugin {
-    @Override
-    public String[] getASMTransformerClass() {
-        return new String[]{ClassTransformer.class.getName()};
+public interface ITransformer {
+    String[] classes();
+    void transform(ClassNode classNode, String name);
+    default boolean nameMatches(MethodNode method, String... names) {
+        boolean matches = false;
+        for (String name : names) {
+            if (method.name.equals(name)) {
+                matches = true;
+                break;
+            }
+        }
+        return matches;
     }
-
-    @Override
-    public String getModContainerClass() {
-        return null;
-    }
-
-    @Override
-    public String getSetupClass() {
-        return null;
-    }
-
-    @Override
-    public void injectData(Map<String, Object> data) {
-    }
-
-    @Override
-    public String getAccessTransformerClass() {
-        return null;
+    default String hooks() {
+        return "io/github/dediamondpro/hycord/tweaker/asm/hooks/";
     }
 }

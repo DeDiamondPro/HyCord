@@ -16,35 +16,8 @@
  * along with HyCord.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ASM originally added by MatthewTGM
+ * "no, I'm not just putting this here for clout. I'm doing it so people don't think Diamond stole code <3"
+ */
 package io.github.dediamondpro.hycord.tweaker;
-
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-
-import java.util.Map;
-
-@IFMLLoadingPlugin.MCVersion("1.8.9")
-public class FMLLoadingPlugin implements IFMLLoadingPlugin {
-    @Override
-    public String[] getASMTransformerClass() {
-        return new String[]{ClassTransformer.class.getName()};
-    }
-
-    @Override
-    public String getModContainerClass() {
-        return null;
-    }
-
-    @Override
-    public String getSetupClass() {
-        return null;
-    }
-
-    @Override
-    public void injectData(Map<String, Object> data) {
-    }
-
-    @Override
-    public String getAccessTransformerClass() {
-        return null;
-    }
-}

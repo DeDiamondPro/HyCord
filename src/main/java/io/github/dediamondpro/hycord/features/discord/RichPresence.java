@@ -148,6 +148,9 @@ public class RichPresence {
         } else if (Utils.isArcadeGame()) {
             mode = game;
             game = "Arcade games";
+        } else if (Utils.isPrototypeGame()){
+            mode = game;
+            game = "Prototype";
         }
         if (LobbyManager.proximity && server.equals("") && scoreboard.size() > 0 && !triedLocraw) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/locraw");

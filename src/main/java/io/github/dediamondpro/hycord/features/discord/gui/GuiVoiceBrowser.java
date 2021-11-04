@@ -187,6 +187,7 @@ public class GuiVoiceBrowser extends GuiScreen {
             Gui.drawModalRectWithCustomSizedTexture(this.width - 33, 1, 0, 0, 16, 16, 16, 16);
 
             TextUtils.drawTextMaxLength("Proximity voice chat", 15, 32, new Color(255, 255, 255).getRGB(), true, this.width);
+            TextUtils.drawTextMaxLength("BETA", 115, 26, new Color(255, 0, 0).getRGB(), false, this.width);
             Gui.drawRect(this.width - 62,
                     29,
                     this.width - 58 + mc.fontRendererObj.getStringWidth("Join"),
@@ -303,14 +304,14 @@ public class GuiVoiceBrowser extends GuiScreen {
                     }
                 }
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_C)) {
-                if (selected = true) {
+                if (selected) {
                     Utils.copyToClipboard(enteredText);
                     selected = false;
                 }
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_A)) {
                 selected = true;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_X)) {
-                if (selected = true) {
+                if (selected) {
                     Utils.copyToClipboard(enteredText);
                     enteredText = "";
                     selected = false;

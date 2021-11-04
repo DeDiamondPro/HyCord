@@ -275,4 +275,9 @@ public class Utils {
         String game = RichPresence.game;
         return game.equals("Bow spleef") || game.equals("Pvp run") || game.contains("Tnt");
     }
+
+    public static boolean isPrototypeGame(){
+        String game = RichPresence.game;
+        return game.equals("Pixel party");
+    }
 }

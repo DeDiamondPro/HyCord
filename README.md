@@ -30,4 +30,4 @@
 - Automatically do /friend list when you join Hypixel
 
 
-# DeDiamondpro is pepega and jani is cool
+# DeDiamondpro and jani are pepega

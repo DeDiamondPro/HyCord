@@ -29,3 +29,5 @@
 - Ask to join button on profile
 - Automatically do /friend list when you join Hypixel
 
+
+# DeDiamondpro and jani are pepega

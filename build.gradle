@@ -34,7 +34,7 @@ repositories {
 dependencies {
     shade ('com.github.JnCrMx:discord-game-sdk4j:v0.5.4')
     shade ("gg.essential:loader-launchwrapper:1.1.2")
-    implementation ("gg.essential:essential-1.8.9-forge:1558")
+    implementation ("gg.essential:essential-1.8.9-forge:1902")
 }
 
 jar {

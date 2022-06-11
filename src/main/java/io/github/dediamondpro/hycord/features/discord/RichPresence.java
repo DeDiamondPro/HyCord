@@ -158,8 +158,7 @@ public class RichPresence {
             triggeredByHyCord = true;
             System.out.println("Using locraw");
         }
-        if (Settings.enableRP)
-            updateRPC();
+        if (HyCord.config.enabled) updateRPC();
     }
 
     private static void initializeRpc() {

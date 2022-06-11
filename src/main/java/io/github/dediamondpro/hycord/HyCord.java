@@ -56,7 +56,7 @@ import java.util.UUID;
 public class HyCord {
 
     public static final String NAME = "HyCord", MODID = "hycord", VERSION = "@VER@";
-    public final Settings config = new Settings();
+    public static Settings config;
     boolean requireUpdate = false;
     public static File source;
     
@@ -73,9 +73,8 @@ public class HyCord {
                         else {
                             Settings.apiKey = args[1];
                             System.out.println(Settings.apiKey);
-                            config.markDirty();
                             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Successfully set your API key"));
-                            config.writeData();
+                            config.save();
                             Thread.currentThread().interrupt();
                         }
                     });
@@ -92,17 +91,15 @@ public class HyCord {
                 UpdateChecker.updater();
             } else if (args.length > 0 && args[0].equalsIgnoreCase("reconnect")) {
                 RichPresence.reconnect();
-            } else
-                GuiUtils.open(config.gui());
+            } else config.openGui();
         }
     });
     SimpleCommand partySize = new SimpleCommand("psize", new SimpleCommand.ProcessCommandRunnable() {
         public void processCommand(ICommandSender sender, String[] args) {
             if (args.length > 0) {
                 Settings.maxPartySize = Integer.parseInt(args[0]);
-                config.markDirty();
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "Set the party size to " + args[0] + "!"));
-                config.writeData();
+                config.save();
             } else
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Please specify a number!"));
         }
@@ -242,7 +239,7 @@ public class HyCord {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         source = event.getSourceFile();
-        config.preload();
+        config = new Settings();
         if (Settings.updateChannel != 0) {
             Thread updateCheck = new Thread(() -> {
                 requireUpdate = UpdateChecker.checkUpdate();

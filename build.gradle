@@ -32,8 +32,8 @@ repositories {
 
 dependencies {
     shade ('com.github.JnCrMx:discord-game-sdk4j:0.5.5')
-    implementation('cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha8')
-    shade('cc.polyfrost:oneconfig-wrapper-1.8.9-forge:1.0.0-alpha4')
+    implementation('cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha11')
+    shade('cc.polyfrost:oneconfig-wrapper-1.8.9-forge:1.0.0-alpha5')
 }
 
 jar {

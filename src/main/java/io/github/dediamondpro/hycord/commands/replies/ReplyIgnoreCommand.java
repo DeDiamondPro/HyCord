@@ -1,0 +1,18 @@
+package io.github.dediamondpro.hycord.commands.replies;
+
+import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
+import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
+import de.jcm.discordgamesdk.activity.ActivityJoinRequestReply;
+import io.github.dediamondpro.hycord.features.discord.RichPresence;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+
+@Command("$hycordreplyignore")
+public class ReplyIgnoreCommand {
+    @Main
+    private static void main(long requestId) {
+        RichPresence.discordRPC.activityManager().sendRequestReply(requestId, ActivityJoinRequestReply.IGNORE);
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "Ignored the request."));
+    }
+}

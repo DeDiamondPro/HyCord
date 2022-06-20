@@ -17,6 +17,8 @@ minecraft {
     replace('@VER@', mod_ver)
     mappings = 'stable_22'
     makeObfSourceJar = false
+
+    clientRunArgs += "--tweakClass cc.polyfrost.oneconfigwrapper.OneConfigWrapper"
 }
 
 configurations {
@@ -32,18 +34,17 @@ repositories {
 
 dependencies {
     shade ('com.github.JnCrMx:discord-game-sdk4j:0.5.5')
-    implementation('cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha11')
-    shade('cc.polyfrost:oneconfig-wrapper-1.8.9-forge:1.0.0-alpha5')
+    implementation('cc.polyfrost:oneconfig-1.8.9-forge:0.1.0-alpha21')
+    shade('cc.polyfrost:oneconfig-wrapper-1.8.9-forge:1.0.0-alpha6')
 }
 
 jar {
     enabled = false
     manifest.attributes(
             "ModSide": "CLIENT",
-            "FMLCorePlugin": "cc.polyfrost.oneconfigwrapper.OneConfigWrapper",
             "TweakOrder": "0",
-            "FMLCorePluginContainsFMLMod": "yes",
-            "ForceLoadAsMod": true
+            "ForceLoadAsMod": true,
+            "TweakClass": "cc.polyfrost.oneconfigwrapper.OneConfigWrapper",
     )
 }
 

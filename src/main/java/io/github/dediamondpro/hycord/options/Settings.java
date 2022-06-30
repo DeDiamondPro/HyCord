@@ -252,6 +252,7 @@ public class Settings extends Config {
 
     public Settings() {
         super(new Mod("HyCord", ModType.HYPIXEL, new VigilanceMigrator("./config/hycord.toml")), "hycord.json");
+        initialize();
         addDependency("showNonTalking", "showUserList");
         addDependency("showIndicatorOther", "showUserList");
     }

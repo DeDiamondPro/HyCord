@@ -5,7 +5,7 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import io.github.dediamondpro.hycord.features.discord.RelationshipHandler;
 import net.minecraft.client.Minecraft;
 
-@Command("status")
+@Command("getstatus")
 public class StatusCommand {
     @Main
     private static void main(String player) {

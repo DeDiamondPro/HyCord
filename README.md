@@ -29,5 +29,4 @@
 - Ask to join button on profile
 - Automatically do /friend list when you join Hypixel
 
-
-# DeDiamondpro and jani are pepega
+[<img src="https://www.bisecthosting.com/partners/custom-banners/793f80ea-c602-458b-968d-6a83df014fe4.webp" alt="https://bisecthosting.com/diamond" width=100%>](https://bisecthosting.com/diamond)
